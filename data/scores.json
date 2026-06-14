@@ -1,287 +1,7 @@
 {
-  "updated": "2026-06-14T17:05:04.112625+00:00",
+  "updated": "2026-06-14T17:22:43.443904+00:00",
   "status": {
-    "Mexico": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "South Africa": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Korea Republic": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Czech Republic": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Canada": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Bosnia and Herzegovina": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Qatar": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Switzerland": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Brazil": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Morocco": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Haiti": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Scotland": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "United States": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Paraguay": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Australia": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Turkey": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Germany": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Curaçao": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Cote d'Ivoire": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Ecuador": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Netherlands": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Japan": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Sweden": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Tunisia": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Belgium": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Egypt": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Iran": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "New Zealand": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Spain": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Cape Verde": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Saudi Arabia": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Uruguay": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "France": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Senegal": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Iraq": {
-      "p": 0,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "pts": 0,
-      "st": "G"
-    },
-    "Norway": {
+    "Algeria": {
       "p": 0,
       "w": 0,
       "d": 0,
@@ -297,12 +17,12 @@
       "pts": 0,
       "st": "G"
     },
-    "Algeria": {
-      "p": 0,
-      "w": 0,
+    "Australia": {
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Austria": {
@@ -313,7 +33,7 @@
       "pts": 0,
       "st": "G"
     },
-    "Jordan": {
+    "Belgium": {
       "p": 0,
       "w": 0,
       "d": 0,
@@ -321,23 +41,31 @@
       "pts": 0,
       "st": "G"
     },
-    "Portugal": {
-      "p": 0,
+    "Bosnia and Herzegovina": {
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
-    "DR Congo": {
-      "p": 0,
+    "Brazil": {
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
-    "Uzbekistan": {
+    "Canada": {
+      "p": 1,
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "pts": 1,
+      "st": "G"
+    },
+    "Cape Verde": {
       "p": 0,
       "w": 0,
       "d": 0,
@@ -353,6 +81,54 @@
       "pts": 0,
       "st": "G"
     },
+    "Croatia": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Curaçao": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Czech Republic": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "DR Congo": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Ecuador": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Egypt": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
     "England": {
       "p": 0,
       "w": 0,
@@ -361,7 +137,15 @@
       "pts": 0,
       "st": "G"
     },
-    "Croatia": {
+    "France": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Germany": {
       "p": 0,
       "w": 0,
       "d": 0,
@@ -377,7 +161,223 @@
       "pts": 0,
       "st": "G"
     },
+    "Haiti": {
+      "p": 1,
+      "w": 0,
+      "d": 0,
+      "l": 1,
+      "pts": 0,
+      "st": "G"
+    },
+    "Iran": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Iraq": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Cote d'Ivoire": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Japan": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Jordan": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Korea Republic": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Mexico": {
+      "p": 1,
+      "w": 1,
+      "d": 0,
+      "l": 0,
+      "pts": 3,
+      "st": "G"
+    },
+    "Morocco": {
+      "p": 1,
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "pts": 1,
+      "st": "G"
+    },
+    "Netherlands": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "New Zealand": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Norway": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
     "Panama": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Paraguay": {
+      "p": 1,
+      "w": 0,
+      "d": 0,
+      "l": 1,
+      "pts": 0,
+      "st": "G"
+    },
+    "Portugal": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Qatar": {
+      "p": 1,
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "pts": 1,
+      "st": "G"
+    },
+    "Saudi Arabia": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Scotland": {
+      "p": 1,
+      "w": 1,
+      "d": 0,
+      "l": 0,
+      "pts": 3,
+      "st": "G"
+    },
+    "Senegal": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "South Africa": {
+      "p": 1,
+      "w": 0,
+      "d": 0,
+      "l": 1,
+      "pts": 0,
+      "st": "G"
+    },
+    "Spain": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Sweden": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Switzerland": {
+      "p": 1,
+      "w": 0,
+      "d": 1,
+      "l": 0,
+      "pts": 1,
+      "st": "G"
+    },
+    "Tunisia": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Turkey": {
+      "p": 1,
+      "w": 0,
+      "d": 0,
+      "l": 1,
+      "pts": 0,
+      "st": "G"
+    },
+    "United States": {
+      "p": 1,
+      "w": 1,
+      "d": 0,
+      "l": 0,
+      "pts": 3,
+      "st": "G"
+    },
+    "Uruguay": {
+      "p": 0,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "pts": 0,
+      "st": "G"
+    },
+    "Uzbekistan": {
       "p": 0,
       "w": 0,
       "d": 0,
@@ -393,7 +393,7 @@
       "a": "Qatar",
       "b": "Switzerland",
       "s": "1-1",
-      "g": ""
+      "g": "Group B"
     },
     {
       "d": "Jun 13",
@@ -401,7 +401,7 @@
       "a": "Brazil",
       "b": "Morocco",
       "s": "1-1",
-      "g": ""
+      "g": "Group C"
     },
     {
       "d": "Jun 13",
@@ -409,7 +409,7 @@
       "a": "Haiti",
       "b": "Scotland",
       "s": "0-1",
-      "g": ""
+      "g": "Group C"
     },
     {
       "d": "Jun 14",
@@ -417,15 +417,15 @@
       "a": "Australia",
       "b": "Turkey",
       "s": "2-0",
-      "g": ""
+      "g": "Group D"
     },
     {
       "d": "Jun 14",
-      "k": "1:00 PM ET",
+      "k": "LIVE",
       "a": "Germany",
       "b": "Curaçao",
-      "s": "",
-      "g": ""
+      "s": "1-0",
+      "g": "Group E"
     },
     {
       "d": "Jun 14",
@@ -433,7 +433,7 @@
       "a": "Netherlands",
       "b": "Japan",
       "s": "",
-      "g": ""
+      "g": "Group F"
     },
     {
       "d": "Jun 14",
@@ -441,7 +441,7 @@
       "a": "Cote d'Ivoire",
       "b": "Ecuador",
       "s": "",
-      "g": ""
+      "g": "Group E"
     },
     {
       "d": "Jun 14",
@@ -449,7 +449,7 @@
       "a": "Sweden",
       "b": "Tunisia",
       "s": "",
-      "g": ""
+      "g": "Group F"
     },
     {
       "d": "Jun 15",
@@ -457,7 +457,7 @@
       "a": "Spain",
       "b": "Cape Verde",
       "s": "",
-      "g": ""
+      "g": "Group H"
     },
     {
       "d": "Jun 15",
@@ -465,7 +465,7 @@
       "a": "Belgium",
       "b": "Egypt",
       "s": "",
-      "g": ""
+      "g": "Group G"
     },
     {
       "d": "Jun 15",
@@ -473,7 +473,7 @@
       "a": "Saudi Arabia",
       "b": "Uruguay",
       "s": "",
-      "g": ""
+      "g": "Group H"
     },
     {
       "d": "Jun 15",
@@ -481,7 +481,39 @@
       "a": "Iran",
       "b": "New Zealand",
       "s": "",
-      "g": ""
+      "g": "Group G"
     }
-  ]
+  ],
+  "h2h": {
+    "Ben|Patrick": [
+      1,
+      0,
+      0
+    ],
+    "Ben|Sandeep": [
+      1,
+      2,
+      0
+    ],
+    "Ben|Sunny": [
+      0,
+      0,
+      0
+    ],
+    "Patrick|Sandeep": [
+      1,
+      0,
+      0
+    ],
+    "Patrick|Sunny": [
+      0,
+      0,
+      1
+    ],
+    "Sandeep|Sunny": [
+      0,
+      1,
+      0
+    ]
+  }
 }
