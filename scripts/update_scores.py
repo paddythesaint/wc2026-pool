@@ -193,6 +193,25 @@ def load_existing():
         return {}
 
 
+def data_changed(existing, new_status, new_fixtures):
+    """Return True only if scores or fixtures meaningfully changed.
+    Ignores the 'updated' timestamp so polling doesn't create spurious commits."""
+    old_status   = existing.get("status", {})
+    old_fixtures = existing.get("fixtures", [])
+
+    for team, rec in new_status.items():
+        if rec != old_status.get(team):
+            return True
+
+    if len(new_fixtures) != len(old_fixtures):
+        return True
+    for nf, of in zip(new_fixtures, old_fixtures):
+        if nf.get("s") != of.get("s") or nf.get("k") != of.get("k") or nf.get("d") != of.get("d"):
+            return True
+
+    return False
+
+
 def main():
     existing = load_existing()
     status   = blank_status()
@@ -210,6 +229,10 @@ def main():
         fixtures = existing["fixtures"]
         print("[fixtures] using existing data (ESPN returned nothing)", file=sys.stderr)
 
+    if not data_changed(existing, status, fixtures):
+        print("[done] no changes detected — skipping write")
+        return
+
     output = {
         "updated":  datetime.now(timezone.utc).isoformat(),
         "status":   status,
@@ -222,7 +245,7 @@ def main():
 
     n_teams    = sum(1 for v in status.values() if v["p"] > 0)
     n_fixtures = len(fixtures)
-    print(f"[done] {n_teams} teams with records · {n_fixtures} fixtures · standings={'ok' if standings_ok else 'partial'}")
+    print(f"[done] scores updated · {n_teams} teams with records · {n_fixtures} fixtures · standings={'ok' if standings_ok else 'partial'}")
 
 
 if __name__ == "__main__":
