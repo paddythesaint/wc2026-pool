@@ -297,6 +297,61 @@ function OddsBar({ odds, nameA, nameB }) {
   );
 }
 
+// ─── ESPN live fetch ──────────────────────────────────────────────────────────
+function espnDate(isoStr) {
+  return new Date(isoStr).toLocaleDateString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric"});
+}
+function espnTime(isoStr) {
+  return new Date(isoStr).toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"numeric",minute:"2-digit",timeZoneName:"short"});
+}
+function parseML(v) {
+  if (v == null) return null;
+  const n = parseInt(String(v).replace("+",""),10);
+  return isNaN(n) ? null : n;
+}
+function extractOddsLive(comp) {
+  const o = (comp.odds||[])[0]; if (!o) return null;
+  const ml = o.moneyline||{};
+  const hv = parseML(ml.home?.close?.odds);
+  const av = parseML(ml.away?.close?.odds);
+  const dv = parseML(ml.draw?.close?.odds) ?? parseML(o.drawOdds?.moneyLine);
+  if (hv == null || av == null) return null;
+  const p = x => x < 0 ? Math.abs(x)/(Math.abs(x)+100) : 100/(x+100);
+  const h=p(hv), a=p(av), d=dv!=null?p(dv):Math.max(0.05,1-h-a), t=h+a+d;
+  return {home:Math.round(h/t*100)/100,draw:Math.round(d/t*100)/100,away:Math.round(a/t*100)/100};
+}
+function etDay(offsetMs=0) {
+  return new Date(Date.now()+offsetMs)
+    .toLocaleDateString("en-CA",{timeZone:"America/New_York"}).replace(/-/g,"");
+}
+async function fetchESPN() {
+  const dates = [etDay(-864e5), etDay(), etDay(864e5)];
+  const all = [];
+  for (const dateStr of dates) {
+    try {
+      const r  = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${dateStr}&t=${Date.now()}`);
+      const ev = (await r.json()).events || [];
+      for (const e of ev) {
+        const comp = e.competitions?.[0]; if (!comp) continue;
+        const cs   = comp.competitors||[]; if (cs.length<2) continue;
+        const home = cs.find(c=>c.homeAway==="home")||cs[0];
+        const away = cs.find(c=>c.homeAway==="away")||cs[1];
+        const st   = comp.status?.type||{};
+        const done = st.completed||false;
+        const live = st.state==="in"||(st.name||"").toLowerCase().includes("halftime");
+        const score= done||live ? `${home.score??0}-${away.score??0}` : "";
+        const k    = live?"LIVE":done?"":espnTime(e.date);
+        const note = (comp.altGameNote||"").replace(/FIFA World Cup,?\s*/g,"").trim();
+        const odds = done||live ? null : extractOddsLive(comp);
+        const fx   = {d:espnDate(e.date),k,a:home.team?.displayName||"",b:away.team?.displayName||"",s:score,g:note};
+        if (odds) fx.odds = odds;
+        all.push(fx);
+      }
+    } catch(_) {}
+  }
+  return all;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
   const [tab, setTab]               = useState("fixtures");
@@ -304,6 +359,7 @@ function PoolDashboard() {
   const [fixtures, setFixtures]     = useState(SEED_FIXTURES);
   const [h2h, setH2h]               = useState({});
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
+  const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
   const [aliveOnly, setAliveOnly]   = useState(false);
   const [sortCol, setSortCol]       = useState("payout");   // bid|payout|roi|wdl|name
@@ -329,18 +385,27 @@ function PoolDashboard() {
     );
   };
 
+  // Fetch standings + H2H from scores.json (updated by GitHub Actions)
   useEffect(() => {
     fetch("./data/scores.json?t=" + Date.now())
       .then(r => r.json())
       .then(data => {
         if (data.updated && new Date(data.updated) > new Date(SEED_DATE)) {
-          if (data.status)                  setStatus({...blankStatus(), ...data.status});
-          if (Array.isArray(data.fixtures)) setFixtures(data.fixtures);
-          if (data.h2h)                     setH2h(data.h2h);
-          setUpdated(new Date(data.updated));
+          if (data.status) setStatus({...blankStatus(), ...data.status});
+          if (data.h2h)    setH2h(data.h2h);
         }
       })
       .catch(() => {});
+  }, []);
+
+  // Fetch fixtures live from ESPN every 60s
+  useEffect(() => {
+    const run = () => fetchESPN()
+      .then(fx => { if (fx.length) { setFixtures(fx); setFixturesLive(true); setUpdated(new Date()); } })
+      .catch(() => {});
+    run();
+    const id = setInterval(run, 60000);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
@@ -421,10 +486,11 @@ function PoolDashboard() {
             </div>
             <div className="flex flex-col items-end justify-center gap-1">
               <div style={{fontSize:12,color:C.mute,textAlign:"right"}}>
-                <span className="livepulse" style={{color:C.green}}>●</span> Auto-updates every 5 min during match hours
+                <span className="livepulse" style={{color:fixturesLive?C.green:C.mute}}>●</span>
+                {fixturesLive ? " Fixtures live from ESPN · refreshes every 60s" : " Loading fixtures…"}
               </div>
               <div style={{fontSize:11,color:C.mute}}>
-                Last updated: <span style={{color:C.text}}>
+                Last refreshed: <span style={{color:C.text}}>
                   {updated.toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"})}
                 </span>
               </div>
