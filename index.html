@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WC26 Auction Pool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>body { margin: 0; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+// ─── Pool data (auction sheet) ────────────────────────────────────────────────
+const BIDDERS = {
+  Patrick: { color: "#34D27B", short: "PAT" },
+  Sunny:   { color: "#F2C14E", short: "SUN" },
+  Sandeep: { color: "#5BA8F5", short: "SAN" },
+  Ben:     { color: "#FF7A59", short: "BEN" },
+};
+
+const TEAMS = [
+  { name: "Algeria",                flag: "🇩🇿", owner: "Sandeep", bid: 5  },
+  { name: "Argentina",              flag: "🇦🇷", owner: "Sunny",   bid: 1  },
+  { name: "Australia",              flag: "🇦🇺", owner: "Patrick", bid: 2  },
+  { name: "Austria",                flag: "🇦🇹", owner: "Sandeep", bid: 10 },
+  { name: "Belgium",                flag: "🇧🇪", owner: "Sunny",   bid: 60 },
+  { name: "Bosnia and Herzegovina", flag: "🇧🇦", owner: "Sunny",   bid: 4  },
+  { name: "Brazil",                 flag: "🇧🇷", owner: "Ben",     bid: 80 },
+  { name: "Canada",                 flag: "🇨🇦", owner: "Sandeep", bid: 15 },
+  { name: "Cape Verde",             flag: "🇨🇻", owner: "Ben",     bid: 5  },
+  { name: "Colombia",               flag: "🇨🇴", owner: "Sandeep", bid: 45 },
+  { name: "Croatia",                flag: "🇭🇷", owner: "Ben",     bid: 40 },
+  { name: "Curaçao",                flag: "🇨🇼", owner: "Ben",     bid: 1  },
+  { name: "Czech Republic",         flag: "🇨🇿", owner: "Sunny",   bid: 5  },
+  { name: "DR Congo",               flag: "🇨🇩", owner: "Ben",     bid: 1  },
+  { name: "Ecuador",                flag: "🇪🇨", owner: "Sunny",   bid: 10 },
+  { name: "Egypt",                  flag: "🇪🇬", owner: "Patrick", bid: 7  },
+  { name: "England",                flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", owner: "Sunny",   bid: 60 },
+  { name: "France",                 flag: "🇫🇷", owner: "Sandeep", bid: 1  },
+  { name: "Germany",                flag: "🇩🇪", owner: "Patrick", bid: 65 },
+  { name: "Ghana",                  flag: "🇬🇭", owner: "Sunny",   bid: 5  },
+  { name: "Haiti",                  flag: "🇭🇹", owner: "Sandeep", bid: 1  },
+  { name: "Iran",                   flag: "🇮🇷", owner: "Patrick", bid: 1  },
+  { name: "Iraq",                   flag: "🇮🇶", owner: "Ben",     bid: 1  },
+  { name: "Cote d'Ivoire",          flag: "🇨🇮", owner: "Patrick", bid: 25 },
+  { name: "Japan",                  flag: "🇯🇵", owner: "Sandeep", bid: 15 },
+  { name: "Jordan",                 flag: "🇯🇴", owner: "Sunny",   bid: 1  },
+  { name: "Korea Republic",         flag: "🇰🇷", owner: "Sandeep", bid: 15 },
+  { name: "Mexico",                 flag: "🇲🇽", owner: "Ben",     bid: 30 },
+  { name: "Morocco",                flag: "🇲🇦", owner: "Sandeep", bid: 40 },
+  { name: "Netherlands",            flag: "🇳🇱", owner: "Patrick", bid: 40 },
+  { name: "New Zealand",            flag: "🇳🇿", owner: "Patrick", bid: 1  },
+  { name: "Norway",                 flag: "🇳🇴", owner: "Sunny",   bid: 30 },
+  { name: "Panama",                 flag: "🇵🇦", owner: "Sunny",   bid: 2  },
+  { name: "Paraguay",               flag: "🇵🇾", owner: "Patrick", bid: 20 },
+  { name: "Portugal",               flag: "🇵🇹", owner: "Ben",     bid: 1  },
+  { name: "Qatar",                  flag: "🇶🇦", owner: "Sandeep", bid: 2  },
+  { name: "Saudi Arabia",           flag: "🇸🇦", owner: "Ben",     bid: 6  },
+  { name: "Scotland",               flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", owner: "Ben",     bid: 5  },
+  { name: "Senegal",                flag: "🇸🇳", owner: "Sandeep", bid: 25 },
+  { name: "South Africa",           flag: "🇿🇦", owner: "Patrick", bid: 3  },
+  { name: "Spain",                  flag: "🇪🇸", owner: "Patrick", bid: 1  },
+  { name: "Sweden",                 flag: "🇸🇪", owner: "Ben",     bid: 10 },
+  { name: "Switzerland",            flag: "🇨🇭", owner: "Ben",     bid: 20 },
+  { name: "Tunisia",                flag: "🇹🇳", owner: "Sunny",   bid: 1  },
+  { name: "Turkey",                 flag: "🇹🇷", owner: "Sandeep", bid: 25 },
+  { name: "United States",          flag: "🇺🇸", owner: "Sunny",   bid: 20 },
+  { name: "Uruguay",                flag: "🇺🇾", owner: "Patrick", bid: 25 },
+  { name: "Uzbekistan",             flag: "🇺🇿", owner: "Patrick", bid: 9  },
+];
+
+const GROUPS = {
+  A: ["Mexico", "South Africa", "Korea Republic", "Czech Republic"],
+  B: ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"],
+  C: ["Brazil", "Morocco", "Haiti", "Scotland"],
+  D: ["United States", "Paraguay", "Australia", "Turkey"],
+  E: ["Germany", "Curaçao", "Cote d'Ivoire", "Ecuador"],
+  F: ["Netherlands", "Japan", "Sweden", "Tunisia"],
+  G: ["Belgium", "Egypt", "Iran", "New Zealand"],
+  H: ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"],
+  I: ["France", "Senegal", "Iraq", "Norway"],
+  J: ["Argentina", "Algeria", "Austria", "Jordan"],
+  K: ["Portugal", "DR Congo", "Uzbekistan", "Colombia"],
+  L: ["England", "Croatia", "Ghana", "Panama"],
+};
+
+const ALIASES = {
+  "ivory coast": "Cote d'Ivoire", "côte d'ivoire": "Cote d'Ivoire", "cote d'ivoire": "Cote d'Ivoire",
+  "south korea": "Korea Republic", "korea": "Korea Republic",
+  usa: "United States", "united states": "United States", us: "United States",
+  "türkiye": "Turkey", turkiye: "Turkey", czechia: "Czech Republic",
+  bosnia: "Bosnia and Herzegovina", "bosnia-herzegovina": "Bosnia and Herzegovina",
+  "dr congo": "DR Congo", "congo dr": "DR Congo", "democratic republic of the congo": "DR Congo",
+  "cabo verde": "Cape Verde", holland: "Netherlands", "ir iran": "Iran",
+  curacao: "Curaçao",
+};
+const findTeam = (raw) => {
+  if (!raw) return null;
+  const n = raw.trim().toLowerCase();
+  const exact = TEAMS.find((t) => t.name.toLowerCase() === n);
+  if (exact) return exact;
+  if (ALIASES[n]) return TEAMS.find((t) => t.name === ALIASES[n]);
+  return TEAMS.find((t) => t.name.toLowerCase().includes(n) || n.includes(t.name.toLowerCase())) || null;
+};
+
+const FINAL_PAYOUT = { EG: 0, E32: 5, E16: 15, EQF: 25, "4TH": 50, "3RD": 75, RU: 125, CH: 250 };
+const ALIVE_FLOOR  = { G: 0, R32: 5, R16: 15, QF: 25, SF: 50, F: 125 };
+
+const STAGE_LABEL = {
+  G: "Group Stage", R32: "In Round of 32", R16: "In Round of 16", QF: "In Quarterfinals",
+  SF: "In Semifinals", F: "In Final", EG: "Out in Groups", E32: "Out in R32",
+  E16: "Out in R16", EQF: "Out in QF", "4TH": "4th Place", "3RD": "3rd Place",
+  RU: "Runner-Up", CH: "CHAMPION",
+};
+
+const isAlive     = (st) => ALIVE_FLOOR[st] !== undefined;
+const payoutLocked = (st) => (isAlive(st) ? ALIVE_FLOOR[st] : FINAL_PAYOUT[st] ?? 0);
+
+const blankStatus = () =>
+  Object.fromEntries(TEAMS.map((t) => [t.name, { p: 0, w: 0, d: 0, l: 0, pts: 0, st: "G" }]));
+
+// ── Baked-in seed (GitHub Actions will keep data/scores.json fresher) ─────────
+const SEED_DATE = "2026-06-11T20:00:00-04:00";
+const seedStatus = () => ({
+  ...blankStatus(),
+  Mexico:        { p: 1, w: 1, d: 0, l: 0, pts: 3, st: "G" },
+  "South Africa":{ p: 1, w: 0, d: 0, l: 1, pts: 0, st: "G" },
+});
+const SEED_FIXTURES = [
+  { d: "Jun 11", k: "",             a: "Mexico",        b: "South Africa",       s: "2-0", g: "Group A · Mexico City"   },
+  { d: "Jun 11", k: "10:00 PM ET",  a: "Korea Republic",b: "Czech Republic",     s: "",    g: "Group A · Guadalajara"    },
+  { d: "Jun 12", k: "3:00 PM ET",   a: "Canada",        b: "Bosnia and Herzegovina", s: "", g: "Group B · Toronto"       },
+  { d: "Jun 12", k: "9:00 PM ET",   a: "United States", b: "Paraguay",           s: "",    g: "Group D · Inglewood"      },
+  { d: "Jun 13", k: "3:00 PM ET",   a: "Qatar",         b: "Switzerland",        s: "",    g: "Group B · Santa Clara"    },
+  { d: "Jun 13", k: "6:00 PM ET",   a: "Brazil",        b: "Morocco",            s: "",    g: "Group C · East Rutherford"},
+  { d: "Jun 13", k: "9:00 PM ET",   a: "Haiti",         b: "Scotland",           s: "",    g: "Group C · Kansas City"    },
+  { d: "Jun 13", k: "12:00 AM ET",  a: "Australia",     b: "Turkey",             s: "",    g: "Group D"                  },
+  { d: "Jun 14", k: "1:00 PM ET",   a: "Germany",       b: "Curaçao",            s: "",    g: "Group E"                  },
+  { d: "Jun 14", k: "4:00 PM ET",   a: "Netherlands",   b: "Japan",              s: "",    g: "Group F"                  },
+  { d: "Jun 14", k: "7:00 PM ET",   a: "Cote d'Ivoire", b: "Ecuador",            s: "",    g: "Group E · Philadelphia"   },
+  { d: "Jun 14", k: "10:00 PM ET",  a: "Sweden",        b: "Tunisia",            s: "",    g: "Group F · Guadalajara"    },
+];
+
+// ─── Component ────────────────────────────────────────────────────────────────
+function PoolDashboard() {
+  const [tab, setTab]         = useState("board");
+  const [status, setStatus]   = useState(seedStatus);
+  const [fixtures, setFixtures] = useState(SEED_FIXTURES);
+  const [updated, setUpdated] = useState(new Date(SEED_DATE));
+  const [ownerFilter, setOwnerFilter] = useState("All");
+  const [aliveOnly, setAliveOnly]     = useState(false);
+
+  // Load live data from data/scores.json (written by GitHub Actions)
+  useEffect(() => {
+    fetch("./data/scores.json?t=" + Date.now())
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.updated && new Date(data.updated) > new Date(SEED_DATE)) {
+          if (data.status)            setStatus({ ...blankStatus(), ...data.status });
+          if (Array.isArray(data.fixtures)) setFixtures(data.fixtures);
+          setUpdated(new Date(data.updated));
+        }
+      })
+      .catch(() => {/* silently use seed data */});
+  }, []);
+
+  useEffect(() => {
+    const l = document.createElement("link");
+    l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap";
+    document.head.appendChild(l);
+    return () => document.head.removeChild(l);
+  }, []);
+
+  const board = useMemo(() => {
+    return Object.keys(BIDDERS).map((name) => {
+      const mine  = TEAMS.filter((t) => t.owner === name);
+      const spent  = mine.reduce((s, t) => s + t.bid, 0);
+      const locked = mine.reduce((s, t) => s + payoutLocked(status[t.name].st), 0);
+      const alive  = mine.filter((t) => isAlive(status[t.name].st)).length;
+      return { name, spent, locked, alive, net: locked - spent, teams: mine };
+    }).sort((a, b) => b.net - a.net || b.locked - a.locked || b.alive - a.alive);
+  }, [status]);
+
+  const superlatives = useMemo(() => {
+    let bestValue = null, bust = null;
+    for (const t of TEAMS) {
+      const st = status[t.name].st;
+      const pay = payoutLocked(st);
+      if (pay > 0) {
+        const roi = pay / t.bid;
+        if (!bestValue || roi > bestValue.roi) bestValue = { ...t, pay, roi };
+      }
+      if (!isAlive(st) && pay === 0 && (!bust || t.bid > bust.bid)) {
+        bust = { ...t, st };
+      }
+    }
+    return { bestValue, bust };
+  }, [status]);
+
+  const filteredTeams = useMemo(() => {
+    return TEAMS.filter(
+      (t) => (ownerFilter === "All" || t.owner === ownerFilter) && (!aliveOnly || isAlive(status[t.name].st))
+    ).sort((a, b) => {
+      const pa = payoutLocked(status[a.name].st), pb = payoutLocked(status[b.name].st);
+      return pb !== pa ? pb - pa : b.bid - a.bid;
+    });
+  }, [ownerFilter, aliveOnly, status]);
+
+  const disp = { fontFamily: "'Oswald', sans-serif" };
+  const body = { fontFamily: "'Inter', sans-serif" };
+  const C = { bg: "#0B1220", panel: "#121C2E", line: "#22304A", text: "#EAF0F7", mute: "#8A99B0", gold: "#F2C14E", green: "#34D27B", red: "#E25555" };
+
+  return (
+    <div style={{ ...body, background: C.bg, minHeight: "100vh", color: C.text }}>
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .livepulse { animation: pulse 1.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce){ .livepulse{ animation:none } }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ borderBottom: `1px solid ${C.line}`, background: "linear-gradient(180deg,#0E1830,#0B1220)" }}>
+        <div className="max-w-5xl mx-auto px-4 pt-5 pb-4">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <div style={{ ...disp, color: C.gold, letterSpacing: "0.18em", fontSize: 11, fontWeight: 600 }}>
+                FIFA WORLD CUP 2026 · 48 TEAMS · $800 POOL
+              </div>
+              <h1 style={{ ...disp, fontSize: 34, fontWeight: 700, lineHeight: 1.05, letterSpacing: "0.01em", textTransform: "uppercase" }}>
+                Auction Pool <span style={{ color: C.green }}>Live</span>
+              </h1>
+            </div>
+            <div className="flex flex-col items-end justify-center gap-1">
+              <div style={{ fontSize: 12, color: C.mute, textAlign: "right" }}>
+                <span className="livepulse" style={{ color: C.green }}>●</span>{" "}
+                Data auto-updates 4× daily
+              </div>
+              <div style={{ fontSize: 11, color: C.mute }}>
+                Last updated:{" "}
+                <span style={{ color: C.text }}>
+                  {updated.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scorebug rail */}
+        <div className="max-w-5xl mx-auto px-4 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {board.map((b, i) => (
+              <div key={b.name} style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `4px solid ${BIDDERS[b.name].color}`, borderRadius: 6, padding: "8px 12px" }}>
+                <div className="flex items-center justify-between">
+                  <span style={{ ...disp, fontSize: 13, fontWeight: 600, letterSpacing: "0.08em" }}>
+                    <span style={{ color: C.mute }}>{i + 1}</span>&nbsp; {b.name.toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: 11, color: C.mute }}>{b.alive}/12 alive</span>
+                </div>
+                <div className="flex items-baseline justify-between mt-1">
+                  <span style={{ ...disp, fontSize: 20, fontWeight: 700, color: b.net >= 0 ? C.green : C.text }}>
+                    {b.net >= 0 ? `+$${b.net}` : `−$${Math.abs(b.net)}`}
+                  </span>
+                  <span style={{ fontSize: 11, color: C.gold }}>${b.locked} locked</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="max-w-5xl mx-auto px-4 mt-4">
+        <div className="flex gap-2 flex-wrap">
+          {[["board","LEADERBOARD"],["groups","GROUPS"],["fixtures","FIXTURES"],["teams","TEAMS"]].map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)}
+              style={{ ...disp, fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", padding: "8px 18px", borderRadius: 6, cursor: "pointer", border: `1px solid ${tab === id ? C.gold : C.line}`, background: tab === id ? "#1A2438" : "transparent", color: tab === id ? C.gold : C.mute }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── LEADERBOARD ── */}
+      {tab === "board" && (
+        <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
+          {board.map((b, i) => (
+            <div key={b.name} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, overflow: "hidden" }}>
+              <div className="flex items-center justify-between px-4 py-3" style={{ borderLeft: `4px solid ${BIDDERS[b.name].color}` }}>
+                <div className="flex items-center gap-3">
+                  <span style={{ ...disp, fontSize: 22, fontWeight: 700, color: C.mute, width: 24 }}>{i + 1}</span>
+                  <div>
+                    <div style={{ ...disp, fontSize: 18, fontWeight: 600, letterSpacing: "0.04em" }}>{b.name.toUpperCase()}</div>
+                    <div style={{ fontSize: 11, color: C.mute }}>Spent ${b.spent} · {b.alive} of 12 still alive</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div style={{ ...disp, fontSize: 24, fontWeight: 700, color: b.net >= 0 ? C.green : C.text }}>
+                    {b.net >= 0 ? `+$${b.net}` : `−$${Math.abs(b.net)}`}
+                  </div>
+                  <div style={{ fontSize: 11, color: C.gold }}>${b.locked} payouts locked</div>
+                </div>
+              </div>
+              <div className="px-4 pb-3 flex flex-wrap gap-1">
+                {b.teams.map((t) => {
+                  const st  = status[t.name].st;
+                  const out = !isAlive(st);
+                  return (
+                    <span key={t.name} title={`${t.name} · $${t.bid} · ${STAGE_LABEL[st]}`}
+                      style={{ fontSize: 16, opacity: out ? 0.3 : 1, filter: out ? "grayscale(1)" : "none" }}>
+                      {t.flag}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, padding: 14 }}>
+              <div style={{ ...disp, fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", color: C.gold }}>BEST VALUE</div>
+              {superlatives.bestValue ? (
+                <div style={{ fontSize: 14, marginTop: 6 }}>
+                  {superlatives.bestValue.flag} <b>{superlatives.bestValue.name}</b> ({superlatives.bestValue.owner}) — ${superlatives.bestValue.pay} locked on a ${superlatives.bestValue.bid} bid ({superlatives.bestValue.roi.toFixed(0)}× return)
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: C.mute, marginTop: 6 }}>No payouts locked yet.</div>
+              )}
+            </div>
+            <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, padding: 14 }}>
+              <div style={{ ...disp, fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", color: C.red }}>BIGGEST BUST</div>
+              {superlatives.bust ? (
+                <div style={{ fontSize: 14, marginTop: 6 }}>
+                  {superlatives.bust.flag} <b>{superlatives.bust.name}</b> ({superlatives.bust.owner}) — ${superlatives.bust.bid} bid, out in the group stage, $0 back
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: C.mute, marginTop: 6 }}>No casualties yet. Everyone's dreams are intact.</div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, padding: 14 }}>
+            <div style={{ ...disp, fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", color: C.mute }}>PAYOUT STRUCTURE</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1 mt-2" style={{ fontSize: 13 }}>
+              <span>Champion <b style={{ color: C.gold }}>$250</b></span>
+              <span>Runner-Up <b style={{ color: C.gold }}>$125</b></span>
+              <span>3rd <b style={{ color: C.gold }}>$75</b></span>
+              <span>4th <b style={{ color: C.gold }}>$50</b></span>
+              <span>QF exit <b>$25</b></span>
+              <span>R16 exit <b>$15</b></span>
+              <span>R32 exit <b>$5</b></span>
+              <span>Group exit <b style={{ color: C.mute }}>$0</b></span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GROUPS ── */}
+      {tab === "groups" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {Object.entries(GROUPS).map(([letter, members]) => {
+              const ranked = members
+                .map((name) => ({ team: TEAMS.find((t) => t.name === name), s: status[name] }))
+                .filter((r) => r.team)
+                .sort((a, b) => b.s.pts - a.s.pts || b.s.w - a.s.w || a.team.name.localeCompare(b.team.name));
+              const anyPlayed = ranked.some((r) => r.s.p > 0);
+              return (
+                <div key={letter} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, overflow: "hidden" }}>
+                  <div className="px-3 py-2 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.line}`, background: "#16203A" }}>
+                    <span style={{ ...disp, fontSize: 14, fontWeight: 700, letterSpacing: "0.12em" }}>GROUP {letter}</span>
+                    <span style={{ fontSize: 10, color: C.mute }}>P W D L · PTS</span>
+                  </div>
+                  {ranked.map((r, idx) => {
+                    const t = r.team, s = r.s;
+                    const out  = !isAlive(s.st);
+                    const zone = idx < 2 ? C.green : idx === 2 ? C.gold : C.mute;
+                    return (
+                      <div key={t.name} className="px-3 py-2 grid items-center"
+                        style={{ gridTemplateColumns: "14px minmax(0,1fr) auto auto", gap: 8, borderBottom: idx < ranked.length - 1 ? `1px solid ${C.line}` : "none", opacity: out && payoutLocked(s.st) === 0 ? 0.5 : 1 }}>
+                        <span style={{ ...disp, fontSize: 12, fontWeight: 700, color: anyPlayed ? zone : C.mute }}>{idx + 1}</span>
+                        <span className="truncate" style={{ minWidth: 0 }}>
+                          <span style={{ marginRight: 5 }}>{t.flag}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600 }}>{t.name}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: BIDDERS[t.owner].color, marginLeft: 6 }}>
+                            {BIDDERS[t.owner].short}
+                          </span>
+                        </span>
+                        <span style={{ fontSize: 12, color: C.mute, fontVariantNumeric: "tabular-nums" }}>
+                          {s.p > 0 ? `${s.p} ${s.w} ${s.d} ${s.l}` : "0 0 0 0"}
+                        </span>
+                        <span style={{ ...disp, fontSize: 15, fontWeight: 700, color: anyPlayed ? C.text : C.mute, width: 20, textAlign: "right" }}>
+                          {s.pts}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-4 mt-3" style={{ fontSize: 11, color: C.mute }}>
+            <span><span style={{ color: C.green, fontWeight: 700 }}>1–2</span> auto-qualify to R32</span>
+            <span><span style={{ color: C.gold, fontWeight: 700 }}>3rd</span> in the running (8 best thirds advance)</span>
+            <span>Owner tags: PAT · SUN · SAN · BEN</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── FIXTURES ── */}
+      {tab === "fixtures" && (
+        <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+          {fixtures.length === 0 && (
+            <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, padding: 20, textAlign: "center", color: C.mute, fontSize: 14 }}>
+              No fixtures loaded yet — data updates automatically 4× daily.
+            </div>
+          )}
+          {Object.entries(
+            fixtures.reduce((acc, m) => { (acc[m.d || "Schedule"] ||= []).push(m); return acc; }, {})
+          ).map(([day, matches]) => {
+            const today   = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            const isToday = day === today;
+            return (
+              <div key={day}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span style={{ ...disp, fontSize: 13, fontWeight: 700, letterSpacing: "0.14em", color: isToday ? C.gold : C.mute }}>
+                    {day.toUpperCase()}
+                  </span>
+                  {isToday && (
+                    <span style={{ ...disp, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", color: "#06120B", background: C.gold, borderRadius: 999, padding: "2px 8px" }}>
+                      TODAY
+                    </span>
+                  )}
+                </div>
+                <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, overflow: "hidden" }}>
+                  {matches.map((m, i) => {
+                    const A    = findTeam(m.a), B = findTeam(m.b);
+                    const duel = A && B && A.owner !== B.owner;
+                    const live = /live|^ht$|half/i.test(m.k || "");
+                    const played = m.s && m.s.trim() !== "";
+                    const Side = ({ T, raw, align }) => (
+                      <div className={align === "r" ? "text-right" : ""} style={{ minWidth: 0 }}>
+                        <div className="truncate" style={{ fontSize: 14, fontWeight: 600 }}>
+                          {align === "r" ? <>{T ? T.name : raw} {T?.flag}</> : <>{T?.flag} {T ? T.name : raw}</>}
+                        </div>
+                        {T && (
+                          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: BIDDERS[T.owner].color }}>
+                            {BIDDERS[T.owner].short} · ${T.bid}
+                          </div>
+                        )}
+                      </div>
+                    );
+                    return (
+                      <div key={i} className="px-3 py-3" style={{ borderBottom: i < matches.length - 1 ? `1px solid ${C.line}` : "none" }}>
+                        <div className="grid items-center" style={{ gridTemplateColumns: "1fr auto 1fr", gap: 10 }}>
+                          <Side T={A} raw={m.a} align="r" />
+                          <div className="text-center" style={{ minWidth: 64 }}>
+                            {live ? (
+                              <div>
+                                <span style={{ ...disp, fontSize: 20, fontWeight: 700 }}>{m.s || "0-0"}</span>
+                                <div className="livepulse" style={{ ...disp, fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", color: C.red }}>● LIVE</div>
+                              </div>
+                            ) : played ? (
+                              <span style={{ ...disp, fontSize: 20, fontWeight: 700 }}>{m.s}</span>
+                            ) : (
+                              <span style={{ fontSize: 11, color: C.mute }}>{m.k || "vs"}</span>
+                            )}
+                          </div>
+                          <Side T={B} raw={m.b} />
+                        </div>
+                        <div className="flex items-center justify-center gap-2 mt-1" style={{ fontSize: 10, color: C.mute }}>
+                          {m.g && <span>{m.g}</span>}
+                          {duel && (
+                            <span style={{ ...disp, fontWeight: 700, letterSpacing: "0.08em", color: C.gold, border: `1px solid ${C.line}`, borderRadius: 999, padding: "1px 8px" }}>
+                              ⚔ {BIDDERS[A.owner].short} v {BIDDERS[B.owner].short}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          {fixtures.length > 0 && (
+            <div style={{ fontSize: 11, color: C.mute }}>
+              ⚔ marks a head-to-head: two pool members' teams facing off. Owner tags show who holds each team and what they paid.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TEAMS ── */}
+      {tab === "teams" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {["All", ...Object.keys(BIDDERS)].map((o) => (
+              <button key={o} onClick={() => setOwnerFilter(o)}
+                style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 999, cursor: "pointer", border: `1px solid ${ownerFilter === o ? (BIDDERS[o]?.color || C.gold) : C.line}`, background: ownerFilter === o ? "#1A2438" : "transparent", color: ownerFilter === o ? (BIDDERS[o]?.color || C.gold) : C.mute }}>
+                {o}
+              </button>
+            ))}
+            <button onClick={() => setAliveOnly(!aliveOnly)}
+              style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 999, cursor: "pointer", marginLeft: "auto", border: `1px solid ${aliveOnly ? C.green : C.line}`, background: aliveOnly ? "#13261C" : "transparent", color: aliveOnly ? C.green : C.mute }}>
+              Alive only
+            </button>
+          </div>
+          <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, overflow: "hidden" }}>
+            <div className="grid px-3 py-2" style={{ gridTemplateColumns: "minmax(0,2.2fr) 1fr 0.7fr 1fr 1.3fr 0.8fr", gap: 8, fontSize: 10, letterSpacing: "0.12em", color: C.mute, fontFamily: "'Oswald', sans-serif", fontWeight: 600, borderBottom: `1px solid ${C.line}` }}>
+              <span>TEAM</span><span>OWNER</span><span>BID</span><span>W-D-L (PTS)</span><span>STATUS</span><span className="text-right">PAYOUT</span>
+            </div>
+            {filteredTeams.map((t) => {
+              const s   = status[t.name];
+              const out = !isAlive(s.st);
+              const pay = payoutLocked(s.st);
+              return (
+                <div key={t.name} className="grid px-3 py-2 items-center"
+                  style={{ gridTemplateColumns: "minmax(0,2.2fr) 1fr 0.7fr 1fr 1.3fr 0.8fr", gap: 8, fontSize: 13, borderBottom: `1px solid ${C.line}`, opacity: out && pay === 0 ? 0.55 : 1 }}>
+                  <span className="truncate"><span style={{ marginRight: 6 }}>{t.flag}</span><b>{t.name}</b></span>
+                  <span style={{ color: BIDDERS[t.owner].color, fontWeight: 600, fontSize: 12 }}>{t.owner}</span>
+                  <span style={{ color: C.mute }}>${t.bid}</span>
+                  <span style={{ color: C.mute, fontSize: 12 }}>{s.p > 0 ? `${s.w}-${s.d}-${s.l} (${s.pts})` : "—"}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: s.st === "CH" ? C.gold : out ? C.red : C.green }}>
+                    {STAGE_LABEL[s.st]}
+                  </span>
+                  <span className="text-right" style={{ color: pay > 0 ? C.gold : C.mute, fontWeight: pay > 0 ? 700 : 400 }}>
+                    {pay > 0 ? `$${pay}` : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: 11, color: C.mute, marginTop: 8 }}>
+            Payout shows money locked so far. Records are group-stage only.
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto px-4 pb-8 pt-2" style={{ fontSize: 11, color: C.mute }}>
+        WC26 Auction Pool · Patrick, Sunny, Sandeep & Ben · Scores via ESPN · Auto-updated by GitHub Actions
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<PoolDashboard />);
+</script>
+</body>
+</html>
