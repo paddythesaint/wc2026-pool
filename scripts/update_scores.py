@@ -127,7 +127,8 @@ def extract_odds(comp):
 
     h_ml = parse_ml(ml.get("home",{}).get("close",{}).get("odds"))
     a_ml = parse_ml(ml.get("away",{}).get("close",{}).get("odds"))
-    d_ml = parse_ml(o.get("drawOdds",{}).get("moneyLine"))  # integer path
+    # draw: prefer moneyline.draw.close.odds (upcoming), fall back to drawOdds.moneyLine (legacy)
+    d_ml = parse_ml(ml.get("draw",{}).get("close",{}).get("odds")) or parse_ml(o.get("drawOdds",{}).get("moneyLine"))
 
     if h_ml is None or a_ml is None: return None
 
@@ -163,7 +164,7 @@ def data_changed(existing, new_status, new_fixtures, new_h2h):
     old_fx = existing.get("fixtures", [])
     if len(new_fixtures) != len(old_fx): return True
     for nf, of in zip(new_fixtures, old_fx):
-        if nf.get("s") != of.get("s") or nf.get("k") != of.get("k") or nf.get("d") != of.get("d"):
+        if nf.get("s") != of.get("s") or nf.get("k") != of.get("k") or nf.get("d") != of.get("d") or nf.get("odds") != of.get("odds"):
             return True
     return False
 
