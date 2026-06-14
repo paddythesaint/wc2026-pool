@@ -299,7 +299,7 @@ function OddsBar({ odds, nameA, nameB }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
-  const [tab, setTab]               = useState("board");
+  const [tab, setTab]               = useState("fixtures");
   const [status, setStatus]         = useState(seedStatus);
   const [fixtures, setFixtures]     = useState(SEED_FIXTURES);
   const [h2h, setH2h]               = useState({});
@@ -555,9 +555,6 @@ function PoolDashboard() {
             </div>
           </div>
 
-          {/* H2H */}
-          <H2HSection h2h={h2h} />
-
           {/* Payout structure */}
           <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:14}}>
             <div style={{...disp,fontSize:11,fontWeight:600,letterSpacing:"0.15em",color:C.mute}}>PAYOUT STRUCTURE</div>
@@ -634,6 +631,7 @@ function PoolDashboard() {
       {/* ══ FIXTURES ══ */}
       {tab==="fixtures" && (
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+          <H2HSection h2h={h2h} />
           {fixtures.length===0 && (
             <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,
               padding:20,textAlign:"center",color:C.mute,fontSize:14}}>
