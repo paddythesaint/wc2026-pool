@@ -1,71 +1,76 @@
 """
 Fetch live 2026 FIFA World Cup data from ESPN's public scoreboard API.
-Computes group standings from completed match results (no standings endpoint needed).
-Runs in GitHub Actions on a cron schedule. No API key required.
+Computes standings, H2H records, and betting odds from match data.
+No API key required. Runs in GitHub Actions on a cron schedule.
 """
-import json
-import os
-import sys
+import json, os, sys
 from datetime import datetime, timezone, timedelta
 from urllib.request import urlopen, Request
-from urllib.error import URLError
 
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "..", "data", "scores.json")
-
-ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world"
-
+ESPN_BASE   = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world"
 TOURNAMENT_START = datetime(2026, 6, 11, tzinfo=timezone.utc)
+MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
 TEAM_MAP = {
-    "Mexico": "Mexico", "South Africa": "South Africa",
-    "Korea Republic": "Korea Republic", "Republic of Korea": "Korea Republic",
-    "Czech Republic": "Czech Republic", "Czechia": "Czech Republic",
-    "Canada": "Canada",
-    "Bosnia-Herzegovina": "Bosnia and Herzegovina",
-    "Bosnia and Herzegovina": "Bosnia and Herzegovina",
-    "Qatar": "Qatar", "Switzerland": "Switzerland",
-    "Brazil": "Brazil", "Morocco": "Morocco",
-    "Haiti": "Haiti", "Scotland": "Scotland",
-    "United States": "United States", "USA": "United States",
-    "Paraguay": "Paraguay", "Australia": "Australia",
-    "Turkey": "Turkey", "Türkiye": "Turkey", "Turkiye": "Turkey",
-    "Germany": "Germany",
-    "Curacao": "Curaçao", "Curaçao": "Curaçao",
-    "Ivory Coast": "Cote d'Ivoire", "Cote d'Ivoire": "Cote d'Ivoire",
-    "Côte d'Ivoire": "Cote d'Ivoire",
-    "Ecuador": "Ecuador", "Netherlands": "Netherlands",
-    "Japan": "Japan", "Sweden": "Sweden", "Tunisia": "Tunisia",
-    "Belgium": "Belgium", "Egypt": "Egypt",
-    "Iran": "Iran", "IR Iran": "Iran",
-    "New Zealand": "New Zealand",
-    "Spain": "Spain", "Cape Verde": "Cape Verde", "Cabo Verde": "Cape Verde",
-    "Saudi Arabia": "Saudi Arabia", "Uruguay": "Uruguay",
-    "France": "France", "Senegal": "Senegal",
-    "Iraq": "Iraq", "Norway": "Norway",
-    "Argentina": "Argentina", "Algeria": "Algeria",
-    "Austria": "Austria", "Jordan": "Jordan",
-    "Portugal": "Portugal",
-    "DR Congo": "DR Congo", "Congo DR": "DR Congo",
-    "Democratic Republic of Congo": "DR Congo",
-    "Uzbekistan": "Uzbekistan", "Colombia": "Colombia",
-    "England": "England", "Croatia": "Croatia",
-    "Ghana": "Ghana", "Panama": "Panama",
+    "Mexico":"Mexico","South Africa":"South Africa",
+    "Korea Republic":"Korea Republic","Republic of Korea":"Korea Republic",
+    "Czech Republic":"Czech Republic","Czechia":"Czech Republic",
+    "Canada":"Canada",
+    "Bosnia-Herzegovina":"Bosnia and Herzegovina","Bosnia and Herzegovina":"Bosnia and Herzegovina",
+    "Qatar":"Qatar","Switzerland":"Switzerland",
+    "Brazil":"Brazil","Morocco":"Morocco","Haiti":"Haiti","Scotland":"Scotland",
+    "United States":"United States","USA":"United States",
+    "Paraguay":"Paraguay","Australia":"Australia",
+    "Turkey":"Turkey","Türkiye":"Turkey","Turkiye":"Turkey",
+    "Germany":"Germany",
+    "Curacao":"Curaçao","Curaçao":"Curaçao",
+    "Ivory Coast":"Cote d'Ivoire","Cote d'Ivoire":"Cote d'Ivoire","Côte d'Ivoire":"Cote d'Ivoire",
+    "Ecuador":"Ecuador","Netherlands":"Netherlands",
+    "Japan":"Japan","Sweden":"Sweden","Tunisia":"Tunisia",
+    "Belgium":"Belgium","Egypt":"Egypt","Iran":"Iran","IR Iran":"Iran",
+    "New Zealand":"New Zealand","Spain":"Spain",
+    "Cape Verde":"Cape Verde","Cabo Verde":"Cape Verde",
+    "Saudi Arabia":"Saudi Arabia","Uruguay":"Uruguay",
+    "France":"France","Senegal":"Senegal","Iraq":"Iraq","Norway":"Norway",
+    "Argentina":"Argentina","Algeria":"Algeria","Austria":"Austria","Jordan":"Jordan",
+    "Portugal":"Portugal",
+    "DR Congo":"DR Congo","Congo DR":"DR Congo","Democratic Republic of Congo":"DR Congo",
+    "Uzbekistan":"Uzbekistan","Colombia":"Colombia",
+    "England":"England","Croatia":"Croatia","Ghana":"Ghana","Panama":"Panama",
 }
 
+# Canonical team list (order matches dashboard)
 CANONICAL_TEAMS = [
-    "Algeria", "Argentina", "Australia", "Austria", "Belgium",
-    "Bosnia and Herzegovina", "Brazil", "Canada", "Cape Verde", "Colombia",
-    "Croatia", "Curaçao", "Czech Republic", "DR Congo", "Ecuador",
-    "Egypt", "England", "France", "Germany", "Ghana", "Haiti", "Iran",
-    "Iraq", "Cote d'Ivoire", "Japan", "Jordan", "Korea Republic",
-    "Mexico", "Morocco", "Netherlands", "New Zealand", "Norway",
-    "Panama", "Paraguay", "Portugal", "Qatar", "Saudi Arabia",
-    "Scotland", "Senegal", "South Africa", "Spain", "Sweden",
-    "Switzerland", "Tunisia", "Turkey", "United States", "Uruguay", "Uzbekistan",
+    "Algeria","Argentina","Australia","Austria","Belgium",
+    "Bosnia and Herzegovina","Brazil","Canada","Cape Verde","Colombia",
+    "Croatia","Curaçao","Czech Republic","DR Congo","Ecuador",
+    "Egypt","England","France","Germany","Ghana","Haiti","Iran",
+    "Iraq","Cote d'Ivoire","Japan","Jordan","Korea Republic",
+    "Mexico","Morocco","Netherlands","New Zealand","Norway",
+    "Panama","Paraguay","Portugal","Qatar","Saudi Arabia",
+    "Scotland","Senegal","South Africa","Spain","Sweden",
+    "Switzerland","Tunisia","Turkey","United States","Uruguay","Uzbekistan",
 ]
 
-MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+# Owner lookup (used for H2H computation)
+TEAM_OWNERS = {
+    "Algeria":"Sandeep","Argentina":"Sunny","Australia":"Patrick","Austria":"Sandeep",
+    "Belgium":"Sunny","Bosnia and Herzegovina":"Sunny","Brazil":"Ben","Canada":"Sandeep",
+    "Cape Verde":"Ben","Colombia":"Sandeep","Croatia":"Ben","Curaçao":"Ben",
+    "Czech Republic":"Sunny","DR Congo":"Ben","Ecuador":"Sunny","Egypt":"Patrick",
+    "England":"Sunny","France":"Sandeep","Germany":"Patrick","Ghana":"Sunny",
+    "Haiti":"Sandeep","Iran":"Patrick","Iraq":"Ben","Cote d'Ivoire":"Patrick",
+    "Japan":"Sandeep","Jordan":"Sunny","Korea Republic":"Sandeep","Mexico":"Ben",
+    "Morocco":"Sandeep","Netherlands":"Patrick","New Zealand":"Patrick","Norway":"Sunny",
+    "Panama":"Sunny","Paraguay":"Patrick","Portugal":"Ben","Qatar":"Sandeep",
+    "Saudi Arabia":"Ben","Scotland":"Ben","Senegal":"Sandeep","South Africa":"Patrick",
+    "Spain":"Patrick","Sweden":"Ben","Switzerland":"Ben","Tunisia":"Sunny",
+    "Turkey":"Sandeep","United States":"Sunny","Uruguay":"Patrick","Uzbekistan":"Patrick",
+}
+
+PLAYERS = sorted(["Ben", "Patrick", "Sandeep", "Sunny"])
 
 
 def fetch_json(url):
@@ -73,112 +78,78 @@ def fetch_json(url):
     with urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode())
 
-
 def map_team(raw):
-    if not raw:
-        return None
-    direct = TEAM_MAP.get(raw)
-    if direct:
-        return direct
-    lower = raw.lower()
+    if not raw: return None
+    if raw in TEAM_MAP: return TEAM_MAP[raw]
+    low = raw.lower()
     for k, v in TEAM_MAP.items():
-        if k.lower() == lower:
-            return v
+        if k.lower() == low: return v
     return None
 
-
 def blank_status():
-    return {t: {"p": 0, "w": 0, "d": 0, "l": 0, "pts": 0, "st": "G"} for t in CANONICAL_TEAMS}
-
+    return {t: {"p":0,"w":0,"d":0,"l":0,"pts":0,"st":"G"} for t in CANONICAL_TEAMS}
 
 def fmt_date(iso_str):
     try:
-        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(iso_str.replace("Z","+00:00"))
         et = dt.astimezone(timezone(timedelta(hours=-4)))
-        return f"{MONTHS[et.month - 1]} {et.day}"
-    except Exception:
-        return ""
-
+        return f"{MONTHS[et.month-1]} {et.day}"
+    except: return ""
 
 def fmt_time(iso_str):
     try:
-        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(iso_str.replace("Z","+00:00"))
         et = dt.astimezone(timezone(timedelta(hours=-4)))
-        hour = et.hour % 12 or 12
-        ampm = "AM" if et.hour < 12 else "PM"
-        return f"{hour}:{et.minute:02d} {ampm} ET"
-    except Exception:
-        return ""
+        h = et.hour % 12 or 12
+        return f"{h}:{et.minute:02d} {'AM' if et.hour<12 else 'PM'} ET"
+    except: return ""
 
+def ml_to_prob(ml):
+    """Convert American money line to implied probability."""
+    if ml is None: return None
+    return abs(ml)/(abs(ml)+100) if ml < 0 else 100/(ml+100)
+
+def extract_odds(comp):
+    """Pull home/draw/away win probabilities from ESPN odds block."""
+    odds_list = comp.get("odds", [])
+    if not odds_list: return None
+    o = odds_list[0]
+    h = ml_to_prob(o.get("homeTeamOdds",{}).get("moneyLine"))
+    a = ml_to_prob(o.get("awayTeamOdds",{}).get("moneyLine"))
+    d = ml_to_prob(o.get("drawOdds",{}).get("moneyLine"))
+    if h is None or a is None: return None
+    if d is None: d = max(0.05, 1 - h - a)
+    total = h + d + a
+    return {"home": round(h/total, 2), "draw": round(d/total, 2), "away": round(a/total, 2)}
 
 def fetch_day(date_str):
-    """Fetch all events for a single date (YYYYMMDD). Returns list of raw event dicts."""
     try:
-        data = fetch_json(f"{ESPN_BASE}/scoreboard?dates={date_str}")
-        return data.get("events", [])
+        return fetch_json(f"{ESPN_BASE}/scoreboard?dates={date_str}").get("events", [])
     except Exception as e:
         print(f"[fetch {date_str}] {e}", file=sys.stderr)
         return []
 
-
-def parse_event(ev, want_fixture=False):
-    """
-    Extract match info from an ESPN event dict.
-    Returns (team_a, score_a, team_b, score_b, completed, in_progress, date_str, kickoff_str, group_label)
-    or None if unusable.
-    """
+def get_competitors(ev):
     comp = ev.get("competitions", [{}])[0]
-    competitors = comp.get("competitors", [])
-    if len(competitors) < 2:
-        return None
-
-    home = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
-    away = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
-
-    name_a = map_team(home.get("team", {}).get("displayName", "")) or home.get("team", {}).get("displayName", "")
-    name_b = map_team(away.get("team", {}).get("displayName", "")) or away.get("team", {}).get("displayName", "")
-
-    st          = comp.get("status", {})
-    st_type     = st.get("type", {})
-    completed   = st_type.get("completed", False)
-    state       = st_type.get("state", "")
-    in_progress = state == "in" or "halftime" in st_type.get("name", "").lower()
-
-    score_a = int(home.get("score", 0)) if (completed or in_progress) else None
-    score_b = int(away.get("score", 0)) if (completed or in_progress) else None
-
-    # Group label from altGameNote e.g. "FIFA World Cup, Group D"
-    note = comp.get("altGameNote", "") or ""
-    group_label = note.replace("FIFA World Cup, ", "").replace("FIFA World Cup", "").strip()
-
-    date_str    = fmt_date(ev.get("date", ""))
-    kickoff_str = "LIVE" if in_progress else ("" if completed else fmt_time(ev.get("date", "")))
-
-    return name_a, score_a, name_b, score_b, completed, in_progress, date_str, kickoff_str, group_label
-
+    cs   = comp.get("competitors", [])
+    if len(cs) < 2: return None, None, None
+    home = next((c for c in cs if c.get("homeAway")=="home"), cs[0])
+    away = next((c for c in cs if c.get("homeAway")=="away"), cs[1])
+    return comp, home, away
 
 def load_existing():
     try:
-        with open(OUTPUT_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+        with open(OUTPUT_FILE, encoding="utf-8") as f: return json.load(f)
+    except: return {}
 
-
-def data_changed(existing, new_status, new_fixtures):
-    old_status   = existing.get("status", {})
-    old_fixtures = existing.get("fixtures", [])
-
-    for team, rec in new_status.items():
-        if rec != old_status.get(team):
-            return True
-
-    if len(new_fixtures) != len(old_fixtures):
-        return True
-    for nf, of in zip(new_fixtures, old_fixtures):
+def data_changed(existing, new_status, new_fixtures, new_h2h):
+    if new_status != existing.get("status"): return True
+    if new_h2h    != existing.get("h2h"):    return True
+    old_fx = existing.get("fixtures", [])
+    if len(new_fixtures) != len(old_fx): return True
+    for nf, of in zip(new_fixtures, old_fx):
         if nf.get("s") != of.get("s") or nf.get("k") != of.get("k") or nf.get("d") != of.get("d"):
             return True
-
     return False
 
 
@@ -187,95 +158,133 @@ def main():
     now_utc  = datetime.now(timezone.utc)
     now_et   = now_utc.astimezone(timezone(timedelta(hours=-4)))
 
-    # ── 1. Fetch all days from tournament start through tomorrow ──────────────
-    days_to_fetch = []
-    cursor = TOURNAMENT_START
-    tomorrow = now_utc + timedelta(days=1)
-    while cursor <= tomorrow:
-        days_to_fetch.append(cursor.strftime("%Y%m%d"))
+    # ── Fetch every day from tournament start through tomorrow ────────────────
+    all_events = []
+    cursor     = TOURNAMENT_START
+    until      = now_utc + timedelta(days=1)
+    while cursor <= until:
+        all_events.extend(fetch_day(cursor.strftime("%Y%m%d")))
         cursor += timedelta(days=1)
 
-    all_events = []
-    for d in days_to_fetch:
-        all_events.extend(fetch_day(d))
-
-    # ── 2. Compute standings from all completed group-stage matches ───────────
+    # ── Compute group-stage standings from completed results ──────────────────
     status = blank_status()
-
-    # Carry forward any known knockout-stage statuses from existing file
+    # Preserve any known knockout statuses from existing file
     for team, rec in existing.get("status", {}).items():
-        if team in status and rec.get("st", "G") not in ("G", "EG"):
+        if team in status and rec.get("st","G") not in ("G","EG"):
             status[team] = rec
 
     for ev in all_events:
-        parsed = parse_event(ev)
-        if not parsed:
-            continue
-        name_a, score_a, name_b, score_b, completed, _, _, _, _ = parsed
-        if not completed or score_a is None or score_b is None:
-            continue
-        # Only count group-stage records
-        season_slug = ev.get("season", {}).get("slug", "")
-        if "group" not in season_slug.lower():
-            continue
+        comp, home, away = get_competitors(ev)
+        if comp is None: continue
+        st_type   = comp.get("status",{}).get("type",{})
+        if not st_type.get("completed", False): continue
+        season_slug = ev.get("season",{}).get("slug","")
+        if "group" not in season_slug.lower(): continue
 
-        for name, gf, ga in [(name_a, score_a, score_b), (name_b, score_b, score_a)]:
-            if name not in status:
-                continue
+        name_a = map_team(home.get("team",{}).get("displayName",""))
+        name_b = map_team(away.get("team",{}).get("displayName",""))
+        if not name_a or not name_b: continue
+        try:
+            ga, gb = int(home.get("score",0)), int(away.get("score",0))
+        except: continue
+
+        for name, gf, gc in [(name_a, ga, gb), (name_b, gb, ga)]:   # ← fixed tuple (3 items)
+            if name not in status: continue
             s = status[name]
             s["p"] += 1
-            if gf > ga:
-                s["w"] += 1; s["pts"] += 3
-            elif gf == ga:
-                s["d"] += 1; s["pts"] += 1
-            else:
-                s["l"] += 1
+            if gf > gc:   s["w"] += 1; s["pts"] += 3
+            elif gf == gc: s["d"] += 1; s["pts"] += 1
+            else:          s["l"] += 1
 
-    # ── 3. Build fixtures list: yesterday, today, tomorrow ────────────────────
+    # ── Compute H2H records across all completed matches ─────────────────────
+    h2h = {f"{p1}|{p2}": [0,0,0] for i,p1 in enumerate(PLAYERS)
+           for p2 in PLAYERS[i+1:]}   # [p1 wins, draws, p2 wins]
+
+    for ev in all_events:
+        comp, home, away = get_competitors(ev)
+        if comp is None: continue
+        if not comp.get("status",{}).get("type",{}).get("completed", False): continue
+
+        name_a = map_team(home.get("team",{}).get("displayName",""))
+        name_b = map_team(away.get("team",{}).get("displayName",""))
+        if not name_a or not name_b: continue
+
+        owner_a = TEAM_OWNERS.get(name_a)
+        owner_b = TEAM_OWNERS.get(name_b)
+        if not owner_a or not owner_b or owner_a == owner_b: continue
+
+        try: ga, gb = int(home.get("score",0)), int(away.get("score",0))
+        except: continue
+
+        # Normalise key alphabetically so lookup is consistent
+        if owner_a < owner_b:
+            key, wa, wb = f"{owner_a}|{owner_b}", ga, gb
+        else:
+            key, wa, wb = f"{owner_b}|{owner_a}", gb, ga
+
+        if key not in h2h: continue
+        if wa > wb:   h2h[key][0] += 1
+        elif wa < wb: h2h[key][2] += 1
+        else:         h2h[key][1] += 1
+
+    # ── Build 3-day fixture window with odds ──────────────────────────────────
     target_dates = set()
     for delta in (-1, 0, 1):
-        day = now_et + timedelta(days=delta)
-        target_dates.add(f"{MONTHS[day.month - 1]} {day.day}")
+        d = now_et + timedelta(days=delta)
+        target_dates.add(f"{MONTHS[d.month-1]} {d.day}")
 
     fixtures = []
     for ev in all_events:
-        parsed = parse_event(ev, want_fixture=True)
-        if not parsed:
-            continue
-        name_a, score_a, name_b, score_b, completed, in_progress, date_str, kickoff_str, group_label = parsed
-        if date_str not in target_dates:
-            continue
-        score_str = f"{score_a}-{score_b}" if score_a is not None else ""
-        fixtures.append({"d": date_str, "k": kickoff_str, "a": name_a, "b": name_b, "s": score_str, "g": group_label})
+        comp, home, away = get_competitors(ev)
+        if comp is None: continue
 
-    # Sort fixtures by date then kick-off
-    date_order = {d: i for i, d in enumerate(
-        [(now_et + timedelta(days=delta)).strftime(f"{MONTHS[(now_et + timedelta(days=delta)).month - 1]} {(now_et + timedelta(days=delta)).day}") for delta in (-1, 0, 1)]
-    )}
+        d_str = fmt_date(ev.get("date",""))
+        if d_str not in target_dates: continue
+
+        st_type     = comp.get("status",{}).get("type",{})
+        completed   = st_type.get("completed", False)
+        state       = st_type.get("state","")
+        in_progress = state == "in" or "halftime" in st_type.get("name","").lower()
+
+        name_a = map_team(home.get("team",{}).get("displayName","")) or home.get("team",{}).get("displayName","")
+        name_b = map_team(away.get("team",{}).get("displayName","")) or away.get("team",{}).get("displayName","")
+
+        score_str = ""
+        if completed or in_progress:
+            score_str = f"{home.get('score',0)}-{away.get('score',0)}"
+
+        kickoff = "LIVE" if in_progress else ("" if completed else fmt_time(ev.get("date","")))
+        note    = comp.get("altGameNote","").replace("FIFA World Cup, ","").replace("FIFA World Cup","").strip()
+        odds    = extract_odds(comp) if not completed else None
+
+        entry = {"d": d_str, "k": kickoff, "a": name_a, "b": name_b, "s": score_str, "g": note}
+        if odds: entry["odds"] = odds
+        fixtures.append(entry)
+
+    # Sort by date window order
+    date_order = {}
+    for i, delta in enumerate((-1, 0, 1)):
+        d = now_et + timedelta(days=delta)
+        date_order[f"{MONTHS[d.month-1]} {d.day}"] = i
     fixtures.sort(key=lambda f: date_order.get(f["d"], 99))
 
     if not fixtures and existing.get("fixtures"):
         fixtures = existing["fixtures"]
-        print("[fixtures] ESPN returned nothing for window — keeping existing", file=sys.stderr)
+        print("[fixtures] ESPN returned nothing — keeping existing", file=sys.stderr)
 
-    # ── 4. Write only if something changed ───────────────────────────────────
-    if not data_changed(existing, status, fixtures):
+    # ── Only write if something actually changed ──────────────────────────────
+    if not data_changed(existing, status, fixtures, h2h):
         print("[done] no changes detected — skipping write")
         return
 
-    output = {
-        "updated":  now_utc.isoformat(),
-        "status":   status,
-        "fixtures": fixtures,
-    }
-
+    output = {"updated": now_utc.isoformat(), "status": status, "fixtures": fixtures, "h2h": h2h}
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
     played = sum(1 for v in status.values() if v["p"] > 0)
-    print(f"[done] updated · {played} teams with match records · {len(fixtures)} fixtures in window")
-
+    battles = sum(1 for v in h2h.values() if sum(v) > 0)
+    print(f"[done] {played} teams with records · {len(fixtures)} fixtures · {battles} H2H battles logged")
 
 if __name__ == "__main__":
     main()
