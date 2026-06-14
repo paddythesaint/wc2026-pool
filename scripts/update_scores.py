@@ -105,21 +105,36 @@ def fmt_time(iso_str):
     except: return ""
 
 def ml_to_prob(ml):
-    """Convert American money line to implied probability."""
+    """Convert American money line integer to implied probability."""
     if ml is None: return None
     return abs(ml)/(abs(ml)+100) if ml < 0 else 100/(ml+100)
 
+def parse_ml(val):
+    """Parse ESPN money line value — can be int or string like '-165' or '+450'."""
+    if val is None: return None
+    try: return int(str(val).replace("+",""))
+    except: return None
+
 def extract_odds(comp):
-    """Pull home/draw/away win probabilities from ESPN odds block."""
+    """Pull home/draw/away win probabilities from ESPN odds block.
+    ESPN structure: odds[0].moneyline.{home,away,draw}.close.odds (string)
+                   odds[0].drawOdds.moneyLine (int, duplicate but handy for draw)
+    """
     odds_list = comp.get("odds", [])
     if not odds_list: return None
     o = odds_list[0]
-    h = ml_to_prob(o.get("homeTeamOdds",{}).get("moneyLine"))
-    a = ml_to_prob(o.get("awayTeamOdds",{}).get("moneyLine"))
-    d = ml_to_prob(o.get("drawOdds",{}).get("moneyLine"))
-    if h is None or a is None: return None
-    if d is None: d = max(0.05, 1 - h - a)
-    total = h + d + a
+    ml = o.get("moneyline", {})
+
+    h_ml = parse_ml(ml.get("home",{}).get("close",{}).get("odds"))
+    a_ml = parse_ml(ml.get("away",{}).get("close",{}).get("odds"))
+    d_ml = parse_ml(o.get("drawOdds",{}).get("moneyLine"))  # integer path
+
+    if h_ml is None or a_ml is None: return None
+
+    h = ml_to_prob(h_ml)
+    a = ml_to_prob(a_ml)
+    d = ml_to_prob(d_ml) if d_ml is not None else max(0.05, 1 - h - a)
+    total = h + a + d
     return {"home": round(h/total, 2), "draw": round(d/total, 2), "away": round(a/total, 2)}
 
 def fetch_day(date_str):

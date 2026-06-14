@@ -40,7 +40,7 @@ const TEAMS = [
   { name:"DR Congo",               flag:"🇨🇩", owner:"Ben",     bid:1,  random:false },
   { name:"Ecuador",                flag:"🇪🇨", owner:"Sunny",   bid:10, random:false },
   { name:"Egypt",                  flag:"🇪🇬", owner:"Patrick", bid:7,  random:false },
-  { name:"England",                flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", owner:"Sunny",   bid:60, random:false },
+  { name:"England",                flag:"ENG", owner:"Sunny",   bid:60, random:false },
   { name:"France",                 flag:"🇫🇷", owner:"Sandeep", bid:1,  random:true  },
   { name:"Germany",                flag:"🇩🇪", owner:"Patrick", bid:65, random:false },
   { name:"Ghana",                  flag:"🇬🇭", owner:"Sunny",   bid:5,  random:false },
@@ -61,7 +61,7 @@ const TEAMS = [
   { name:"Portugal",               flag:"🇵🇹", owner:"Ben",     bid:1,  random:true  },
   { name:"Qatar",                  flag:"🇶🇦", owner:"Sandeep", bid:2,  random:false },
   { name:"Saudi Arabia",           flag:"🇸🇦", owner:"Ben",     bid:6,  random:false },
-  { name:"Scotland",               flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", owner:"Ben",     bid:5,  random:false },
+  { name:"Scotland",               flag:"SCT", owner:"Ben",     bid:5,  random:false },
   { name:"Senegal",                flag:"🇸🇳", owner:"Sandeep", bid:25, random:false },
   { name:"South Africa",           flag:"🇿🇦", owner:"Patrick", bid:3,  random:false },
   { name:"Spain",                  flag:"🇪🇸", owner:"Patrick", bid:1,  random:true  },
@@ -149,11 +149,26 @@ const C = {
 const disp = {fontFamily:"'Oswald', sans-serif"};
 const body = {fontFamily:"'Inter', sans-serif"};
 
+// ─── Flag display (handles text abbreviations for subdivision flags) ──────────
+function Flag({ f, size=16 }) {
+  if (!f) return null;
+  // Text abbreviations (ENG, SCT) rendered as styled badge
+  if (f.length <= 4 && /^[A-Z]+$/.test(f)) return (
+    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
+      fontSize:9,fontWeight:800,letterSpacing:"0.05em",color:C.text,
+      background:"#1E2E48",border:`1px solid ${C.line}`,borderRadius:3,
+      padding:"1px 4px",minWidth:size,height:size,verticalAlign:"middle",lineHeight:1}}>
+      {f}
+    </span>
+  );
+  return <span style={{fontSize:size}}>{f}</span>;
+}
+
 // ─── ROI badge ────────────────────────────────────────────────────────────────
 function RoiBadge({ team, st }) {
   if (team.random) return (
     <span style={{fontSize:9,fontWeight:700,letterSpacing:"0.08em",color:C.mute,
-      border:`1px solid ${C.line}`,borderRadius:3,padding:"1px 5px"}}>🎲 DRAW</span>
+      border:`1px solid ${C.line}`,borderRadius:3,padding:"1px 5px"}}>🎲 RANDOM</span>
   );
   const pay = payoutLocked(st);
   if (team.bid < 2) return null;
@@ -187,7 +202,7 @@ function ScenarioBar({ floor, ceiling, spent }) {
           <span style={{color:netCeil>=0?C.green:C.text,fontWeight:600}}>
             {netCeil>=0?"+":"-"}${Math.abs(netCeil)}
           </span>
-          <span style={{color:C.mute}}> ceiling</span>
+          <span style={{color:C.mute}}> max upside *</span>
         </span>
       </div>
       <div style={{height:6,background:"#1A2438",borderRadius:99,overflow:"hidden",position:"relative"}}>
@@ -291,6 +306,28 @@ function PoolDashboard() {
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [ownerFilter, setOwnerFilter] = useState("All");
   const [aliveOnly, setAliveOnly]   = useState(false);
+  const [sortCol, setSortCol]       = useState("payout");   // bid|payout|roi|wdl|name
+  const [sortDir, setSortDir]       = useState(-1);          // 1 asc, -1 desc
+
+  const toggleSort = (col) => {
+    if (sortCol === col) setSortDir(d => -d);
+    else { setSortCol(col); setSortDir(-1); }
+  };
+  const SortHdr = ({col, children, align}) => {
+    const active = sortCol === col;
+    return (
+      <span onClick={() => toggleSort(col)}
+        style={{cursor:"pointer", color: active ? C.gold : C.mute,
+          textAlign: align||"left", userSelect:"none",
+          display:"flex", alignItems:"center", gap:3,
+          justifyContent: align==="right" ? "flex-end" : "flex-start"}}>
+        {children}
+        <span style={{fontSize:8, opacity: active ? 1 : 0.3}}>
+          {active ? (sortDir === -1 ? "▼" : "▲") : "⬍"}
+        </span>
+      </span>
+    );
+  };
 
   useEffect(() => {
     fetch("./data/scores.json?t=" + Date.now())
@@ -340,14 +377,25 @@ function PoolDashboard() {
   }, [status]);
 
   const filteredTeams = useMemo(() => {
-    return TEAMS.filter(t =>
+    const list = TEAMS.filter(t =>
       (ownerFilter==="All" || t.owner===ownerFilter) &&
       (!aliveOnly || isAlive(status[t.name].st))
-    ).sort((a,b) => {
-      const pa=payoutLocked(status[a.name].st), pb=payoutLocked(status[b.name].st);
-      return pb!==pa ? pb-pa : b.bid-a.bid;
+    );
+    list.sort((a,b) => {
+      const sa=status[a.name], sb=status[b.name];
+      const pa=payoutLocked(sa.st), pb=payoutLocked(sb.st);
+      const roiA = a.bid>=2&&!a.random ? pa/a.bid : -1;
+      const roiB = b.bid>=2&&!b.random ? pb/b.bid : -1;
+      let cmp = 0;
+      if      (sortCol==="name")   cmp = a.name.localeCompare(b.name);
+      else if (sortCol==="bid")    cmp = a.bid - b.bid;
+      else if (sortCol==="payout") cmp = pa - pb;
+      else if (sortCol==="roi")    cmp = roiA - roiB;
+      else if (sortCol==="wdl")    cmp = sa.pts - sb.pts || sa.w - sb.w;
+      return cmp * sortDir || b.bid - a.bid;
     });
-  }, [ownerFilter, aliveOnly, status]);
+    return list;
+  }, [ownerFilter, aliveOnly, status, sortCol, sortDir]);
 
   return (
     <div style={{...body,background:C.bg,minHeight:"100vh",color:C.text}}>
@@ -458,7 +506,7 @@ function PoolDashboard() {
                       style={{fontSize:16,opacity:out?0.3:1,filter:out?"grayscale(1)":"none",
                         position:"relative"}}>
                       {won && !out && <span style={{position:"absolute",top:-6,right:-4,fontSize:8}}>🔥</span>}
-                      {t.flag}
+                      <Flag f={t.flag} size={16} />
                     </span>
                   );
                 })}
@@ -472,7 +520,7 @@ function PoolDashboard() {
               <div style={{...disp,fontSize:11,fontWeight:600,letterSpacing:"0.15em",color:C.gold}}>BEST VALUE</div>
               {superlatives.bestValue ? (
                 <div style={{fontSize:13,marginTop:6}}>
-                  {superlatives.bestValue.flag} <b>{superlatives.bestValue.name}</b>
+                  <Flag f={superlatives.bestValue.flag} /> <b>{superlatives.bestValue.name}</b>
                   <span style={{color:BIDDERS[superlatives.bestValue.owner].color}}> ({superlatives.bestValue.owner})</span>
                   <br/><span style={{color:C.mute,fontSize:12}}>${superlatives.bestValue.pay} on ${superlatives.bestValue.bid} bid · </span>
                   <b style={{color:C.gold}}>{superlatives.bestValue.roi.toFixed(1)}× ROI</b>
@@ -485,7 +533,7 @@ function PoolDashboard() {
               <div style={{...disp,fontSize:11,fontWeight:600,letterSpacing:"0.15em",color:C.red}}>BIGGEST BUST</div>
               {superlatives.bust ? (
                 <div style={{fontSize:13,marginTop:6}}>
-                  {superlatives.bust.flag} <b>{superlatives.bust.name}</b>
+                  <Flag f={superlatives.bust.flag} /> <b>{superlatives.bust.name}</b>
                   <span style={{color:BIDDERS[superlatives.bust.owner].color}}> ({superlatives.bust.owner})</span>
                   <br/><span style={{color:C.mute,fontSize:12}}>${superlatives.bust.bid} bid · out in groups · $0 back</span>
                 </div>
@@ -497,7 +545,7 @@ function PoolDashboard() {
               <div style={{...disp,fontSize:11,fontWeight:600,letterSpacing:"0.15em",color:C.green}}>🔥 ON FIRE</div>
               {superlatives.hotStreak ? (
                 <div style={{fontSize:13,marginTop:6}}>
-                  {superlatives.hotStreak.flag} <b>{superlatives.hotStreak.name}</b>
+                  <Flag f={superlatives.hotStreak.flag} /> <b>{superlatives.hotStreak.name}</b>
                   <span style={{color:BIDDERS[superlatives.hotStreak.owner].color}}> ({superlatives.hotStreak.owner})</span>
                   <br/><span style={{color:C.mute,fontSize:12}}>{superlatives.hotStreak.s.w}W in group stage so far</span>
                 </div>
@@ -555,7 +603,7 @@ function PoolDashboard() {
                           opacity:out&&payoutLocked(s.st)===0?0.5:1}}>
                         <span style={{...disp,fontSize:12,fontWeight:700,color:anyPlayed?zone:C.mute}}>{idx+1}</span>
                         <span className="truncate" style={{minWidth:0}}>
-                          <span style={{marginRight:5}}>{t.flag}</span>
+                          <span style={{marginRight:5}}><Flag f={t.flag} /></span>
                           <span style={{fontSize:13,fontWeight:600}}>{t.name}</span>
                           <span style={{fontSize:10,fontWeight:700,letterSpacing:"0.06em",
                             color:BIDDERS[t.owner].color,marginLeft:6}}>
@@ -618,8 +666,8 @@ function PoolDashboard() {
                       <div className={align==="r"?"text-right":""} style={{minWidth:0}}>
                         <div className="truncate" style={{fontSize:14,fontWeight:600}}>
                           {align==="r"
-                            ? <>{T?T.name:raw} {T?.flag}</>
-                            : <>{T?.flag} {T?T.name:raw}</>}
+                            ? <>{T?T.name:raw} <Flag f={T?.flag} /></>
+                            : <><Flag f={T?.flag} /> {T?T.name:raw}</>}
                         </div>
                         {T && (
                           <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.08em",
@@ -701,11 +749,15 @@ function PoolDashboard() {
           <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
             <div className="grid px-3 py-2"
               style={{gridTemplateColumns:"minmax(0,2fr) 0.8fr 0.5fr 0.9fr 1.2fr 0.6fr 0.7fr",gap:6,
-                fontSize:10,letterSpacing:"0.12em",color:C.mute,...disp,fontWeight:600,
+                fontSize:10,letterSpacing:"0.12em",...disp,fontWeight:600,
                 borderBottom:`1px solid ${C.line}`}}>
-              <span>TEAM</span><span>OWNER</span><span>BID</span>
-              <span>W-D-L (PTS)</span><span>STATUS</span>
-              <span className="text-right">PAYOUT</span><span className="text-right">ROI</span>
+              <SortHdr col="name">TEAM</SortHdr>
+              <span style={{color:C.mute}}>OWNER</span>
+              <SortHdr col="bid">BID</SortHdr>
+              <SortHdr col="wdl">W-D-L (PTS)</SortHdr>
+              <span style={{color:C.mute}}>STATUS</span>
+              <SortHdr col="payout" align="right">PAYOUT</SortHdr>
+              <SortHdr col="roi" align="right">ROI</SortHdr>
             </div>
             {filteredTeams.map(t => {
               const s   = status[t.name];
@@ -716,7 +768,7 @@ function PoolDashboard() {
                   style={{gridTemplateColumns:"minmax(0,2fr) 0.8fr 0.5fr 0.9fr 1.2fr 0.6fr 0.7fr",gap:6,
                     fontSize:13,borderBottom:`1px solid ${C.line}`,opacity:out&&pay===0?0.55:1}}>
                   <span className="truncate">
-                    <span style={{marginRight:6}}>{t.flag}</span>
+                    <span style={{marginRight:6}}><Flag f={t.flag} /></span>
                     <b>{t.name}</b>
                     {s.w>=2 && isAlive(s.st) && <span style={{marginLeft:4,fontSize:12}}>🔥</span>}
                   </span>
@@ -738,13 +790,14 @@ function PoolDashboard() {
             })}
           </div>
           <div style={{fontSize:11,color:C.mute,marginTop:8}}>
-            ROI = locked payout ÷ bid price · 🎲 = randomly drawn team (bid doesn't reflect pre-tournament valuation) · 🔥 = won 2+ group games
+            ROI = locked payout ÷ bid price · 🎲 RANDOM = randomly allocated team · 🔥 = won 2+ group games · Click column headers to sort
           </div>
         </div>
       )}
 
       <div className="max-w-5xl mx-auto px-4 pb-8 pt-2" style={{fontSize:11,color:C.mute}}>
         WC26 Auction Pool · Patrick, Sunny, Sandeep & Ben · Scores via ESPN · Auto-updated by GitHub Actions
+        <br/>* Max upside assumes every alive team wins the whole tournament — physically impossible but shows theoretical ceiling
       </div>
     </div>
   );
