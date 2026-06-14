@@ -1,5 +1,6 @@
 """
-Fetch live 2026 FIFA World Cup data from ESPN's public API and write data/scores.json.
+Fetch live 2026 FIFA World Cup data from ESPN's public scoreboard API.
+Computes group standings from completed match results (no standings endpoint needed).
 Runs in GitHub Actions on a cron schedule. No API key required.
 """
 import json
@@ -12,11 +13,10 @@ from urllib.error import URLError
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "..", "data", "scores.json")
 
-# ESPN league slug for FIFA World Cup 2026
-ESPN_LEAGUE = "fifa.world"
-ESPN_BASE   = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{ESPN_LEAGUE}"
+ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world"
 
-# Map ESPN display names → our canonical names
+TOURNAMENT_START = datetime(2026, 6, 11, tzinfo=timezone.utc)
+
 TEAM_MAP = {
     "Mexico": "Mexico", "South Africa": "South Africa",
     "Korea Republic": "Korea Republic", "Republic of Korea": "Korea Republic",
@@ -53,10 +53,17 @@ TEAM_MAP = {
     "Ghana": "Ghana", "Panama": "Panama",
 }
 
-ALL_TEAMS = list(TEAM_MAP.values())
-# deduplicate while preserving order
-seen = set()
-CANONICAL_TEAMS = [t for t in ALL_TEAMS if not (t in seen or seen.add(t))]
+CANONICAL_TEAMS = [
+    "Algeria", "Argentina", "Australia", "Austria", "Belgium",
+    "Bosnia and Herzegovina", "Brazil", "Canada", "Cape Verde", "Colombia",
+    "Croatia", "Curaçao", "Czech Republic", "DR Congo", "Ecuador",
+    "Egypt", "England", "France", "Germany", "Ghana", "Haiti", "Iran",
+    "Iraq", "Cote d'Ivoire", "Japan", "Jordan", "Korea Republic",
+    "Mexico", "Morocco", "Netherlands", "New Zealand", "Norway",
+    "Panama", "Paraguay", "Portugal", "Qatar", "Saudi Arabia",
+    "Scotland", "Senegal", "South Africa", "Spain", "Sweden",
+    "Switzerland", "Tunisia", "Turkey", "United States", "Uruguay", "Uzbekistan",
+]
 
 MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
@@ -65,10 +72,6 @@ def fetch_json(url):
     req = Request(url, headers={"User-Agent": "wc2026-pool/1.0"})
     with urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode())
-
-
-def blank_status():
-    return {t: {"p": 0, "w": 0, "d": 0, "l": 0, "pts": 0, "st": "G"} for t in CANONICAL_TEAMS}
 
 
 def map_team(raw):
@@ -84,21 +87,20 @@ def map_team(raw):
     return None
 
 
+def blank_status():
+    return {t: {"p": 0, "w": 0, "d": 0, "l": 0, "pts": 0, "st": "G"} for t in CANONICAL_TEAMS}
+
+
 def fmt_date(iso_str):
-    """Convert ESPN ISO date → 'Jun 14' style."""
     try:
         dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
-        # Convert to ET for display
         et = dt.astimezone(timezone(timedelta(hours=-4)))
         return f"{MONTHS[et.month - 1]} {et.day}"
     except Exception:
         return ""
 
 
-def fmt_time(iso_str, status_type):
-    """Return kickoff string or LIVE."""
-    if "in_progress" in status_type.lower() or "halftime" in status_type.lower():
-        return "LIVE"
+def fmt_time(iso_str):
     try:
         dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
         et = dt.astimezone(timezone(timedelta(hours=-4)))
@@ -109,80 +111,50 @@ def fmt_time(iso_str, status_type):
         return ""
 
 
-def fetch_standings(status_out):
-    """Pull group standings from ESPN and update status_out in-place."""
+def fetch_day(date_str):
+    """Fetch all events for a single date (YYYYMMDD). Returns list of raw event dicts."""
     try:
-        data = fetch_json(f"{ESPN_BASE}/standings")
-        groups = data.get("standings", {}).get("groups", [])
-        if not groups:
-            # try alternate path
-            groups = data.get("children", [])
-        for grp in groups:
-            entries = grp.get("standings", {}).get("entries", grp.get("entries", []))
-            for entry in entries:
-                raw_name  = entry.get("team", {}).get("displayName", "")
-                canonical = map_team(raw_name)
-                if not canonical or canonical not in status_out:
-                    continue
-                stats = {s["name"]: s["value"] for s in entry.get("stats", [])}
-                gp  = int(stats.get("gamesPlayed",  stats.get("played", 0)))
-                w   = int(stats.get("wins",         0))
-                d   = int(stats.get("ties",         stats.get("draws", 0)))
-                l   = int(stats.get("losses",       0))
-                pts = int(stats.get("points",       w * 3 + d))
-                status_out[canonical].update({"p": gp, "w": w, "d": d, "l": l, "pts": pts})
-        return True
+        data = fetch_json(f"{ESPN_BASE}/scoreboard?dates={date_str}")
+        return data.get("events", [])
     except Exception as e:
-        print(f"[standings] error: {e}", file=sys.stderr)
-        return False
+        print(f"[fetch {date_str}] {e}", file=sys.stderr)
+        return []
 
 
-def fetch_fixtures():
-    """Fetch yesterday, today, tomorrow from ESPN scoreboard."""
-    fixtures = []
-    now_et = datetime.now(timezone(timedelta(hours=-4)))
+def parse_event(ev, want_fixture=False):
+    """
+    Extract match info from an ESPN event dict.
+    Returns (team_a, score_a, team_b, score_b, completed, in_progress, date_str, kickoff_str, group_label)
+    or None if unusable.
+    """
+    comp = ev.get("competitions", [{}])[0]
+    competitors = comp.get("competitors", [])
+    if len(competitors) < 2:
+        return None
 
-    for delta in (-1, 0, 1):
-        day = now_et + timedelta(days=delta)
-        date_str = day.strftime("%Y%m%d")
-        try:
-            data   = fetch_json(f"{ESPN_BASE}/scoreboard?dates={date_str}")
-            events = data.get("events", [])
-            for ev in events:
-                comp = ev.get("competitions", [{}])[0]
-                competitors = comp.get("competitors", [])
-                if len(competitors) < 2:
-                    continue
+    home = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
+    away = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
 
-                # ESPN puts home team first — we want home on left
-                home = next((c for c in competitors if c.get("homeAway") == "home"), competitors[0])
-                away = next((c for c in competitors if c.get("homeAway") == "away"), competitors[1])
+    name_a = map_team(home.get("team", {}).get("displayName", "")) or home.get("team", {}).get("displayName", "")
+    name_b = map_team(away.get("team", {}).get("displayName", "")) or away.get("team", {}).get("displayName", "")
 
-                team_a = map_team(home.get("team", {}).get("displayName", "")) or home.get("team", {}).get("displayName", "")
-                team_b = map_team(away.get("team", {}).get("displayName", "")) or away.get("team", {}).get("displayName", "")
+    st          = comp.get("status", {})
+    st_type     = st.get("type", {})
+    completed   = st_type.get("completed", False)
+    state       = st_type.get("state", "")
+    in_progress = state == "in" or "halftime" in st_type.get("name", "").lower()
 
-                status     = comp.get("status", {})
-                status_type = status.get("type", {}).get("name", "")
-                completed  = status.get("type", {}).get("completed", False)
-                in_progress = "in_progress" in status_type.lower() or "halftime" in status_type.lower()
+    score_a = int(home.get("score", 0)) if (completed or in_progress) else None
+    score_b = int(away.get("score", 0)) if (completed or in_progress) else None
 
-                score = ""
-                if completed or in_progress:
-                    score = f"{home.get('score', '0')}-{away.get('score', '0')}"
+    # Group label from altGameNote e.g. "FIFA World Cup, Group D"
+    note = comp.get("altGameNote", "") or ""
+    group_label = note.replace("FIFA World Cup, ", "").replace("FIFA World Cup", "").strip()
 
-                # Group/round label from notes
-                notes = comp.get("notes", [])
-                round_label = notes[0].get("headline", "") if notes else ""
+    date_str    = fmt_date(ev.get("date", ""))
+    kickoff_str = "LIVE" if in_progress else ("" if completed else fmt_time(ev.get("date", "")))
 
-                d    = fmt_date(ev.get("date", ""))
-                k    = "LIVE" if in_progress else ("" if completed else fmt_time(ev.get("date", ""), status_type))
-
-                if d:
-                    fixtures.append({"d": d, "k": k, "a": team_a, "b": team_b, "s": score, "g": round_label})
-        except Exception as e:
-            print(f"[fixtures {date_str}] error: {e}", file=sys.stderr)
-
-    return fixtures
+    return name_a, score_a, name_b, score_b, completed, in_progress, date_str, kickoff_str, group_label
 
 
 def load_existing():
@@ -194,8 +166,6 @@ def load_existing():
 
 
 def data_changed(existing, new_status, new_fixtures):
-    """Return True only if scores or fixtures meaningfully changed.
-    Ignores the 'updated' timestamp so polling doesn't create spurious commits."""
     old_status   = existing.get("status", {})
     old_fixtures = existing.get("fixtures", [])
 
@@ -214,27 +184,87 @@ def data_changed(existing, new_status, new_fixtures):
 
 def main():
     existing = load_existing()
-    status   = blank_status()
+    now_utc  = datetime.now(timezone.utc)
+    now_et   = now_utc.astimezone(timezone(timedelta(hours=-4)))
 
-    # Carry forward any knockout-round statuses from the existing file
+    # ── 1. Fetch all days from tournament start through tomorrow ──────────────
+    days_to_fetch = []
+    cursor = TOURNAMENT_START
+    tomorrow = now_utc + timedelta(days=1)
+    while cursor <= tomorrow:
+        days_to_fetch.append(cursor.strftime("%Y%m%d"))
+        cursor += timedelta(days=1)
+
+    all_events = []
+    for d in days_to_fetch:
+        all_events.extend(fetch_day(d))
+
+    # ── 2. Compute standings from all completed group-stage matches ───────────
+    status = blank_status()
+
+    # Carry forward any known knockout-stage statuses from existing file
     for team, rec in existing.get("status", {}).items():
         if team in status and rec.get("st", "G") not in ("G", "EG"):
             status[team] = rec
 
-    standings_ok = fetch_standings(status)
-    fixtures     = fetch_fixtures()
+    for ev in all_events:
+        parsed = parse_event(ev)
+        if not parsed:
+            continue
+        name_a, score_a, name_b, score_b, completed, _, _, _, _ = parsed
+        if not completed or score_a is None or score_b is None:
+            continue
+        # Only count group-stage records
+        season_slug = ev.get("season", {}).get("slug", "")
+        if "group" not in season_slug.lower():
+            continue
 
-    # Fall back to existing fixtures if ESPN returned nothing
+        for name, gf, ga in [(name_a, score_a, score_b), (name_b, score_b, score_a)]:
+            if name not in status:
+                continue
+            s = status[name]
+            s["p"] += 1
+            if gf > ga:
+                s["w"] += 1; s["pts"] += 3
+            elif gf == ga:
+                s["d"] += 1; s["pts"] += 1
+            else:
+                s["l"] += 1
+
+    # ── 3. Build fixtures list: yesterday, today, tomorrow ────────────────────
+    target_dates = set()
+    for delta in (-1, 0, 1):
+        day = now_et + timedelta(days=delta)
+        target_dates.add(f"{MONTHS[day.month - 1]} {day.day}")
+
+    fixtures = []
+    for ev in all_events:
+        parsed = parse_event(ev, want_fixture=True)
+        if not parsed:
+            continue
+        name_a, score_a, name_b, score_b, completed, in_progress, date_str, kickoff_str, group_label = parsed
+        if date_str not in target_dates:
+            continue
+        score_str = f"{score_a}-{score_b}" if score_a is not None else ""
+        fixtures.append({"d": date_str, "k": kickoff_str, "a": name_a, "b": name_b, "s": score_str, "g": group_label})
+
+    # Sort fixtures by date then kick-off
+    date_order = {d: i for i, d in enumerate(
+        [(now_et + timedelta(days=delta)).strftime(f"{MONTHS[(now_et + timedelta(days=delta)).month - 1]} {(now_et + timedelta(days=delta)).day}") for delta in (-1, 0, 1)]
+    )}
+    fixtures.sort(key=lambda f: date_order.get(f["d"], 99))
+
     if not fixtures and existing.get("fixtures"):
         fixtures = existing["fixtures"]
-        print("[fixtures] using existing data (ESPN returned nothing)", file=sys.stderr)
+        print("[fixtures] ESPN returned nothing for window — keeping existing", file=sys.stderr)
 
+    # ── 4. Write only if something changed ───────────────────────────────────
     if not data_changed(existing, status, fixtures):
         print("[done] no changes detected — skipping write")
         return
 
     output = {
-        "updated":  datetime.now(timezone.utc).isoformat(),
+        "updated":  now_utc.isoformat(),
         "status":   status,
         "fixtures": fixtures,
     }
@@ -243,9 +273,8 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
-    n_teams    = sum(1 for v in status.values() if v["p"] > 0)
-    n_fixtures = len(fixtures)
-    print(f"[done] scores updated · {n_teams} teams with records · {n_fixtures} fixtures · standings={'ok' if standings_ok else 'partial'}")
+    played = sum(1 for v in status.values() if v["p"] > 0)
+    print(f"[done] updated · {played} teams with match records · {len(fixtures)} fixtures in window")
 
 
 if __name__ == "__main__":
