@@ -385,17 +385,21 @@ function PoolDashboard() {
     );
   };
 
-  // Fetch standings + H2H from scores.json (updated by GitHub Actions)
+  // Fetch standings + H2H from scores.json (updated by GitHub Actions every 5 min)
   useEffect(() => {
-    fetch("./data/scores.json?t=" + Date.now())
-      .then(r => r.json())
-      .then(data => {
-        if (data.updated && new Date(data.updated) > new Date(SEED_DATE)) {
-          if (data.status) setStatus({...blankStatus(), ...data.status});
-          if (data.h2h)    setH2h(data.h2h);
-        }
-      })
-      .catch(() => {});
+    const run = () =>
+      fetch("./data/scores.json?t=" + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          if (data.updated && new Date(data.updated) > new Date(SEED_DATE)) {
+            if (data.status) setStatus({...blankStatus(), ...data.status});
+            if (data.h2h)    setH2h(data.h2h);
+          }
+        })
+        .catch(() => {});
+    run();
+    const id = setInterval(run, 60000);
+    return () => clearInterval(id);
   }, []);
 
   // Fetch fixtures live from ESPN every 60s
