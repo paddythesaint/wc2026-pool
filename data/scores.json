@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T02:30:37.436125+00:00",
+  "updated": "2026-06-15T17:34:19.220831+00:00",
   "status": {
     "Algeria": {
       "p": 0,
@@ -330,11 +330,11 @@
       "st": "G"
     },
     "Sweden": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Switzerland": {
@@ -346,10 +346,10 @@
       "st": "G"
     },
     "Tunisia": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
@@ -388,30 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 13",
-      "k": "",
-      "a": "Qatar",
-      "b": "Switzerland",
-      "s": "1-1",
-      "g": "Group B"
-    },
-    {
-      "d": "Jun 13",
-      "k": "",
-      "a": "Brazil",
-      "b": "Morocco",
-      "s": "1-1",
-      "g": "Group C"
-    },
-    {
-      "d": "Jun 13",
-      "k": "",
-      "a": "Haiti",
-      "b": "Scotland",
-      "s": "0-1",
-      "g": "Group C"
-    },
-    {
       "d": "Jun 14",
       "k": "",
       "a": "Australia",
@@ -445,28 +421,23 @@
     },
     {
       "d": "Jun 14",
-      "k": "LIVE",
+      "k": "",
       "a": "Sweden",
       "b": "Tunisia",
-      "s": "1-0",
-      "g": "Group F",
-      "odds": {
-        "home": 0.5,
-        "draw": 0.28,
-        "away": 0.21
-      }
+      "s": "5-1",
+      "g": "Group F"
     },
     {
       "d": "Jun 15",
-      "k": "12:00 PM ET",
+      "k": "LIVE",
       "a": "Spain",
       "b": "Cape Verde",
-      "s": "",
+      "s": "0-0",
       "g": "Group H",
       "odds": {
-        "home": 0.88,
-        "draw": 0.08,
-        "away": 0.04
+        "home": 0.87,
+        "draw": 0.09,
+        "away": 0.05
       }
     },
     {
@@ -477,7 +448,7 @@
       "s": "",
       "g": "Group G",
       "odds": {
-        "home": 0.6,
+        "home": 0.61,
         "draw": 0.24,
         "away": 0.16
       }
@@ -490,9 +461,9 @@
       "s": "",
       "g": "Group H",
       "odds": {
-        "home": 0.13,
-        "draw": 0.22,
-        "away": 0.65
+        "home": 0.11,
+        "draw": 0.21,
+        "away": 0.67
       }
     },
     {
@@ -503,9 +474,48 @@
       "s": "",
       "g": "Group G",
       "odds": {
-        "home": 0.49,
-        "draw": 0.28,
-        "away": 0.22
+        "home": 0.53,
+        "draw": 0.27,
+        "away": 0.19
+      }
+    },
+    {
+      "d": "Jun 16",
+      "k": "3:00 PM ET",
+      "a": "France",
+      "b": "Senegal",
+      "s": "",
+      "g": "Group I",
+      "odds": {
+        "home": 0.65,
+        "draw": 0.21,
+        "away": 0.14
+      }
+    },
+    {
+      "d": "Jun 16",
+      "k": "6:00 PM ET",
+      "a": "Iraq",
+      "b": "Norway",
+      "s": "",
+      "g": "Group I",
+      "odds": {
+        "home": 0.06,
+        "draw": 0.14,
+        "away": 0.8
+      }
+    },
+    {
+      "d": "Jun 16",
+      "k": "9:00 PM ET",
+      "a": "Argentina",
+      "b": "Algeria",
+      "s": "",
+      "g": "Group J",
+      "odds": {
+        "home": 0.68,
+        "draw": 0.21,
+        "away": 0.11
       }
     }
   ],
@@ -521,7 +531,7 @@
       0
     ],
     "Ben|Sunny": [
-      0,
+      1,
       0,
       0
     ],
