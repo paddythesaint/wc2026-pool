@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T18:10:37.346676+00:00",
+  "updated": "2026-06-15T23:26:39.398803+00:00",
   "status": {
     "Algeria": {
       "p": 0,
@@ -34,11 +34,11 @@
       "st": "G"
     },
     "Belgium": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Bosnia and Herzegovina": {
@@ -122,11 +122,11 @@
       "st": "G"
     },
     "Egypt": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "England": {
@@ -437,28 +437,23 @@
     },
     {
       "d": "Jun 15",
-      "k": "3:00 PM ET",
+      "k": "",
       "a": "Belgium",
       "b": "Egypt",
-      "s": "",
-      "g": "Group G",
-      "odds": {
-        "home": 0.61,
-        "draw": 0.23,
-        "away": 0.16
-      }
+      "s": "1-1",
+      "g": "Group G"
     },
     {
       "d": "Jun 15",
-      "k": "6:00 PM ET",
+      "k": "LIVE",
       "a": "Saudi Arabia",
       "b": "Uruguay",
-      "s": "",
+      "s": "1-0",
       "g": "Group H",
       "odds": {
-        "home": 0.11,
-        "draw": 0.21,
-        "away": 0.67
+        "home": 0.13,
+        "draw": 0.23,
+        "away": 0.64
       }
     },
     {
@@ -537,7 +532,7 @@
     ],
     "Patrick|Sunny": [
       1,
-      0,
+      1,
       1
     ],
     "Sandeep|Sunny": [
