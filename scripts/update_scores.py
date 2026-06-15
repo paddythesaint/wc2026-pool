@@ -15,19 +15,19 @@ MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec
 
 TEAM_MAP = {
     "Mexico":"Mexico","South Africa":"South Africa",
-    "Korea Republic":"Korea Republic","Republic of Korea":"Korea Republic",
+    "Korea Republic":"Korea Republic","Republic of Korea":"Korea Republic","South Korea":"Korea Republic",
     "Czech Republic":"Czech Republic","Czechia":"Czech Republic",
     "Canada":"Canada",
     "Bosnia-Herzegovina":"Bosnia and Herzegovina","Bosnia and Herzegovina":"Bosnia and Herzegovina",
     "Qatar":"Qatar","Switzerland":"Switzerland",
     "Brazil":"Brazil","Morocco":"Morocco","Haiti":"Haiti","Scotland":"Scotland",
-    "United States":"United States","USA":"United States",
+    "United States":"United States","USA":"United States","US":"United States",
     "Paraguay":"Paraguay","Australia":"Australia",
     "Turkey":"Turkey","Türkiye":"Turkey","Turkiye":"Turkey",
     "Germany":"Germany",
-    "Curacao":"Curaçao","Curaçao":"Curaçao",
+    "Curacao":"Curaçao","Curaçao":"Curaçao","Curaçao":"Curaçao",
     "Ivory Coast":"Cote d'Ivoire","Cote d'Ivoire":"Cote d'Ivoire","Côte d'Ivoire":"Cote d'Ivoire",
-    "Ecuador":"Ecuador","Netherlands":"Netherlands",
+    "Ecuador":"Ecuador","Netherlands":"Netherlands","Holland":"Netherlands",
     "Japan":"Japan","Sweden":"Sweden","Tunisia":"Tunisia",
     "Belgium":"Belgium","Egypt":"Egypt","Iran":"Iran","IR Iran":"Iran",
     "New Zealand":"New Zealand","Spain":"Spain",
@@ -37,6 +37,7 @@ TEAM_MAP = {
     "Argentina":"Argentina","Algeria":"Algeria","Austria":"Austria","Jordan":"Jordan",
     "Portugal":"Portugal",
     "DR Congo":"DR Congo","Congo DR":"DR Congo","Democratic Republic of Congo":"DR Congo",
+    "DRC":"DR Congo","Congo, DR":"DR Congo",
     "Uzbekistan":"Uzbekistan","Colombia":"Colombia",
     "England":"England","Croatia":"Croatia","Ghana":"Ghana","Panama":"Panama",
 }
@@ -78,12 +79,17 @@ def fetch_json(url):
     with urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode())
 
+_unmapped_warned = set()
+
 def map_team(raw):
     if not raw: return None
     if raw in TEAM_MAP: return TEAM_MAP[raw]
     low = raw.lower()
     for k, v in TEAM_MAP.items():
         if k.lower() == low: return v
+    if raw not in _unmapped_warned:
+        print(f"[warn] unmapped team name from ESPN: {raw!r}", file=sys.stderr)
+        _unmapped_warned.add(raw)
     return None
 
 def blank_status():
@@ -181,6 +187,11 @@ def main():
     while cursor <= until:
         all_events.extend(fetch_day(cursor.strftime("%Y%m%d")))
         cursor += timedelta(days=1)
+
+    # If ESPN returned nothing at all, keep the existing file untouched
+    if not all_events:
+        print("[done] ESPN returned no events — keeping existing data unchanged", file=sys.stderr)
+        return
 
     # ── Compute group-stage standings from completed results ──────────────────
     status = blank_status()
