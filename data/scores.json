@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-14T21:54:50.008998+00:00",
+  "updated": "2026-06-15T02:30:37.436125+00:00",
   "status": {
     "Algeria": {
       "p": 0,
@@ -114,10 +114,10 @@
       "st": "G"
     },
     "Ecuador": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
@@ -186,19 +186,19 @@
       "st": "G"
     },
     "Cote d'Ivoire": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Japan": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Jordan": {
@@ -234,11 +234,11 @@
       "st": "G"
     },
     "Netherlands": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "New Zealand": {
@@ -429,36 +429,26 @@
     },
     {
       "d": "Jun 14",
-      "k": "LIVE",
+      "k": "",
       "a": "Netherlands",
       "b": "Japan",
       "s": "2-2",
-      "g": "Group F",
-      "odds": {
-        "home": 0.47,
-        "draw": 0.28,
-        "away": 0.25
-      }
+      "g": "Group F"
     },
     {
       "d": "Jun 14",
-      "k": "7:00 PM ET",
+      "k": "",
       "a": "Cote d'Ivoire",
       "b": "Ecuador",
-      "s": "",
-      "g": "Group E",
-      "odds": {
-        "home": 0.29,
-        "draw": 0.33,
-        "away": 0.38
-      }
+      "s": "1-0",
+      "g": "Group E"
     },
     {
       "d": "Jun 14",
-      "k": "10:00 PM ET",
+      "k": "LIVE",
       "a": "Sweden",
       "b": "Tunisia",
-      "s": "",
+      "s": "1-0",
       "g": "Group F",
       "odds": {
         "home": 0.5,
@@ -487,9 +477,9 @@
       "s": "",
       "g": "Group G",
       "odds": {
-        "home": 0.59,
+        "home": 0.6,
         "draw": 0.24,
-        "away": 0.17
+        "away": 0.16
       }
     },
     {
@@ -537,11 +527,11 @@
     ],
     "Patrick|Sandeep": [
       1,
-      0,
+      1,
       0
     ],
     "Patrick|Sunny": [
-      0,
+      1,
       0,
       1
     ],
