@@ -25,7 +25,7 @@ TEAM_MAP = {
     "Paraguay":"Paraguay","Australia":"Australia",
     "Turkey":"Turkey","Türkiye":"Turkey","Turkiye":"Turkey",
     "Germany":"Germany",
-    "Curacao":"Curaçao","Curaçao":"Curaçao",
+    "Curacao":"Curaçao","Curaçao":"Curaçao","Curaçao":"Curaçao",
     "Ivory Coast":"Cote d'Ivoire","Cote d'Ivoire":"Cote d'Ivoire","Côte d'Ivoire":"Cote d'Ivoire",
     "Ecuador":"Ecuador","Netherlands":"Netherlands","Holland":"Netherlands",
     "Japan":"Japan","Sweden":"Sweden","Tunisia":"Tunisia",
@@ -116,23 +116,25 @@ def ml_to_prob(ml):
     return abs(ml)/(abs(ml)+100) if ml < 0 else 100/(ml+100)
 
 def parse_ml(val):
-    """Parse ESPN money line value."""
+    """Parse ESPN money line value — can be int or string like '-165' or '+450'."""
     if val is None: return None
     try: return int(str(val).replace("+",""))
     except: return None
 
-def close_ml(ml, side):
-    return parse_ml(((ml.get(side) or {}).get("close") or {}).get("odds"))
-
 def extract_odds(comp):
-    odds_list = [x for x in (comp.get("odds") or []) if x]
+    """Pull home/draw/away win probabilities from ESPN odds block.
+    ESPN structure: odds[0].moneyline.{home,away,draw}.close.odds (string)
+                   odds[0].drawOdds.moneyLine (int, duplicate but handy for draw)
+    """
+    odds_list = comp.get("odds", [])
     if not odds_list: return None
     o = odds_list[0]
-    ml = o.get("moneyline") or {}
+    ml = o.get("moneyline", {})
 
-    h_ml = close_ml(ml, "home")
-    a_ml = close_ml(ml, "away")
-    d_ml = close_ml(ml, "draw") or parse_ml((o.get("drawOdds") or {}).get("moneyLine"))
+    h_ml = parse_ml(ml.get("home",{}).get("close",{}).get("odds"))
+    a_ml = parse_ml(ml.get("away",{}).get("close",{}).get("odds"))
+    # draw: prefer moneyline.draw.close.odds (upcoming), fall back to drawOdds.moneyLine (legacy)
+    d_ml = parse_ml(ml.get("draw",{}).get("close",{}).get("odds")) or parse_ml(o.get("drawOdds",{}).get("moneyLine"))
 
     if h_ml is None or a_ml is None: return None
 
@@ -178,6 +180,7 @@ def main():
     now_utc  = datetime.now(timezone.utc)
     now_et   = now_utc.astimezone(timezone(timedelta(hours=-4)))
 
+    # ── Fetch every day from tournament start through tomorrow ────────────────
     all_events = []
     cursor     = TOURNAMENT_START
     until      = now_utc + timedelta(days=1)
@@ -185,11 +188,14 @@ def main():
         all_events.extend(fetch_day(cursor.strftime("%Y%m%d")))
         cursor += timedelta(days=1)
 
+    # If ESPN returned nothing at all, keep the existing file untouched
     if not all_events:
-        print("[done] ESPN returned no events - keeping existing data unchanged", file=sys.stderr)
+        print("[done] ESPN returned no events — keeping existing data unchanged", file=sys.stderr)
         return
 
+    # ── Compute group-stage standings from completed results ──────────────────
     status = blank_status()
+    # Preserve any known knockout statuses from existing file
     for team, rec in existing.get("status", {}).items():
         if team in status and rec.get("st","G") not in ("G","EG"):
             status[team] = rec
@@ -209,7 +215,7 @@ def main():
             ga, gb = int(home.get("score",0)), int(away.get("score",0))
         except: continue
 
-        for name, gf, gc in [(name_a, ga, gb), (name_b, gb, ga)]:
+        for name, gf, gc in [(name_a, ga, gb), (name_b, gb, ga)]:   # ← fixed tuple (3 items)
             if name not in status: continue
             s = status[name]
             s["p"] += 1
@@ -217,8 +223,9 @@ def main():
             elif gf == gc: s["d"] += 1; s["pts"] += 1
             else:          s["l"] += 1
 
+    # ── Compute H2H records across all completed matches ─────────────────────
     h2h = {f"{p1}|{p2}": [0,0,0] for i,p1 in enumerate(PLAYERS)
-           for p2 in PLAYERS[i+1:]}
+           for p2 in PLAYERS[i+1:]}   # [p1 wins, draws, p2 wins]
 
     for ev in all_events:
         comp, home, away = get_competitors(ev)
@@ -236,6 +243,7 @@ def main():
         try: ga, gb = int(home.get("score",0)), int(away.get("score",0))
         except: continue
 
+        # Normalise key alphabetically so lookup is consistent
         if owner_a < owner_b:
             key, wa, wb = f"{owner_a}|{owner_b}", ga, gb
         else:
@@ -246,6 +254,7 @@ def main():
         elif wa < wb: h2h[key][2] += 1
         else:         h2h[key][1] += 1
 
+    # ── Build 3-day fixture window with odds ──────────────────────────────────
     target_dates = set()
     for delta in (-1, 0, 1):
         d = now_et + timedelta(days=delta)
@@ -279,6 +288,7 @@ def main():
         if odds: entry["odds"] = odds
         fixtures.append(entry)
 
+    # Sort by date window order
     date_order = {}
     for i, delta in enumerate((-1, 0, 1)):
         d = now_et + timedelta(days=delta)
@@ -287,10 +297,11 @@ def main():
 
     if not fixtures and existing.get("fixtures"):
         fixtures = existing["fixtures"]
-        print("[fixtures] ESPN returned nothing - keeping existing", file=sys.stderr)
+        print("[fixtures] ESPN returned nothing — keeping existing", file=sys.stderr)
 
+    # ── Only write if something actually changed ──────────────────────────────
     if not data_changed(existing, status, fixtures, h2h):
-        print("[done] no changes detected - skipping write")
+        print("[done] no changes detected — skipping write")
         return
 
     output = {"updated": now_utc.isoformat(), "status": status, "fixtures": fixtures, "h2h": h2h}
