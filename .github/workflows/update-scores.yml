@@ -2,11 +2,11 @@ name: Update Scores
 
 on:
   schedule:
-    # Every 10 minutes during WC2026 match windows (covers noon–2 AM ET all days)
+    # Every 15 minutes during WC2026 match windows (covers noon–2 AM ET all days)
     # 16:00–23:59 UTC = noon–8 PM ET
-    - cron: "*/10 16-23 * * *"
+    - cron: "*/15 16-23 * * *"
     # 00:00–06:00 UTC = 8 PM–2 AM ET
-    - cron: "*/10 0-6 * * *"
+    - cron: "*/15 0-6 * * *"
   workflow_dispatch:   # manual trigger from the Actions tab
 
 jobs:
