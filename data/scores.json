@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T23:26:39.398803+00:00",
+  "updated": "2026-06-16T01:43:27.092562+00:00",
   "status": {
     "Algeria": {
       "p": 0,
@@ -98,10 +98,10 @@
       "st": "G"
     },
     "Czech Republic": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
@@ -210,11 +210,11 @@
       "st": "G"
     },
     "Korea Republic": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Mexico": {
@@ -290,11 +290,11 @@
       "st": "G"
     },
     "Saudi Arabia": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Scotland": {
@@ -370,11 +370,11 @@
       "st": "G"
     },
     "Uruguay": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Uzbekistan": {
@@ -445,28 +445,23 @@
     },
     {
       "d": "Jun 15",
-      "k": "LIVE",
+      "k": "",
       "a": "Saudi Arabia",
       "b": "Uruguay",
-      "s": "1-0",
-      "g": "Group H",
-      "odds": {
-        "home": 0.13,
-        "draw": 0.23,
-        "away": 0.64
-      }
+      "s": "1-1",
+      "g": "Group H"
     },
     {
       "d": "Jun 15",
-      "k": "9:00 PM ET",
+      "k": "LIVE",
       "a": "Iran",
       "b": "New Zealand",
-      "s": "",
+      "s": "1-1",
       "g": "Group G",
       "odds": {
-        "home": 0.53,
-        "draw": 0.27,
-        "away": 0.19
+        "home": 0.51,
+        "draw": 0.28,
+        "away": 0.21
       }
     },
     {
@@ -477,9 +472,9 @@
       "s": "",
       "g": "Group I",
       "odds": {
-        "home": 0.65,
-        "draw": 0.21,
-        "away": 0.14
+        "home": 0.64,
+        "draw": 0.22,
+        "away": 0.15
       }
     },
     {
@@ -512,7 +507,7 @@
   "h2h": {
     "Ben|Patrick": [
       1,
-      1,
+      2,
       1
     ],
     "Ben|Sandeep": [
@@ -536,7 +531,7 @@
       1
     ],
     "Sandeep|Sunny": [
-      0,
+      1,
       1,
       0
     ]
