@@ -117,7 +117,9 @@ const STAGE_LABEL  = {
 
 const isAlive      = st => ALIVE_FLOOR[st] !== undefined;
 const payoutLocked = st => isAlive(st) ? ALIVE_FLOOR[st] : (FINAL_PAYOUT[st] ?? 0);
-const maxPayout    = st => isAlive(st) ? 250 : (FINAL_PAYOUT[st] ?? 0);
+
+// Best-case payouts assigned in order to N alive teams (1 champion, 1 RU, 1 3rd, 1 4th, then QF exits, etc.)
+const BEST_SLOTS = [250,125,75,50,25,25,25,25,15,15,15,15,15,15,15,15,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5];
 
 const blankStatus = () => Object.fromEntries(TEAMS.map(t => [t.name,{p:0,w:0,d:0,l:0,pts:0,st:"G"}]));
 
@@ -486,9 +488,11 @@ function PoolDashboard() {
     return Object.keys(BIDDERS).map(name => {
       const mine    = TEAMS.filter(t => t.owner === name);
       const spent   = mine.reduce((s,t) => s + t.bid, 0);
-      const locked  = mine.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
-      const ceiling = mine.reduce((s,t) => s + maxPayout(status[t.name].st), 0);
-      const alive   = mine.filter(t => isAlive(status[t.name].st)).length;
+      const locked     = mine.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+      const alive      = mine.filter(t => isAlive(status[t.name].st)).length;
+      const deadPay    = mine.filter(t => !isAlive(status[t.name].st)).reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+      const aliveTeams = mine.filter(t => isAlive(status[t.name].st));
+      const ceiling    = deadPay + aliveTeams.reduce((s,t,i) => s + Math.max(BEST_SLOTS[i]??0, payoutLocked(status[t.name].st)), 0);
       return {name, spent, locked, ceiling, alive, net: locked - spent, teams: mine};
     }).sort((a,b) => b.net-a.net || b.locked-a.locked || b.alive-a.alive);
   }, [status]);
@@ -928,7 +932,7 @@ function PoolDashboard() {
 
       <div className="max-w-5xl mx-auto px-4 pb-8 pt-2" style={{fontSize:11,color:C.mute}}>
         WC26 Auction Pool · Patrick, Sunny, Sandeep & Ben · Scores via ESPN · Auto-updated by GitHub Actions
-        <br/>* Max upside assumes every alive team wins the whole tournament — physically impossible but shows theoretical ceiling
+        <br/>* Max upside = best realistic scenario: alive teams assigned the top available prize slots (1 champion, 1 runner-up, 1 3rd, etc.)
       </div>
     </div>
   );
