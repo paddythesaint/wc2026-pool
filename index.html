@@ -264,7 +264,7 @@ function H2HLeaderboard({ h2h }) {
               ) : (
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
                   <span style={{fontSize:11,color:C.mute}}>
-                    <b style={{color:C.green}}>{p.w}</b>W · <b style={{color:C.mute}}>{p.d}</b>D · <b style={{color:C.red}}>{p.l}</b>L
+                    <b style={{color:C.text}}>{p.played}</b>P · <b style={{color:C.green}}>{p.w}</b>W · <b style={{color:C.mute}}>{p.d}</b>D · <b style={{color:C.red}}>{p.l}</b>L
                   </span>
                   <span style={{
                     ...disp,fontSize:13,fontWeight:700,
@@ -486,8 +486,8 @@ function PoolDashboard() {
 
   const board = useMemo(() => {
     return Object.keys(BIDDERS).map(name => {
-      const mine       = TEAMS.filter(t => t.owner === name);
-      const spent      = mine.reduce((s,t) => s + t.bid, 0);
+      const mine    = TEAMS.filter(t => t.owner === name);
+      const spent   = mine.reduce((s,t) => s + t.bid, 0);
       const locked     = mine.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
       const alive      = mine.filter(t => isAlive(status[t.name].st)).length;
       const deadPay    = mine.filter(t => !isAlive(status[t.name].st)).reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
