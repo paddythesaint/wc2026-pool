@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-16T01:43:27.092562+00:00",
+  "updated": "2026-06-16T13:52:39.973913+00:00",
   "status": {
     "Algeria": {
       "p": 0,
@@ -170,11 +170,11 @@
       "st": "G"
     },
     "Iran": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Iraq": {
@@ -242,11 +242,11 @@
       "st": "G"
     },
     "New Zealand": {
-      "p": 0,
+      "p": 1,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Norway": {
@@ -388,46 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 14",
-      "k": "",
-      "a": "Australia",
-      "b": "Turkey",
-      "s": "2-0",
-      "g": "Group D"
-    },
-    {
-      "d": "Jun 14",
-      "k": "",
-      "a": "Germany",
-      "b": "Curaçao",
-      "s": "7-1",
-      "g": "Group E"
-    },
-    {
-      "d": "Jun 14",
-      "k": "",
-      "a": "Netherlands",
-      "b": "Japan",
-      "s": "2-2",
-      "g": "Group F"
-    },
-    {
-      "d": "Jun 14",
-      "k": "",
-      "a": "Cote d'Ivoire",
-      "b": "Ecuador",
-      "s": "1-0",
-      "g": "Group E"
-    },
-    {
-      "d": "Jun 14",
-      "k": "",
-      "a": "Sweden",
-      "b": "Tunisia",
-      "s": "5-1",
-      "g": "Group F"
-    },
-    {
       "d": "Jun 15",
       "k": "",
       "a": "Spain",
@@ -453,16 +413,11 @@
     },
     {
       "d": "Jun 15",
-      "k": "LIVE",
+      "k": "",
       "a": "Iran",
       "b": "New Zealand",
-      "s": "1-1",
-      "g": "Group G",
-      "odds": {
-        "home": 0.51,
-        "draw": 0.28,
-        "away": 0.21
-      }
+      "s": "2-2",
+      "g": "Group G"
     },
     {
       "d": "Jun 16",
@@ -472,9 +427,9 @@
       "s": "",
       "g": "Group I",
       "odds": {
-        "home": 0.64,
-        "draw": 0.22,
-        "away": 0.15
+        "home": 0.65,
+        "draw": 0.21,
+        "away": 0.14
       }
     },
     {
@@ -485,9 +440,9 @@
       "s": "",
       "g": "Group I",
       "odds": {
-        "home": 0.06,
+        "home": 0.07,
         "draw": 0.14,
-        "away": 0.8
+        "away": 0.79
       }
     },
     {
@@ -498,9 +453,74 @@
       "s": "",
       "g": "Group J",
       "odds": {
-        "home": 0.68,
+        "home": 0.67,
         "draw": 0.21,
+        "away": 0.12
+      }
+    },
+    {
+      "d": "Jun 17",
+      "k": "12:00 AM ET",
+      "a": "Austria",
+      "b": "Jordan",
+      "s": "",
+      "g": "Group J",
+      "odds": {
+        "home": 0.7,
+        "draw": 0.19,
         "away": 0.11
+      }
+    },
+    {
+      "d": "Jun 17",
+      "k": "1:00 PM ET",
+      "a": "Portugal",
+      "b": "DR Congo",
+      "s": "",
+      "g": "Group K",
+      "odds": {
+        "home": 0.75,
+        "draw": 0.17,
+        "away": 0.09
+      }
+    },
+    {
+      "d": "Jun 17",
+      "k": "4:00 PM ET",
+      "a": "England",
+      "b": "Croatia",
+      "s": "",
+      "g": "Group L",
+      "odds": {
+        "home": 0.56,
+        "draw": 0.25,
+        "away": 0.19
+      }
+    },
+    {
+      "d": "Jun 17",
+      "k": "7:00 PM ET",
+      "a": "Ghana",
+      "b": "Panama",
+      "s": "",
+      "g": "Group L",
+      "odds": {
+        "home": 0.43,
+        "draw": 0.29,
+        "away": 0.28
+      }
+    },
+    {
+      "d": "Jun 17",
+      "k": "10:00 PM ET",
+      "a": "Uzbekistan",
+      "b": "Colombia",
+      "s": "",
+      "g": "Group K",
+      "odds": {
+        "home": 0.1,
+        "draw": 0.2,
+        "away": 0.7
       }
     }
   ],
