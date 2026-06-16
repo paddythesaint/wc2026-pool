@@ -221,6 +221,68 @@ function ScenarioBar({ floor, ceiling, spent }) {
   );
 }
 
+// ─── H2H leaderboard ──────────────────────────────────────────────────────────
+function H2HLeaderboard({ h2h }) {
+  const players = ["Ben","Patrick","Sandeep","Sunny"];
+  const records = React.useMemo(() => {
+    const r = {};
+    players.forEach(p => { r[p] = {w:0, d:0, l:0}; });
+    Object.entries(h2h).forEach(([key, [w1, draws, w2]]) => {
+      const [p1, p2] = key.split("|");
+      if (r[p1]) { r[p1].w += w1; r[p1].d += draws; r[p1].l += w2; }
+      if (r[p2]) { r[p2].w += w2; r[p2].d += draws; r[p2].l += w1; }
+    });
+    return players
+      .map(name => ({ name, ...r[name], pts: r[name].w*3 + r[name].d, played: r[name].w + r[name].d + r[name].l }))
+      .sort((a,b) => b.pts-a.pts || b.w-a.w || a.l-b.l);
+  }, [h2h]);
+
+  const medals = ["🥇","🥈","🥉",""];
+
+  return (
+    <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:14}}>
+      <div style={{...disp,fontSize:11,fontWeight:600,letterSpacing:"0.15em",color:C.mute,marginBottom:10}}>
+        LEADERBOARD
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {records.map((p, i) => {
+          const color = BIDDERS[p.name].color;
+          const isFirst = i === 0 && p.pts > 0;
+          return (
+            <div key={p.name} style={{
+              display:"flex",alignItems:"center",gap:10,
+              background: isFirst ? `${color}15` : "#0E1828",
+              border:`1px solid ${isFirst ? color+"40" : C.line}`,
+              borderRadius:6,padding:"8px 12px"
+            }}>
+              <span style={{width:18,fontSize:13,textAlign:"center"}}>{medals[i]||""}</span>
+              <span style={{...disp,fontSize:13,fontWeight:700,color,flex:1,letterSpacing:"0.04em"}}>
+                {p.name}
+              </span>
+              {p.played === 0 ? (
+                <span style={{fontSize:11,color:C.mute}}>No matches yet</span>
+              ) : (
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <span style={{fontSize:11,color:C.mute}}>
+                    <b style={{color:C.text}}>{p.played}</b>P · <b style={{color:C.green}}>{p.w}</b>W · <b style={{color:C.mute}}>{p.d}</b>D · <b style={{color:C.red}}>{p.l}</b>L
+                  </span>
+                  <span style={{
+                    ...disp,fontSize:13,fontWeight:700,
+                    color: i===0 && p.pts>0 ? color : C.text,
+                    minWidth:30,textAlign:"right"
+                  }}>
+                    {p.pts} <span style={{fontSize:9,color:C.mute,fontWeight:400}}>PTS</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── H2H grid ─────────────────────────────────────────────────────────────────
 function H2HSection({ h2h }) {
   const players = ["Ben","Patrick","Sandeep","Sunny"];
@@ -705,6 +767,7 @@ function PoolDashboard() {
       {/* ══ FIXTURES ══ */}
       {tab==="fixtures" && (
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+          <H2HLeaderboard h2h={h2h} />
           <H2HSection h2h={h2h} />
           {fixtures.length===0 && (
             <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,
