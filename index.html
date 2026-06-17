@@ -222,20 +222,21 @@ function ScenarioBar({ floor, ceiling, spent }) {
 }
 
 // ─── H2H leaderboard ──────────────────────────────────────────────────────────
-function H2HLeaderboard({ h2h }) {
+function H2HLeaderboard({ status }) {
   const players = ["Ben","Patrick","Sandeep","Sunny"];
   const records = React.useMemo(() => {
-    const r = {};
-    players.forEach(p => { r[p] = {w:0, d:0, l:0}; });
-    Object.entries(h2h).forEach(([key, [w1, draws, w2]]) => {
-      const [p1, p2] = key.split("|");
-      if (r[p1]) { r[p1].w += w1; r[p1].d += draws; r[p1].l += w2; }
-      if (r[p2]) { r[p2].w += w2; r[p2].d += draws; r[p2].l += w1; }
-    });
     return players
-      .map(name => ({ name, ...r[name], pts: r[name].w*3 + r[name].d, played: r[name].w + r[name].d + r[name].l }))
+      .map(name => {
+        const mine = TEAMS.filter(t => t.owner === name);
+        const r = mine.reduce((acc, t) => {
+          const s = status[t.name];
+          acc.w += s.w; acc.d += s.d; acc.l += s.l;
+          return acc;
+        }, {w:0, d:0, l:0});
+        return { name, ...r, pts: r.w*3 + r.d, played: r.w + r.d + r.l };
+      })
       .sort((a,b) => b.pts-a.pts || b.w-a.w || a.l-b.l);
-  }, [h2h]);
+  }, [status]);
 
   const medals = ["🥇","🥈","🥉",""];
 
@@ -767,7 +768,7 @@ function PoolDashboard() {
       {/* ══ FIXTURES ══ */}
       {tab==="fixtures" && (
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
-          <H2HLeaderboard h2h={h2h} />
+          <H2HLeaderboard status={status} />
           <H2HSection h2h={h2h} />
           {fixtures.length===0 && (
             <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,
