@@ -1,20 +1,20 @@
 {
-  "updated": "2026-06-16T22:22:08.967009+00:00",
+  "updated": "2026-06-17T12:57:54.202261+00:00",
   "status": {
     "Algeria": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
     "Argentina": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Australia": {
@@ -26,11 +26,11 @@
       "st": "G"
     },
     "Austria": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Belgium": {
@@ -178,10 +178,10 @@
       "st": "G"
     },
     "Iraq": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
@@ -202,10 +202,10 @@
       "st": "G"
     },
     "Jordan": {
-      "p": 0,
+      "p": 1,
       "w": 0,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 0,
       "st": "G"
     },
@@ -250,11 +250,11 @@
       "st": "G"
     },
     "Norway": {
-      "p": 0,
-      "w": 0,
+      "p": 1,
+      "w": 1,
       "d": 0,
       "l": 0,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Panama": {
@@ -388,38 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 15",
-      "k": "",
-      "a": "Spain",
-      "b": "Cape Verde",
-      "s": "0-0",
-      "g": "Group H"
-    },
-    {
-      "d": "Jun 15",
-      "k": "",
-      "a": "Belgium",
-      "b": "Egypt",
-      "s": "1-1",
-      "g": "Group G"
-    },
-    {
-      "d": "Jun 15",
-      "k": "",
-      "a": "Saudi Arabia",
-      "b": "Uruguay",
-      "s": "1-1",
-      "g": "Group H"
-    },
-    {
-      "d": "Jun 15",
-      "k": "",
-      "a": "Iran",
-      "b": "New Zealand",
-      "s": "2-2",
-      "g": "Group G"
-    },
-    {
       "d": "Jun 16",
       "k": "",
       "a": "France",
@@ -429,42 +397,27 @@
     },
     {
       "d": "Jun 16",
-      "k": "LIVE",
+      "k": "",
       "a": "Iraq",
       "b": "Norway",
-      "s": "0-0",
-      "g": "Group I",
-      "odds": {
-        "home": 0.07,
-        "draw": 0.15,
-        "away": 0.78
-      }
+      "s": "1-4",
+      "g": "Group I"
     },
     {
       "d": "Jun 16",
-      "k": "9:00 PM ET",
+      "k": "",
       "a": "Argentina",
       "b": "Algeria",
-      "s": "",
-      "g": "Group J",
-      "odds": {
-        "home": 0.67,
-        "draw": 0.21,
-        "away": 0.12
-      }
+      "s": "3-0",
+      "g": "Group J"
     },
     {
       "d": "Jun 17",
-      "k": "12:00 AM ET",
+      "k": "",
       "a": "Austria",
       "b": "Jordan",
-      "s": "",
-      "g": "Group J",
-      "odds": {
-        "home": 0.7,
-        "draw": 0.19,
-        "away": 0.11
-      }
+      "s": "3-1",
+      "g": "Group J"
     },
     {
       "d": "Jun 17",
@@ -474,9 +427,9 @@
       "s": "",
       "g": "Group K",
       "odds": {
-        "home": 0.74,
+        "home": 0.76,
         "draw": 0.17,
-        "away": 0.09
+        "away": 0.07
       }
     },
     {
@@ -489,7 +442,7 @@
       "odds": {
         "home": 0.56,
         "draw": 0.25,
-        "away": 0.19
+        "away": 0.18
       }
     },
     {
@@ -500,9 +453,9 @@
       "s": "",
       "g": "Group L",
       "odds": {
-        "home": 0.42,
+        "home": 0.41,
         "draw": 0.3,
-        "away": 0.28
+        "away": 0.29
       }
     },
     {
@@ -516,6 +469,58 @@
         "home": 0.1,
         "draw": 0.2,
         "away": 0.7
+      }
+    },
+    {
+      "d": "Jun 18",
+      "k": "12:00 PM ET",
+      "a": "Czech Republic",
+      "b": "South Africa",
+      "s": "",
+      "g": "Group A",
+      "odds": {
+        "home": 0.55,
+        "draw": 0.26,
+        "away": 0.2
+      }
+    },
+    {
+      "d": "Jun 18",
+      "k": "3:00 PM ET",
+      "a": "Switzerland",
+      "b": "Bosnia and Herzegovina",
+      "s": "",
+      "g": "Group B",
+      "odds": {
+        "home": 0.62,
+        "draw": 0.23,
+        "away": 0.15
+      }
+    },
+    {
+      "d": "Jun 18",
+      "k": "6:00 PM ET",
+      "a": "Canada",
+      "b": "Qatar",
+      "s": "",
+      "g": "Group B",
+      "odds": {
+        "home": 0.75,
+        "draw": 0.17,
+        "away": 0.09
+      }
+    },
+    {
+      "d": "Jun 18",
+      "k": "9:00 PM ET",
+      "a": "Mexico",
+      "b": "Korea Republic",
+      "s": "",
+      "g": "Group A",
+      "odds": {
+        "home": 0.47,
+        "draw": 0.29,
+        "away": 0.24
       }
     }
   ],
@@ -533,7 +538,7 @@
     "Ben|Sunny": [
       1,
       0,
-      0
+      1
     ],
     "Patrick|Sandeep": [
       1,
@@ -546,9 +551,9 @@
       1
     ],
     "Sandeep|Sunny": [
+      2,
       1,
-      1,
-      0
+      1
     ]
   }
 }
