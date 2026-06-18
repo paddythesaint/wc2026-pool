@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-18T10:40:34.672289+00:00",
+  "updated": "2026-06-18T19:59:53.569799+00:00",
   "status": {
     "Algeria": {
       "p": 1,
@@ -98,11 +98,11 @@
       "st": "G"
     },
     "Czech Republic": {
-      "p": 1,
+      "p": 2,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "DR Congo": {
@@ -314,11 +314,11 @@
       "st": "G"
     },
     "South Africa": {
-      "p": 1,
+      "p": 2,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Spain": {
@@ -429,23 +429,18 @@
     },
     {
       "d": "Jun 18",
-      "k": "12:00 PM ET",
+      "k": "",
       "a": "Czech Republic",
       "b": "South Africa",
-      "s": "",
-      "g": "Group A",
-      "odds": {
-        "home": 0.53,
-        "draw": 0.27,
-        "away": 0.2
-      }
+      "s": "1-1",
+      "g": "Group A"
     },
     {
       "d": "Jun 18",
-      "k": "3:00 PM ET",
+      "k": "LIVE",
       "a": "Switzerland",
       "b": "Bosnia and Herzegovina",
-      "s": "",
+      "s": "0-0",
       "g": "Group B",
       "odds": {
         "home": 0.61,
@@ -461,8 +456,8 @@
       "s": "",
       "g": "Group B",
       "odds": {
-        "home": 0.75,
-        "draw": 0.17,
+        "home": 0.73,
+        "draw": 0.18,
         "away": 0.09
       }
     },
@@ -526,9 +521,9 @@
       "s": "",
       "g": "Group D",
       "odds": {
-        "home": 0.49,
+        "home": 0.47,
         "draw": 0.28,
-        "away": 0.23
+        "away": 0.25
       }
     }
   ],
@@ -555,7 +550,7 @@
     ],
     "Patrick|Sunny": [
       1,
-      1,
+      2,
       1
     ],
     "Sandeep|Sunny": [
