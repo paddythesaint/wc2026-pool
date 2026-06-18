@@ -417,6 +417,69 @@ async function fetchESPN() {
   return all;
 }
 
+// ─── Live standings + H2H (computed client-side from ESPN, no backend needed) ─
+const TOURNAMENT_START_DATE = new Date("2026-06-11T00:00:00Z");
+const H2H_PLAYERS = ["Ben","Patrick","Sandeep","Sunny"];
+
+function blankH2H() {
+  const h2h = {};
+  for (let i = 0; i < H2H_PLAYERS.length; i++)
+    for (let j = i+1; j < H2H_PLAYERS.length; j++)
+      h2h[`${H2H_PLAYERS[i]}|${H2H_PLAYERS[j]}`] = [0,0,0];
+  return h2h;
+}
+
+async function fetchAllEspnEvents() {
+  const dates = [];
+  const end = new Date(Date.now() + 864e5);
+  for (let d = new Date(TOURNAMENT_START_DATE); d <= end; d = new Date(d.getTime()+864e5)) {
+    dates.push(d.toISOString().slice(0,10).replace(/-/g,""));
+  }
+  const dayResults = await Promise.all(dates.map(d =>
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}&t=${Date.now()}`)
+      .then(r => r.json()).then(j => j.events || []).catch(() => [])
+  ));
+  const byId = new Map();
+  for (const events of dayResults) for (const ev of events) byId.set(ev.id, ev);
+  return [...byId.values()];
+}
+
+function computeStandingsAndH2H(events) {
+  const status = blankStatus();
+  const h2h = blankH2H();
+  for (const ev of events) {
+    const comp = ev.competitions?.[0]; if (!comp) continue;
+    const cs   = comp.competitors||[]; if (cs.length<2) continue;
+    if (!comp.status?.type?.completed) continue;
+    const home = cs.find(c=>c.homeAway==="home")||cs[0];
+    const away = cs.find(c=>c.homeAway==="away")||cs[1];
+    const A = findTeam(home.team?.displayName);
+    const B = findTeam(away.team?.displayName);
+    if (!A || !B) continue;
+    const ga = Number(home.score ?? 0), gb = Number(away.score ?? 0);
+
+    if ((ev.season?.slug||"").toLowerCase().includes("group")) {
+      for (const [t, gf, gc] of [[A,ga,gb],[B,gb,ga]]) {
+        const s = status[t.name];
+        s.p++;
+        if (gf>gc) { s.w++; s.pts+=3; }
+        else if (gf===gc) { s.d++; s.pts+=1; }
+        else s.l++;
+      }
+    }
+
+    if (A.owner !== B.owner) {
+      const [o1,o2] = A.owner < B.owner ? [A.owner,B.owner] : [B.owner,A.owner];
+      const [wa,wb] = A.owner < B.owner ? [ga,gb] : [gb,ga];
+      const key = `${o1}|${o2}`;
+      if (wa>wb) h2h[key][0]++;
+      else if (wa<wb) h2h[key][2]++;
+      else h2h[key][1]++;
+    }
+  }
+  return { status, h2h };
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
   const [tab, setTab]               = useState("fixtures");
@@ -450,18 +513,18 @@ function PoolDashboard() {
     );
   };
 
-  // Fetch standings + H2H from scores.json (updated by GitHub Actions every 5 min)
+  // Fetch standings + H2H live from ESPN every 60s (same source as fixtures —
+  // no longer dependent on the GitHub Actions cron job, which can lag for hours)
   useEffect(() => {
-    const run = () =>
-      fetch("./data/scores.json?t=" + Date.now())
-        .then(r => r.json())
-        .then(data => {
-          if (data.updated && new Date(data.updated) > new Date(SEED_DATE)) {
-            if (data.status) setStatus({...blankStatus(), ...data.status});
-            if (data.h2h)    setH2h(data.h2h);
-          }
-        })
-        .catch(() => {});
+    const run = () => fetchAllEspnEvents()
+      .then(events => {
+        if (events.length) {
+          const { status: s, h2h: h } = computeStandingsAndH2H(events);
+          setStatus(s);
+          setH2h(h);
+        }
+      })
+      .catch(() => {});
     run();
     const id = setInterval(run, 60000);
     return () => clearInterval(id);
@@ -932,7 +995,7 @@ function PoolDashboard() {
       )}
 
       <div className="max-w-5xl mx-auto px-4 pb-8 pt-2" style={{fontSize:11,color:C.mute}}>
-        WC26 Auction Pool · Patrick, Sunny, Sandeep & Ben · Scores via ESPN · Auto-updated by GitHub Actions
+        WC26 Auction Pool · Patrick, Sunny, Sandeep & Ben · Live scores via ESPN · Refreshes every 60s
         <br/>* Max upside = best realistic scenario: alive teams assigned the top available prize slots (1 champion, 1 runner-up, 1 3rd, etc.)
       </div>
     </div>
