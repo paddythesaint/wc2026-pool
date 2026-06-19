@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-19T18:20:53.649463+00:00",
+  "updated": "2026-06-19T22:12:54.788993+00:00",
   "status": {
     "Algeria": {
       "p": 1,
@@ -18,10 +18,10 @@
       "st": "G"
     },
     "Australia": {
-      "p": 1,
+      "p": 2,
       "w": 1,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 3,
       "st": "G"
     },
@@ -362,11 +362,11 @@
       "st": "G"
     },
     "United States": {
-      "p": 1,
-      "w": 1,
+      "p": 2,
+      "w": 2,
       "d": 0,
       "l": 0,
-      "pts": 3,
+      "pts": 6,
       "st": "G"
     },
     "Uruguay": {
@@ -421,28 +421,23 @@
     },
     {
       "d": "Jun 19",
-      "k": "3:00 PM ET",
+      "k": "",
       "a": "United States",
       "b": "Australia",
-      "s": "",
-      "g": "Group D",
-      "odds": {
-        "home": 0.59,
-        "draw": 0.23,
-        "away": 0.18
-      }
+      "s": "2-0",
+      "g": "Group D"
     },
     {
       "d": "Jun 19",
-      "k": "6:00 PM ET",
+      "k": "LIVE",
       "a": "Scotland",
       "b": "Morocco",
-      "s": "",
+      "s": "0-1",
       "g": "Group C",
       "odds": {
-        "home": 0.17,
+        "home": 0.18,
         "draw": 0.26,
-        "away": 0.57
+        "away": 0.56
       }
     },
     {
@@ -492,8 +487,8 @@
       "s": "",
       "g": "Group E",
       "odds": {
-        "home": 0.62,
-        "draw": 0.21,
+        "home": 0.63,
+        "draw": 0.2,
         "away": 0.17
       }
     },
@@ -535,7 +530,7 @@
     "Patrick|Sunny": [
       1,
       2,
-      1
+      2
     ],
     "Sandeep|Sunny": [
       2,
