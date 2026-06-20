@@ -362,6 +362,31 @@ function OddsBar({ odds, nameA, nameB }) {
   );
 }
 
+// ─── Odds trend sparkline ──────────────────────────────────────────────────────
+function OddsTrend({ snaps, nameA, nameB }) {
+  if (!snaps || snaps.length < 2) return null;
+  const W = 200, H = 28;
+  const pts = snaps.map((s,i) => [
+    (i/(snaps.length-1))*W,
+    H - s.h*H,
+  ]);
+  const path = pts.map((p,i) => `${i===0?"M":"L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const first = snaps[0], last = snaps[snaps.length-1];
+  const delta = Math.round((last.h-first.h)*100);
+  return (
+    <div className="flex items-center gap-2 mt-1" style={{fontSize:9,color:C.mute}}>
+      <svg width={W} height={H} style={{flexShrink:0}}>
+        <path d={path} fill="none" stroke={C.gold} strokeWidth="1.5"/>
+      </svg>
+      <span>
+        {nameA} win odds {delta>0?"▲":delta<0?"▼":"–"} <b style={{color:delta>0?C.green:delta<0?C.red:C.mute}}>
+          {delta===0?"flat":`${Math.abs(delta)}pt`}
+        </b> since tracking began
+      </span>
+    </div>
+  );
+}
+
 // ─── ESPN live fetch ──────────────────────────────────────────────────────────
 function espnDate(isoStr) {
   return new Date(isoStr).toLocaleDateString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric"});
@@ -408,7 +433,7 @@ async function fetchESPN() {
         const k    = live?"LIVE":done?"":espnTime(e.date);
         const note = (comp.altGameNote||"").replace(/FIFA World Cup,?\s*/g,"").trim();
         const odds = done||live ? null : extractOddsLive(comp);
-        const fx   = {d:espnDate(e.date),k,a:home.team?.displayName||"",b:away.team?.displayName||"",s:score,g:note};
+        const fx   = {d:espnDate(e.date),k,a:home.team?.displayName||"",b:away.team?.displayName||"",s:score,g:note,id:e.id};
         if (odds) fx.odds = odds;
         all.push(fx);
       }
@@ -582,6 +607,7 @@ function PoolDashboard() {
   const [status, setStatus]         = useState(seedStatus);
   const [fixtures, setFixtures]     = useState(SEED_FIXTURES);
   const [h2h, setH2h]               = useState({});
+  const [oddsHistory, setOddsHistory] = useState({});
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
@@ -633,6 +659,16 @@ function PoolDashboard() {
       .catch(() => {});
     run();
     const id = setInterval(run, 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Odds-trend history is snapshotted hourly by a GitHub Action (lightweight,
+  // separate from live scoring) — just re-fetch the static file every 5 min.
+  useEffect(() => {
+    const run = () => fetch(`data/odds_history.json?t=${Date.now()}`)
+      .then(r => r.json()).then(setOddsHistory).catch(() => {});
+    run();
+    const id = setInterval(run, 300000);
     return () => clearInterval(id);
   }, []);
 
@@ -995,6 +1031,9 @@ function PoolDashboard() {
                         {/* Odds bar for upcoming matches */}
                         {upcoming && m.odds && (
                           <OddsBar odds={m.odds} nameA={A?A.name:m.a} nameB={B?B.name:m.b} />
+                        )}
+                        {upcoming && m.id && oddsHistory[m.id] && (
+                          <OddsTrend snaps={oddsHistory[m.id].snaps} nameA={A?A.name:m.a} nameB={B?B.name:m.b} />
                         )}
                         <div className="flex items-center justify-center gap-2 mt-1"
                           style={{fontSize:10,color:C.mute}}>
