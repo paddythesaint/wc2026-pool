@@ -518,5 +518,357 @@
         "a": 0.804
       }
     ]
+  },
+  "760415": {
+    "a": "Mexico",
+    "b": "South Africa",
+    "date": "2026-06-11T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760414": {
+    "a": "South Korea",
+    "b": "Czechia",
+    "date": "2026-06-12T02:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760416": {
+    "a": "Canada",
+    "b": "Bosnia-Herzegovina",
+    "date": "2026-06-12T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760417": {
+    "a": "United States",
+    "b": "Paraguay",
+    "date": "2026-06-13T01:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 4,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760420": {
+    "a": "Qatar",
+    "b": "Switzerland",
+    "date": "2026-06-13T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760419": {
+    "a": "Brazil",
+    "b": "Morocco",
+    "date": "2026-06-13T22:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760418": {
+    "a": "Haiti",
+    "b": "Scotland",
+    "date": "2026-06-14T01:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 0,
+      "as": 1,
+      "winner": "away"
+    }
+  },
+  "760421": {
+    "a": "Australia",
+    "b": "Türkiye",
+    "date": "2026-06-14T04:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760422": {
+    "a": "Germany",
+    "b": "Curaçao",
+    "date": "2026-06-14T17:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 7,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760425": {
+    "a": "Netherlands",
+    "b": "Japan",
+    "date": "2026-06-14T20:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 2,
+      "winner": "draw"
+    }
+  },
+  "760423": {
+    "a": "Ivory Coast",
+    "b": "Ecuador",
+    "date": "2026-06-14T23:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760424": {
+    "a": "Sweden",
+    "b": "Tunisia",
+    "date": "2026-06-15T02:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 5,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760428": {
+    "a": "Spain",
+    "b": "Cape Verde",
+    "date": "2026-06-15T16:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 0,
+      "as": 0,
+      "winner": "draw"
+    }
+  },
+  "760426": {
+    "a": "Belgium",
+    "b": "Egypt",
+    "date": "2026-06-15T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760429": {
+    "a": "Saudi Arabia",
+    "b": "Uruguay",
+    "date": "2026-06-15T22:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760427": {
+    "a": "Iran",
+    "b": "New Zealand",
+    "date": "2026-06-16T01:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 2,
+      "winner": "draw"
+    }
+  },
+  "760432": {
+    "a": "France",
+    "b": "Senegal",
+    "date": "2026-06-16T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 3,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760430": {
+    "a": "Iraq",
+    "b": "Norway",
+    "date": "2026-06-16T22:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 4,
+      "winner": "away"
+    }
+  },
+  "760433": {
+    "a": "Argentina",
+    "b": "Algeria",
+    "date": "2026-06-17T01:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 3,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760431": {
+    "a": "Austria",
+    "b": "Jordan",
+    "date": "2026-06-17T04:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 3,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760435": {
+    "a": "Portugal",
+    "b": "Congo DR",
+    "date": "2026-06-17T17:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760437": {
+    "a": "England",
+    "b": "Croatia",
+    "date": "2026-06-17T20:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 4,
+      "as": 2,
+      "winner": "home"
+    }
+  },
+  "760434": {
+    "a": "Ghana",
+    "b": "Panama",
+    "date": "2026-06-17T23:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760436": {
+    "a": "Uzbekistan",
+    "b": "Colombia",
+    "date": "2026-06-18T02:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 3,
+      "winner": "away"
+    }
+  },
+  "760438": {
+    "a": "Czechia",
+    "b": "South Africa",
+    "date": "2026-06-18T16:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 1,
+      "winner": "draw"
+    }
+  },
+  "760439": {
+    "a": "Switzerland",
+    "b": "Bosnia-Herzegovina",
+    "date": "2026-06-18T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 4,
+      "as": 1,
+      "winner": "home"
+    }
+  },
+  "760440": {
+    "a": "Canada",
+    "b": "Qatar",
+    "date": "2026-06-18T22:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 6,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760441": {
+    "a": "Mexico",
+    "b": "South Korea",
+    "date": "2026-06-19T01:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 1,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760442": {
+    "a": "United States",
+    "b": "Australia",
+    "date": "2026-06-19T19:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 2,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760445": {
+    "a": "Scotland",
+    "b": "Morocco",
+    "date": "2026-06-19T22:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 0,
+      "as": 1,
+      "winner": "away"
+    }
+  },
+  "760444": {
+    "a": "Brazil",
+    "b": "Haiti",
+    "date": "2026-06-20T00:30Z",
+    "snaps": [],
+    "result": {
+      "hs": 3,
+      "as": 0,
+      "winner": "home"
+    }
+  },
+  "760443": {
+    "a": "Türkiye",
+    "b": "Paraguay",
+    "date": "2026-06-20T03:00Z",
+    "snaps": [],
+    "result": {
+      "hs": 0,
+      "as": 1,
+      "winner": "away"
+    }
   }
 }
