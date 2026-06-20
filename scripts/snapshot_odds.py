@@ -30,11 +30,11 @@ def extract_odds(comp):
     odds_list = comp.get("odds", [])
     if not odds_list: return None
     o = odds_list[0]
-    ml = o.get("moneyline", {})
+    ml = o.get("moneyline") or {}
 
-    h_ml = parse_ml(ml.get("home",{}).get("close",{}).get("odds"))
-    a_ml = parse_ml(ml.get("away",{}).get("close",{}).get("odds"))
-    d_ml = parse_ml(ml.get("draw",{}).get("close",{}).get("odds")) or parse_ml(o.get("drawOdds",{}).get("moneyLine"))
+    h_ml = parse_ml((ml.get("home") or {}).get("close", {}).get("odds"))
+    a_ml = parse_ml((ml.get("away") or {}).get("close", {}).get("odds"))
+    d_ml = parse_ml((ml.get("draw") or {}).get("close", {}).get("odds")) or parse_ml((o.get("drawOdds") or {}).get("moneyLine"))
 
     if h_ml is None or a_ml is None: return None
 
@@ -73,32 +73,36 @@ def main():
 
     changed = False
     for ev in events:
-        comp = ev.get("competitions", [{}])[0]
-        if comp.get("status", {}).get("type", {}).get("completed", False):
-            continue  # only track odds for matches still upcoming
+        try:
+            comp = ev.get("competitions", [{}])[0]
+            if comp.get("status", {}).get("type", {}).get("completed", False):
+                continue  # only track odds for matches still upcoming
 
-        odds = extract_odds(comp)
-        if not odds:
+            odds = extract_odds(comp)
+            if not odds:
+                continue
+
+            eid = ev.get("id")
+            if not eid:
+                continue
+
+            cs    = comp.get("competitors", [])
+            home  = next((c for c in cs if c.get("homeAway") == "home"), cs[0] if cs else {})
+            away  = next((c for c in cs if c.get("homeAway") == "away"), cs[1] if len(cs) > 1 else {})
+
+            entry = history.setdefault(eid, {
+                "a": home.get("team", {}).get("displayName", ""),
+                "b": away.get("team", {}).get("displayName", ""),
+                "date": ev.get("date", ""),
+                "snaps": [],
+            })
+            last = entry["snaps"][-1] if entry["snaps"] else None
+            if not last or (last["h"], last["d"], last["a"]) != (odds["h"], odds["d"], odds["a"]):
+                entry["snaps"].append({"t": now_iso, **odds})
+                changed = True
+        except Exception as e:
+            print(f"[warn] skipping event {ev.get('id')}: {e}", file=sys.stderr)
             continue
-
-        eid = ev.get("id")
-        if not eid:
-            continue
-
-        cs    = comp.get("competitors", [])
-        home  = next((c for c in cs if c.get("homeAway") == "home"), cs[0] if cs else {})
-        away  = next((c for c in cs if c.get("homeAway") == "away"), cs[1] if len(cs) > 1 else {})
-
-        entry = history.setdefault(eid, {
-            "a": home.get("team", {}).get("displayName", ""),
-            "b": away.get("team", {}).get("displayName", ""),
-            "date": ev.get("date", ""),
-            "snaps": [],
-        })
-        last = entry["snaps"][-1] if entry["snaps"] else None
-        if not last or (last["h"], last["d"], last["a"]) != (odds["h"], odds["d"], odds["a"]):
-            entry["snaps"].append({"t": now_iso, **odds})
-            changed = True
 
     if not changed:
         print("[done] no odds movement detected - skipping write")
