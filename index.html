@@ -387,7 +387,96 @@ function OddsTrend({ snaps, nameA, nameB }) {
   );
 }
 
-// ─── ESPN live fetch ──────────────────────────────────────────────────────────
+// ─── Upsets ─────────────────────────────────────────────────────────────────
+// An "upset" is a completed match where the actual outcome (home/away win or
+// draw) was less likely than not according to the closing betting line.
+const UPSET_THRESHOLD = 0.5; // actual outcome's closing probability below this
+
+function computeUpsets(oddsHistory) {
+  const list = [];
+  for (const [id, m] of Object.entries(oddsHistory||{})) {
+    if (!m.result || !m.closing) continue;
+    const A = findTeam(m.a), B = findTeam(m.b);
+    if (!A || !B) continue;
+    const key = m.result.winner === "home" ? "h" : m.result.winner === "away" ? "a" : "d";
+    const prob = m.closing[key];
+    if (prob == null || prob >= UPSET_THRESHOLD) continue;
+    const winnerTeam = m.result.winner === "home" ? A : m.result.winner === "away" ? B : null;
+    list.push({
+      id, a: A, b: B, hs: m.result.hs, as: m.result.as, winner: m.result.winner,
+      winnerTeam, prob, surprise: 1 - prob, date: m.date,
+    });
+  }
+  return list.sort((x,y) => y.surprise - x.surprise);
+}
+
+function UpsetsPanel({ oddsHistory }) {
+  const upsets = React.useMemo(() => computeUpsets(oddsHistory), [oddsHistory]);
+  const tally = React.useMemo(() => {
+    const t = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, 0]));
+    for (const u of upsets) if (u.winnerTeam) t[u.winnerTeam.owner]++;
+    return t;
+  }, [upsets]);
+
+  if (upsets.length === 0) {
+    return (
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,
+        padding:20,textAlign:"center",color:C.mute,fontSize:14}}>
+        No upsets tracked yet — needs completed matches with a recorded closing line.
+        Backfilling odds for already-played games as the tracker catches up.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:14}}>
+        <div style={{...disp,fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:C.mute,marginBottom:10}}>
+          UPSET WINS BY OWNER
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([owner,count]) => (
+            <div key={owner} className="flex items-center gap-2" style={{
+              border:`1px solid ${C.line}`,borderRadius:999,padding:"4px 12px"}}>
+              <span style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.06em",color:BIDDERS[owner].color}}>
+                {owner}
+              </span>
+              <span style={{...disp,fontSize:14,fontWeight:700}}>{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+        <div style={{...disp,fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:C.mute,padding:"12px 14px 0"}}>
+          BIGGEST UPSETS
+        </div>
+        {upsets.slice(0,20).map((u,i) => (
+          <div key={u.id} className="px-3 py-3 flex items-center gap-3"
+            style={{borderTop:i===0?`1px solid ${C.line}`:`1px solid ${C.line}`,marginTop:i===0?10:0}}>
+            <div style={{minWidth:38,textAlign:"center"}}>
+              <span style={{...disp,fontSize:16,fontWeight:700,color:C.gold}}>
+                {Math.round(u.surprise*100)}%
+              </span>
+              <div style={{fontSize:8,color:C.mute}}>surprise</div>
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="flex items-center gap-1" style={{fontSize:13,fontWeight:600}}>
+                <Flag f={u.a.flag}/> {u.a.name} <span style={{color:C.mute}}>{u.hs}–{u.as}</span> {u.b.name} <Flag f={u.b.flag}/>
+              </div>
+              <div style={{fontSize:10,color:C.mute,marginTop:2}}>
+                {u.winnerTeam.name} were only <b style={{color:C.text}}>{Math.round(u.prob*100)}%</b> to {u.winner==="draw"?"draw":"win"}
+                {u.winnerTeam && <> · <span style={{color:BIDDERS[u.winnerTeam.owner].color,fontWeight:700}}>{BIDDERS[u.winnerTeam.owner].short}</span></>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 function espnDate(isoStr) {
   return new Date(isoStr).toLocaleDateString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric"});
 }
@@ -791,7 +880,7 @@ function PoolDashboard() {
       {/* ── Tabs ── */}
       <div className="max-w-5xl mx-auto px-4 mt-4">
         <div className="flex gap-2 flex-wrap">
-          {[["board","LEADERBOARD"],["groups","GROUPS"],["fixtures","FIXTURES"],["teams","TEAMS"]].map(([id,label]) => (
+          {[["board","LEADERBOARD"],["groups","GROUPS"],["fixtures","FIXTURES"],["teams","TEAMS"],["upsets","UPSETS"]].map(([id,label]) => (
             <button key={id} onClick={()=>setTab(id)}
               style={{...disp,fontSize:14,fontWeight:600,letterSpacing:"0.1em",padding:"8px 18px",
                 borderRadius:6,cursor:"pointer",border:`1px solid ${tab===id?C.gold:C.line}`,
@@ -1125,6 +1214,16 @@ function PoolDashboard() {
           </div>
           <div style={{fontSize:11,color:C.mute,marginTop:8}}>
             ROI = locked payout ÷ bid price · 🎲 RANDOM = randomly allocated team · 🔥 = won 2+ group games · Click column headers to sort
+          </div>
+        </div>
+      )}
+
+      {/* ══ UPSETS ══ */}
+      {tab==="upsets" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <UpsetsPanel oddsHistory={oddsHistory} />
+          <div style={{fontSize:11,color:C.mute,marginTop:8}}>
+            Upset = the actual result was less likely than not per the closing betting line · based on tracked odds, may not cover every match
           </div>
         </div>
       )}
