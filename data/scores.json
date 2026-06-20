@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-19T22:12:54.788993+00:00",
+  "updated": "2026-06-20T09:54:39.361205+00:00",
   "status": {
     "Algeria": {
       "p": 1,
@@ -50,11 +50,11 @@
       "st": "G"
     },
     "Brazil": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 1,
       "l": 0,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "Canada": {
@@ -162,10 +162,10 @@
       "st": "G"
     },
     "Haiti": {
-      "p": 1,
+      "p": 2,
       "w": 0,
       "d": 0,
-      "l": 1,
+      "l": 2,
       "pts": 0,
       "st": "G"
     },
@@ -226,11 +226,11 @@
       "st": "G"
     },
     "Morocco": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 1,
       "l": 0,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "Netherlands": {
@@ -266,11 +266,11 @@
       "st": "G"
     },
     "Paraguay": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 0,
       "l": 1,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Portugal": {
@@ -298,10 +298,10 @@
       "st": "G"
     },
     "Scotland": {
-      "p": 1,
+      "p": 2,
       "w": 1,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 3,
       "st": "G"
     },
@@ -354,10 +354,10 @@
       "st": "G"
     },
     "Turkey": {
-      "p": 1,
+      "p": 2,
       "w": 0,
       "d": 0,
-      "l": 1,
+      "l": 2,
       "pts": 0,
       "st": "G"
     },
@@ -388,38 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 18",
-      "k": "",
-      "a": "Czech Republic",
-      "b": "South Africa",
-      "s": "1-1",
-      "g": "Group A"
-    },
-    {
-      "d": "Jun 18",
-      "k": "",
-      "a": "Switzerland",
-      "b": "Bosnia and Herzegovina",
-      "s": "4-1",
-      "g": "Group B"
-    },
-    {
-      "d": "Jun 18",
-      "k": "",
-      "a": "Canada",
-      "b": "Qatar",
-      "s": "6-0",
-      "g": "Group B"
-    },
-    {
-      "d": "Jun 18",
-      "k": "",
-      "a": "Mexico",
-      "b": "Korea Republic",
-      "s": "1-0",
-      "g": "Group A"
-    },
-    {
       "d": "Jun 19",
       "k": "",
       "a": "United States",
@@ -429,42 +397,27 @@
     },
     {
       "d": "Jun 19",
-      "k": "LIVE",
+      "k": "",
       "a": "Scotland",
       "b": "Morocco",
       "s": "0-1",
-      "g": "Group C",
-      "odds": {
-        "home": 0.18,
-        "draw": 0.26,
-        "away": 0.56
-      }
+      "g": "Group C"
     },
     {
       "d": "Jun 19",
-      "k": "8:30 PM ET",
+      "k": "",
       "a": "Brazil",
       "b": "Haiti",
-      "s": "",
-      "g": "Group C",
-      "odds": {
-        "home": 0.87,
-        "draw": 0.09,
-        "away": 0.05
-      }
+      "s": "3-0",
+      "g": "Group C"
     },
     {
       "d": "Jun 19",
-      "k": "11:00 PM ET",
+      "k": "",
       "a": "Turkey",
       "b": "Paraguay",
-      "s": "",
-      "g": "Group D",
-      "odds": {
-        "home": 0.46,
-        "draw": 0.29,
-        "away": 0.25
-      }
+      "s": "0-1",
+      "g": "Group D"
     },
     {
       "d": "Jun 20",
@@ -474,9 +427,9 @@
       "s": "",
       "g": "Group F",
       "odds": {
-        "home": 0.55,
-        "draw": 0.24,
-        "away": 0.21
+        "home": 0.56,
+        "draw": 0.23,
+        "away": 0.2
       }
     },
     {
@@ -487,9 +440,9 @@
       "s": "",
       "g": "Group E",
       "odds": {
-        "home": 0.63,
+        "home": 0.64,
         "draw": 0.2,
-        "away": 0.17
+        "away": 0.16
       }
     },
     {
@@ -500,9 +453,74 @@
       "s": "",
       "g": "Group E",
       "odds": {
-        "home": 0.87,
+        "home": 0.85,
+        "draw": 0.11,
+        "away": 0.05
+      }
+    },
+    {
+      "d": "Jun 21",
+      "k": "12:00 AM ET",
+      "a": "Tunisia",
+      "b": "Japan",
+      "s": "",
+      "g": "Group F",
+      "odds": {
+        "home": 0.15,
+        "draw": 0.23,
+        "away": 0.62
+      }
+    },
+    {
+      "d": "Jun 21",
+      "k": "12:00 PM ET",
+      "a": "Spain",
+      "b": "Saudi Arabia",
+      "s": "",
+      "g": "Group H",
+      "odds": {
+        "home": 0.88,
         "draw": 0.09,
         "away": 0.04
+      }
+    },
+    {
+      "d": "Jun 21",
+      "k": "3:00 PM ET",
+      "a": "Belgium",
+      "b": "Iran",
+      "s": "",
+      "g": "Group G",
+      "odds": {
+        "home": 0.66,
+        "draw": 0.21,
+        "away": 0.13
+      }
+    },
+    {
+      "d": "Jun 21",
+      "k": "6:00 PM ET",
+      "a": "Uruguay",
+      "b": "Cape Verde",
+      "s": "",
+      "g": "Group H",
+      "odds": {
+        "home": 0.67,
+        "draw": 0.22,
+        "away": 0.11
+      }
+    },
+    {
+      "d": "Jun 21",
+      "k": "9:00 PM ET",
+      "a": "New Zealand",
+      "b": "Egypt",
+      "s": "",
+      "g": "Group G",
+      "odds": {
+        "home": 0.17,
+        "draw": 0.23,
+        "away": 0.6
       }
     }
   ],
@@ -513,9 +531,9 @@
       1
     ],
     "Ben|Sandeep": [
+      3,
       2,
-      2,
-      0
+      1
     ],
     "Ben|Sunny": [
       2,
@@ -523,7 +541,7 @@
       2
     ],
     "Patrick|Sandeep": [
-      1,
+      2,
       1,
       1
     ],
