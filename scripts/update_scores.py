@@ -121,15 +121,18 @@ def parse_ml(val):
     try: return int(str(val).replace("+",""))
     except: return None
 
+def close_ml(ml, side):
+    return parse_ml(((ml.get(side) or {}).get("close") or {}).get("odds"))
+
 def extract_odds(comp):
     odds_list = comp.get("odds", [])
     if not odds_list: return None
     o = odds_list[0]
     ml = o.get("moneyline") or {}
 
-    h_ml = parse_ml((ml.get("home") or {}).get("close", {}).get("odds"))
-    a_ml = parse_ml((ml.get("away") or {}).get("close", {}).get("odds"))
-    d_ml = parse_ml((ml.get("draw") or {}).get("close", {}).get("odds")) or parse_ml((o.get("drawOdds") or {}).get("moneyLine"))
+    h_ml = close_ml(ml, "home")
+    a_ml = close_ml(ml, "away")
+    d_ml = close_ml(ml, "draw") or parse_ml((o.get("drawOdds") or {}).get("moneyLine"))
 
     if h_ml is None or a_ml is None: return None
 
