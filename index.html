@@ -121,13 +121,13 @@ const payoutLocked = st => isAlive(st) ? ALIVE_FLOOR[st] : (FINAL_PAYOUT[st] ?? 
 // Best-case payouts assigned in order to N alive teams (1 champion, 1 RU, 1 3rd, 1 4th, then QF exits, etc.)
 const BEST_SLOTS = [250,125,75,50,25,25,25,25,15,15,15,15,15,15,15,15,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5];
 
-const blankStatus = () => Object.fromEntries(TEAMS.map(t => [t.name,{p:0,w:0,d:0,l:0,pts:0,st:"G"}]));
+const blankStatus = () => Object.fromEntries(TEAMS.map(t => [t.name,{p:0,w:0,d:0,l:0,pts:0,gf:0,ga:0,st:"G"}]));
 
 const SEED_DATE = "2026-06-11T20:00:00-04:00";
 const seedStatus = () => ({
   ...blankStatus(),
-  Mexico:          {p:1,w:1,d:0,l:0,pts:3,st:"G"},
-  "South Africa":  {p:1,w:0,d:0,l:1,pts:0,st:"G"},
+  Mexico:          {p:1,w:1,d:0,l:0,pts:3,gf:2,ga:0,st:"G"},
+  "South Africa":  {p:1,w:0,d:0,l:1,pts:0,gf:0,ga:2,st:"G"},
 });
 const SEED_FIXTURES = [
   {d:"Jun 11",k:"",           a:"Mexico",        b:"South Africa",          s:"2-0",g:"Group A · Mexico City"   },
@@ -461,7 +461,7 @@ function computeStandingsAndH2H(events) {
     if ((ev.season?.slug||"").toLowerCase().includes("group")) {
       for (const [t, gf, gc] of [[A,ga,gb],[B,gb,ga]]) {
         const s = status[t.name];
-        s.p++;
+        s.p++; s.gf += gf; s.ga += gc;
         if (gf>gc) { s.w++; s.pts+=3; }
         else if (gf===gc) { s.d++; s.pts+=1; }
         else s.l++;
@@ -477,7 +477,42 @@ function computeStandingsAndH2H(events) {
       else h2h[key][1]++;
     }
   }
+  applyGroupStageElimination(status);
   return { status, h2h };
+}
+
+// Once a group's 4 teams have each played all 3 group matches, rank 1-2 advance
+// to R32 and rank 4 is eliminated immediately. Rank 3 (3rd place) is provisional
+// until every group has finished, since the 2026 format also advances the best
+// 8 third-place finishers across all 12 groups.
+function applyGroupStageElimination(status) {
+  const groupRows = {};
+  for (const [g, names] of Object.entries(GROUPS)) {
+    groupRows[g] = names
+      .map(name => {
+        const s = status[name];
+        return { name, p: s.p, pts: s.pts, gd: s.gf - s.ga, gf: s.gf };
+      })
+      .sort((a,b) => b.pts-a.pts || b.gd-a.gd || b.gf-a.gf || a.name.localeCompare(b.name));
+  }
+
+  const thirdPlace = [];
+  for (const rows of Object.values(groupRows)) {
+    const complete = rows.every(r => r.p >= 3);
+    if (!complete) continue;
+    rows.forEach((r, idx) => {
+      if (idx < 2)      status[r.name].st = "R32";
+      else if (idx === 3) status[r.name].st = "EG";
+      else                thirdPlace.push(r);
+    });
+  }
+
+  const allGroupsComplete = Object.values(groupRows).every(rows => rows.every(r => r.p >= 3));
+  if (allGroupsComplete) {
+    thirdPlace
+      .sort((a,b) => b.pts-a.pts || b.gd-a.gd || b.gf-a.gf || a.name.localeCompare(b.name))
+      .forEach((r, idx) => { status[r.name].st = idx < 8 ? "R32" : "EG"; });
+  }
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
