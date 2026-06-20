@@ -1,0 +1,39 @@
+name: Snapshot Odds
+
+on:
+  schedule:
+    # Hourly - this only feeds a "how have the odds moved" trend chart,
+    # not live scores, so occasional gaps from GitHub's scheduler are fine.
+    - cron: "0 * * * *"
+  workflow_dispatch:   # manual trigger from the Actions tab
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Snapshot betting odds
+        run: python scripts/snapshot_odds.py
+
+      - name: Commit & push if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/odds_history.json
+          if git diff --staged --quiet; then
+            echo "Odds unchanged — no commit needed"
+          else
+            git commit -m "chore: snapshot odds $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin main
+            git push
+          fi
