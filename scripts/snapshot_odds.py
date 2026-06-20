@@ -1,15 +1,18 @@
 """
-Snapshot ESPN's next-match betting odds for upcoming fixtures so the site
-can chart how they move over time. Lightweight, low-frequency cron job -
-separate from update_scores.py, which handles live scores on a tighter loop.
+Track ESPN's next-match betting odds over time, and lock in the closing
+line + final result once a match completes, so the site can flag upsets
+(low pre-match win odds vs. the actual outcome). Lightweight, low-frequency
+cron job - separate from update_scores.py, which handles live scores on a
+tighter loop.
 """
 import json, os, sys
 from datetime import datetime, timezone, timedelta
 from urllib.request import urlopen, Request
 
-SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_FILE  = os.path.join(SCRIPT_DIR, "..", "data", "odds_history.json")
-ESPN_BASE    = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world"
+SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_FILE    = os.path.join(SCRIPT_DIR, "..", "data", "odds_history.json")
+ESPN_BASE      = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world"
+TOURNAMENT_START = datetime(2026, 6, 11, tzinfo=timezone.utc)
 LOOKAHEAD_DAYS = 14
 
 def fetch_json(url):
@@ -60,8 +63,11 @@ def main():
     history = load_existing()
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-    cursor = datetime.now(timezone.utc)
-    until  = cursor + timedelta(days=LOOKAHEAD_DAYS)
+    # Sweep from tournament start through the lookahead window every run -
+    # this lets us backfill closing odds/results for matches that already
+    # completed before this script existed, not just snapshot upcoming ones.
+    cursor = TOURNAMENT_START
+    until  = datetime.now(timezone.utc) + timedelta(days=LOOKAHEAD_DAYS)
     events = []
     while cursor <= until:
         events.extend(fetch_day(cursor.strftime("%Y%m%d")))
@@ -75,14 +81,7 @@ def main():
     for ev in events:
         try:
             comp = ev.get("competitions", [{}])[0]
-            if comp.get("status", {}).get("type", {}).get("completed", False):
-                continue  # only track odds for matches still upcoming
-
-            odds = extract_odds(comp)
-            if not odds:
-                continue
-
-            eid = ev.get("id")
+            eid  = ev.get("id")
             if not eid:
                 continue
 
@@ -90,12 +89,45 @@ def main():
             home  = next((c for c in cs if c.get("homeAway") == "home"), cs[0] if cs else {})
             away  = next((c for c in cs if c.get("homeAway") == "away"), cs[1] if len(cs) > 1 else {})
 
-            entry = history.setdefault(eid, {
-                "a": home.get("team", {}).get("displayName", ""),
-                "b": away.get("team", {}).get("displayName", ""),
-                "date": ev.get("date", ""),
-                "snaps": [],
-            })
+            completed = comp.get("status", {}).get("type", {}).get("completed", False)
+            odds = extract_odds(comp)
+
+            entry = history.get(eid)
+            if entry is None:
+                if not odds and not completed:
+                    continue  # nothing useful to record yet
+                entry = history[eid] = {
+                    "a": home.get("team", {}).get("displayName", ""),
+                    "b": away.get("team", {}).get("displayName", ""),
+                    "date": ev.get("date", ""),
+                    "snaps": [],
+                }
+                changed = True
+
+            if completed:
+                if "result" not in entry:
+                    try:
+                        hs, as_ = int(home.get("score", 0)), int(away.get("score", 0))
+                    except (TypeError, ValueError):
+                        hs = as_ = None
+                    if hs is not None:
+                        entry["result"] = {
+                            "hs": hs, "as": as_,
+                            "winner": "home" if hs > as_ else "away" if as_ > hs else "draw",
+                        }
+                        changed = True
+                if "closing" not in entry:
+                    # Prefer odds straight off the now-completed event (ESPN
+                    # often still serves the closing line); fall back to the
+                    # last pre-kickoff snapshot we already had.
+                    closing = odds or (entry["snaps"][-1] if entry["snaps"] else None)
+                    if closing:
+                        entry["closing"] = {k: closing[k] for k in ("h", "d", "a")}
+                        changed = True
+                continue
+
+            if not odds:
+                continue
             last = entry["snaps"][-1] if entry["snaps"] else None
             if not last or (last["h"], last["d"], last["a"]) != (odds["h"], odds["d"], odds["a"]):
                 entry["snaps"].append({"t": now_iso, **odds})
@@ -111,7 +143,7 @@ def main():
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
-    print(f"[done] snapshotted odds for {len(history)} tracked fixtures")
+    print(f"[done] tracking odds for {len(history)} fixtures")
 
 if __name__ == "__main__":
     main()
