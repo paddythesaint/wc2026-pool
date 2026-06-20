@@ -92,7 +92,7 @@ def main():
             home  = next((c for c in cs if c.get("homeAway") == "home"), cs[0] if cs else {})
             away  = next((c for c in cs if c.get("homeAway") == "away"), cs[1] if len(cs) > 1 else {})
 
-            completed = comp.get("status", {}).get("type", {}).get("completed", False)
+            completed = ((comp.get("status") or {}).get("type") or {}).get("completed", False)
             odds = extract_odds(comp)
 
             entry = history.get(eid)
@@ -100,8 +100,8 @@ def main():
                 if not odds and not completed:
                     continue  # nothing useful to record yet
                 entry = history[eid] = {
-                    "a": home.get("team", {}).get("displayName", ""),
-                    "b": away.get("team", {}).get("displayName", ""),
+                    "a": (home.get("team") or {}).get("displayName", ""),
+                    "b": (away.get("team") or {}).get("displayName", ""),
                     "date": ev.get("date", ""),
                     "snaps": [],
                 }
