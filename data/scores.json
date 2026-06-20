@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-20T15:56:26.307576+00:00",
+  "updated": "2026-06-20T20:51:52.772720+00:00",
   "status": {
     "Algeria": {
       "p": 1,
@@ -234,11 +234,11 @@
       "st": "G"
     },
     "Netherlands": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 1,
       "l": 0,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "New Zealand": {
@@ -330,10 +330,10 @@
       "st": "G"
     },
     "Sweden": {
-      "p": 1,
+      "p": 2,
       "w": 1,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 3,
       "st": "G"
     },
@@ -421,27 +421,22 @@
     },
     {
       "d": "Jun 20",
-      "k": "1:00 PM ET",
+      "k": "",
       "a": "Netherlands",
       "b": "Sweden",
-      "s": "",
-      "g": "Group F",
-      "odds": {
-        "home": 0.56,
-        "draw": 0.23,
-        "away": 0.21
-      }
+      "s": "5-1",
+      "g": "Group F"
     },
     {
       "d": "Jun 20",
-      "k": "4:00 PM ET",
+      "k": "LIVE",
       "a": "Germany",
       "b": "Cote d'Ivoire",
-      "s": "",
+      "s": "0-1",
       "g": "Group E",
       "odds": {
-        "home": 0.64,
-        "draw": 0.21,
+        "home": 0.65,
+        "draw": 0.2,
         "away": 0.15
       }
     },
@@ -453,9 +448,9 @@
       "s": "",
       "g": "Group E",
       "odds": {
-        "home": 0.84,
-        "draw": 0.11,
-        "away": 0.05
+        "home": 0.82,
+        "draw": 0.12,
+        "away": 0.06
       }
     },
     {
@@ -466,9 +461,9 @@
       "s": "",
       "g": "Group F",
       "odds": {
-        "home": 0.14,
-        "draw": 0.23,
-        "away": 0.63
+        "home": 0.13,
+        "draw": 0.22,
+        "away": 0.65
       }
     },
     {
@@ -479,7 +474,7 @@
       "s": "",
       "g": "Group H",
       "odds": {
-        "home": 0.88,
+        "home": 0.87,
         "draw": 0.09,
         "away": 0.04
       }
@@ -505,8 +500,8 @@
       "s": "",
       "g": "Group H",
       "odds": {
-        "home": 0.67,
-        "draw": 0.22,
+        "home": 0.66,
+        "draw": 0.23,
         "away": 0.11
       }
     },
@@ -528,7 +523,7 @@
     "Ben|Patrick": [
       1,
       2,
-      1
+      2
     ],
     "Ben|Sandeep": [
       3,
