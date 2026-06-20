@@ -478,7 +478,68 @@ function computeStandingsAndH2H(events) {
     }
   }
   applyGroupStageElimination(status);
+  applyKnockoutResults(status, events);
   return { status, h2h };
+}
+
+// Knockout round detection: ESPN labels each fixture's round in altGameNote
+// (e.g. "Round of 32 · Houston"), same field already used for the Fixtures
+// tab's "Group A · Mexico City" captions. Order matters - "semifinal" and
+// "quarterfinal" both contain "final", so check the more specific rounds first.
+const KNOCKOUT_ROUND_PATTERNS = [
+  ["3RD_PLACE", /third[- ]place/i],
+  ["SF",        /semi[- ]?final/i],
+  ["QF",        /quarter[- ]?final/i],
+  ["R16",       /round of 16/i],
+  ["R32",       /round of 32/i],
+  ["FINAL",     /\bfinal\b/i],
+];
+const KNOCKOUT_ORDER   = ["R32","R16","QF","SF","FINAL","3RD_PLACE"];
+// Mirrors ALIVE_FLOOR/FINAL_PAYOUT: a winner advances to the next alive stage,
+// a loser locks in their final payout stage. SF losers stay at "SF" (still
+// alive at the $50 floor) until the 3rd-place match resolves "3RD" vs "4TH".
+const KNOCKOUT_OUTCOME = {
+  R32:         { win: "R16", lose: "E32" },
+  R16:         { win: "QF",  lose: "E16" },
+  QF:          { win: "SF",  lose: "EQF" },
+  SF:          { win: "F",   lose: "SF"  },
+  FINAL:       { win: "CH",  lose: "RU"  },
+  "3RD_PLACE": { win: "3RD", lose: "4TH" },
+};
+
+function detectKnockoutRound(ev, comp) {
+  const text = `${comp.altGameNote||""} ${ev.season?.slug||""} ${ev.name||""}`;
+  for (const [key, re] of KNOCKOUT_ROUND_PATTERNS) if (re.test(text)) return key;
+  return null;
+}
+
+function applyKnockoutResults(status, events) {
+  const byRound = Object.fromEntries(KNOCKOUT_ORDER.map(r => [r, []]));
+  for (const ev of events) {
+    const comp = ev.competitions?.[0]; if (!comp) continue;
+    if (!comp.status?.type?.completed) continue;
+    const round = detectKnockoutRound(ev, comp);
+    if (round) byRound[round].push(ev);
+  }
+  // Process in bracket order so a team's stage always ends up at the most
+  // advanced round actually reached, regardless of fetch/event ordering.
+  for (const round of KNOCKOUT_ORDER) {
+    for (const ev of byRound[round]) {
+      const comp  = ev.competitions[0];
+      const cs    = comp.competitors||[];
+      const home  = cs.find(c=>c.homeAway==="home")||cs[0];
+      const away  = cs.find(c=>c.homeAway==="away")||cs[1];
+      const A = findTeam(home.team?.displayName);
+      const B = findTeam(away.team?.displayName);
+      if (!A || !B) continue;
+      const aWon = (typeof home.winner === "boolean" || typeof away.winner === "boolean")
+        ? !!home.winner
+        : Number(home.score||0) > Number(away.score||0);
+      const outcome = KNOCKOUT_OUTCOME[round];
+      status[A.name].st = aWon ? outcome.win  : outcome.lose;
+      status[B.name].st = aWon ? outcome.lose : outcome.win;
+    }
+  }
 }
 
 // Once a group's 4 teams have each played all 3 group matches, rank 1-2 advance
