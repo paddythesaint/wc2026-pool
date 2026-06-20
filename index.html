@@ -401,10 +401,26 @@ function computeUpsets(oddsHistory) {
     const key = m.result.winner === "home" ? "h" : m.result.winner === "away" ? "a" : "d";
     const prob = m.closing[key];
     if (prob == null || prob >= UPSET_THRESHOLD) continue;
-    const winnerTeam = m.result.winner === "home" ? A : m.result.winner === "away" ? B : null;
+
+    // Points actually earned vs. what the closing odds implied each team
+    // should expect on average (win=3, draw=1, loss=0) - this is what lets
+    // a draw "upset" credit the underdog instead of going unattributed,
+    // since they picked up a point the market said they were unlikely to get.
+    const { h, d, a } = m.closing;
+    const ptsHome = m.result.winner === "home" ? 3 : m.result.winner === "draw" ? 1 : 0;
+    const ptsAway = m.result.winner === "away" ? 3 : m.result.winner === "draw" ? 1 : 0;
+    const swingHome = ptsHome - (h*3 + d*1);
+    const swingAway = ptsAway - (a*3 + d*1);
+    const benefitSwing = Math.max(swingHome, swingAway);
+    // Only credit a team when they actually beat the market's expected
+    // points, not just edged out the other side by a fraction of a point
+    // (e.g. a draw between two closely-matched sides isn't really "an upset
+    // someone benefited from").
+    const benefitTeam = benefitSwing > 0.05 ? (swingHome > swingAway ? A : B) : null;
+
     list.push({
       id, a: A, b: B, hs: m.result.hs, as: m.result.as, winner: m.result.winner,
-      winnerTeam, prob, surprise: 1 - prob, date: m.date,
+      benefitTeam, benefitSwing, prob, surprise: 1 - prob, date: m.date,
     });
   }
   return list.sort((x,y) => y.surprise - x.surprise);
@@ -414,7 +430,7 @@ function UpsetsPanel({ oddsHistory }) {
   const upsets = React.useMemo(() => computeUpsets(oddsHistory), [oddsHistory]);
   const tally = React.useMemo(() => {
     const t = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, 0]));
-    for (const u of upsets) if (u.winnerTeam) t[u.winnerTeam.owner]++;
+    for (const u of upsets) if (u.benefitTeam) t[u.benefitTeam.owner] += u.benefitSwing;
     return t;
   }, [upsets]);
 
@@ -432,18 +448,21 @@ function UpsetsPanel({ oddsHistory }) {
     <div className="space-y-4">
       <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:14}}>
         <div style={{...disp,fontSize:12,fontWeight:700,letterSpacing:"0.1em",color:C.mute,marginBottom:10}}>
-          UPSET WINS BY OWNER
+          UPSET POINTS GAINED BY OWNER
         </div>
         <div className="flex flex-wrap gap-3">
-          {Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([owner,count]) => (
+          {Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(([owner,pts]) => (
             <div key={owner} className="flex items-center gap-2" style={{
               border:`1px solid ${C.line}`,borderRadius:999,padding:"4px 12px"}}>
               <span style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.06em",color:BIDDERS[owner].color}}>
                 {owner}
               </span>
-              <span style={{...disp,fontSize:14,fontWeight:700}}>{count}</span>
+              <span style={{...disp,fontSize:14,fontWeight:700}}>+{pts.toFixed(1)}</span>
             </div>
           ))}
+        </div>
+        <div style={{fontSize:10,color:C.mute,marginTop:8}}>
+          Points a team earned beyond what the closing odds implied on average (win=3/draw=1/loss=0) - so a draw pulled off by an underdog counts too, not just outright wins.
         </div>
       </div>
 
@@ -465,8 +484,8 @@ function UpsetsPanel({ oddsHistory }) {
                 <Flag f={u.a.flag}/> {u.a.name} <span style={{color:C.mute}}>{u.hs}–{u.as}</span> {u.b.name} <Flag f={u.b.flag}/>
               </div>
               <div style={{fontSize:10,color:C.mute,marginTop:2}}>
-                {u.winnerTeam.name} were only <b style={{color:C.text}}>{Math.round(u.prob*100)}%</b> to {u.winner==="draw"?"draw":"win"}
-                {u.winnerTeam && <> · <span style={{color:BIDDERS[u.winnerTeam.owner].color,fontWeight:700}}>{BIDDERS[u.winnerTeam.owner].short}</span></>}
+                {u.winner==="draw" ? "A draw" : "The result"} was only <b style={{color:C.text}}>{Math.round(u.prob*100)}%</b> likely per the closing line
+                {u.benefitTeam && <> · <b style={{color:C.text}}>{u.benefitTeam.name}</b> +{u.benefitSwing.toFixed(1)} pts vs. expected · <span style={{color:BIDDERS[u.benefitTeam.owner].color,fontWeight:700}}>{BIDDERS[u.benefitTeam.owner].short}</span></>}
               </div>
             </div>
           </div>
