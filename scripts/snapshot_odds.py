@@ -136,7 +136,9 @@ def main():
                 entry["snaps"].append({"t": now_iso, **odds})
                 changed = True
         except Exception as e:
+            import traceback
             print(f"[warn] skipping event {ev.get('id')}: {e}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
             continue
 
     if not changed:
