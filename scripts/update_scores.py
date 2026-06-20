@@ -125,7 +125,7 @@ def close_ml(ml, side):
     return parse_ml(((ml.get(side) or {}).get("close") or {}).get("odds"))
 
 def extract_odds(comp):
-    odds_list = comp.get("odds", [])
+    odds_list = [x for x in (comp.get("odds") or []) if x]
     if not odds_list: return None
     o = odds_list[0]
     ml = o.get("moneyline") or {}
