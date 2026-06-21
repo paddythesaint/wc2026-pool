@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-20T20:51:52.772720+00:00",
+  "updated": "2026-06-21T10:46:25.363348+00:00",
   "status": {
     "Algeria": {
       "p": 1,
@@ -90,11 +90,11 @@
       "st": "G"
     },
     "Curaçao": {
-      "p": 1,
+      "p": 2,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Czech Republic": {
@@ -114,11 +114,11 @@
       "st": "G"
     },
     "Ecuador": {
-      "p": 1,
+      "p": 2,
       "w": 0,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 0,
+      "pts": 1,
       "st": "G"
     },
     "Egypt": {
@@ -146,11 +146,11 @@
       "st": "G"
     },
     "Germany": {
-      "p": 1,
-      "w": 1,
+      "p": 2,
+      "w": 2,
       "d": 0,
       "l": 0,
-      "pts": 3,
+      "pts": 6,
       "st": "G"
     },
     "Ghana": {
@@ -186,19 +186,19 @@
       "st": "G"
     },
     "Cote d'Ivoire": {
-      "p": 1,
+      "p": 2,
       "w": 1,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 3,
       "st": "G"
     },
     "Japan": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 1,
       "l": 0,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "Jordan": {
@@ -346,10 +346,10 @@
       "st": "G"
     },
     "Tunisia": {
-      "p": 1,
+      "p": 2,
       "w": 0,
       "d": 0,
-      "l": 1,
+      "l": 2,
       "pts": 0,
       "st": "G"
     },
@@ -388,38 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 19",
-      "k": "",
-      "a": "United States",
-      "b": "Australia",
-      "s": "2-0",
-      "g": "Group D"
-    },
-    {
-      "d": "Jun 19",
-      "k": "",
-      "a": "Scotland",
-      "b": "Morocco",
-      "s": "0-1",
-      "g": "Group C"
-    },
-    {
-      "d": "Jun 19",
-      "k": "",
-      "a": "Brazil",
-      "b": "Haiti",
-      "s": "3-0",
-      "g": "Group C"
-    },
-    {
-      "d": "Jun 19",
-      "k": "",
-      "a": "Turkey",
-      "b": "Paraguay",
-      "s": "0-1",
-      "g": "Group D"
-    },
-    {
       "d": "Jun 20",
       "k": "",
       "a": "Netherlands",
@@ -429,42 +397,27 @@
     },
     {
       "d": "Jun 20",
-      "k": "LIVE",
+      "k": "",
       "a": "Germany",
       "b": "Cote d'Ivoire",
-      "s": "0-1",
-      "g": "Group E",
-      "odds": {
-        "home": 0.65,
-        "draw": 0.2,
-        "away": 0.15
-      }
+      "s": "2-1",
+      "g": "Group E"
     },
     {
       "d": "Jun 20",
-      "k": "8:00 PM ET",
+      "k": "",
       "a": "Ecuador",
       "b": "Curaçao",
-      "s": "",
-      "g": "Group E",
-      "odds": {
-        "home": 0.82,
-        "draw": 0.12,
-        "away": 0.06
-      }
+      "s": "0-0",
+      "g": "Group E"
     },
     {
       "d": "Jun 21",
-      "k": "12:00 AM ET",
+      "k": "",
       "a": "Tunisia",
       "b": "Japan",
-      "s": "",
-      "g": "Group F",
-      "odds": {
-        "home": 0.13,
-        "draw": 0.22,
-        "away": 0.65
-      }
+      "s": "0-4",
+      "g": "Group F"
     },
     {
       "d": "Jun 21",
@@ -476,7 +429,7 @@
       "odds": {
         "home": 0.87,
         "draw": 0.09,
-        "away": 0.04
+        "away": 0.05
       }
     },
     {
@@ -513,9 +466,61 @@
       "s": "",
       "g": "Group G",
       "odds": {
-        "home": 0.17,
+        "home": 0.16,
         "draw": 0.23,
-        "away": 0.6
+        "away": 0.61
+      }
+    },
+    {
+      "d": "Jun 22",
+      "k": "1:00 PM ET",
+      "a": "Argentina",
+      "b": "Austria",
+      "s": "",
+      "g": "Group J",
+      "odds": {
+        "home": 0.61,
+        "draw": 0.24,
+        "away": 0.15
+      }
+    },
+    {
+      "d": "Jun 22",
+      "k": "5:00 PM ET",
+      "a": "France",
+      "b": "Iraq",
+      "s": "",
+      "g": "Group I",
+      "odds": {
+        "home": 0.89,
+        "draw": 0.08,
+        "away": 0.03
+      }
+    },
+    {
+      "d": "Jun 22",
+      "k": "8:00 PM ET",
+      "a": "Norway",
+      "b": "Senegal",
+      "s": "",
+      "g": "Group I",
+      "odds": {
+        "home": 0.42,
+        "draw": 0.27,
+        "away": 0.31
+      }
+    },
+    {
+      "d": "Jun 22",
+      "k": "11:00 PM ET",
+      "a": "Jordan",
+      "b": "Algeria",
+      "s": "",
+      "g": "Group J",
+      "odds": {
+        "home": 0.16,
+        "draw": 0.23,
+        "away": 0.61
       }
     }
   ],
@@ -532,7 +537,7 @@
     ],
     "Ben|Sunny": [
       2,
-      0,
+      1,
       2
     ],
     "Patrick|Sandeep": [
@@ -546,7 +551,7 @@
       2
     ],
     "Sandeep|Sunny": [
-      2,
+      3,
       1,
       1
     ]
