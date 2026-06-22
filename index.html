@@ -332,6 +332,94 @@ function BracketPanel({ status }) {
   );
 }
 
+// ─── Qualification-count history (chart + changelog) ──────────────────────────
+// `qualHistory` is a list of {t, counts:{owner:count}} snapshots, appended by
+// a GitHub Action only when a count actually changes - so consecutive entries
+// always differ by at least one owner, which is what the changelog below relies on.
+function QualificationHistoryPanel({ qualHistory }) {
+  if (!qualHistory || qualHistory.length === 0) {
+    return (
+      <div style={{fontSize:11,color:C.mute}}>
+        Tracking projected qualification counts as group results come in - check back after the next match finishes.
+      </div>
+    );
+  }
+
+  const owners = Object.keys(BIDDERS);
+  const maxCount = Math.max(12, ...qualHistory.flatMap(h => owners.map(o => h.counts[o] || 0)));
+  const W = 600, H = 140, PAD = 4;
+
+  const fmtTime = (iso) => {
+    try {
+      return new Date(iso).toLocaleString("en-US", {
+        month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone:"America/New_York",
+      }) + " ET";
+    } catch { return iso; }
+  };
+
+  const changes = [];
+  for (let i = qualHistory.length - 1; i >= 1; i--) {
+    const cur = qualHistory[i].counts, prev = qualHistory[i-1].counts;
+    const deltas = owners
+      .map(o => ({ o, d: (cur[o]||0) - (prev[o]||0) }))
+      .filter(x => x.d !== 0);
+    if (deltas.length) changes.push({ t: qualHistory[i].t, deltas });
+  }
+
+  return (
+    <div className="space-y-3">
+      {qualHistory.length >= 2 && (
+        <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+          <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+            {owners.map(o => {
+              const pts = qualHistory.map((h,i) => [
+                qualHistory.length===1 ? 0 : (i/(qualHistory.length-1))*(W-2*PAD)+PAD,
+                H-PAD - ((h.counts[o]||0)/maxCount)*(H-2*PAD),
+              ]);
+              const path = pts.map((p,i) => `${i===0?"M":"L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+              return <path key={o} d={path} fill="none" stroke={BIDDERS[o].color} strokeWidth="2"/>;
+            })}
+          </svg>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {owners.map(o => {
+              const latest = qualHistory[qualHistory.length-1].counts[o] || 0;
+              return (
+                <span key={o} style={{fontSize:11,color:C.mute}}>
+                  <span style={{color:BIDDERS[o].color,fontWeight:700}}>{BIDDERS[o].short}</span> {latest}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+        <div className="px-3 py-2" style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
+          <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>QUALIFICATION CHANGELOG</span>
+        </div>
+        {changes.length === 0 && (
+          <div className="px-3 py-2" style={{fontSize:11,color:C.mute}}>No changes recorded yet.</div>
+        )}
+        {changes.map((c, idx) => (
+          <div key={c.t} className="px-3 py-2"
+            style={{borderBottom: idx < changes.length-1 ? `1px solid ${C.line}` : "none"}}>
+            <div style={{fontSize:10,color:C.mute}}>{fmtTime(c.t)}</div>
+            <div style={{fontSize:12,marginTop:2}}>
+              {c.deltas.map(({o,d}, i) => (
+                <span key={o}>
+                  {i>0 && ", "}
+                  <span style={{color:BIDDERS[o].color,fontWeight:700}}>{o}</span>{" "}
+                  <b style={{color:d>0?C.green:C.red}}>{d>0?`+${d}`:d}</b>
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -941,6 +1029,7 @@ function PoolDashboard() {
   const [fixtures, setFixtures]     = useState(SEED_FIXTURES);
   const [h2h, setH2h]               = useState({});
   const [oddsHistory, setOddsHistory] = useState({});
+  const [qualHistory, setQualHistory] = useState([]);
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
@@ -1000,6 +1089,17 @@ function PoolDashboard() {
   useEffect(() => {
     const run = () => fetch(`data/odds_history.json?t=${Date.now()}`)
       .then(r => r.json()).then(setOddsHistory).catch(() => {});
+    run();
+    const id = setInterval(run, 300000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Qualification-count history is snapshotted alongside live scores by the
+  // same GitHub Action (every 15 min, only written when a count changes) —
+  // just re-fetch the static file every 5 min.
+  useEffect(() => {
+    const run = () => fetch(`data/qualification_history.json?t=${Date.now()}`)
+      .then(r => r.json()).then(setQualHistory).catch(() => {});
     run();
     const id = setInterval(run, 300000);
     return () => clearInterval(id);
@@ -1296,8 +1396,9 @@ function PoolDashboard() {
 
       {/* ══ BRACKET ══ */}
       {tab==="bracket" && (
-        <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
           <BracketPanel status={status} />
+          <QualificationHistoryPanel qualHistory={qualHistory} />
         </div>
       )}
 
