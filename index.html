@@ -238,6 +238,100 @@ function ThirdPlaceTable({ status }) {
   );
 }
 
+// ─── Round-of-32 bracket panel ─────────────────────────────────────────────────
+function BracketPanel({ status }) {
+  const top8 = React.useMemo(() => getCurrentThirdPlace(status).slice(0, 8), [status]);
+
+  const tally = React.useMemo(() => {
+    const t = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, { h1: 0, h2: 0, wc: 0 }]));
+    for (const g of Object.keys(GROUPS)) {
+      const ranked = rankGroup(g, status);
+      const winner = TEAMS.find(tm => tm.name === ranked[0].name);
+      const runnerUp = TEAMS.find(tm => tm.name === ranked[1].name);
+      const winnerHalf = isHalf1WinnerGroup(g) ? "h1" : "h2";
+      const runnerUpHalf = isHalf1WinnerGroup(g) ? "h2" : "h1";
+      if (winner) t[winner.owner][winnerHalf]++;
+      if (runnerUp) t[runnerUp.owner][runnerUpHalf]++;
+    }
+    for (const r of top8) {
+      const team = TEAMS.find(tm => tm.name === r.name);
+      if (team) t[team.owner].wc++;
+    }
+    return t;
+  }, [status, top8]);
+
+  const SlotDisplay = ({ slot }) => {
+    if (slot.t === "WC") {
+      const candidates = top8.filter(r => slot.pool.includes(r.group));
+      return (
+        <div style={{fontSize:12,color:C.mute}}>
+          <span style={{fontStyle:"italic"}}>Wildcard</span>
+          <span style={{fontSize:10}}> · pool {slot.pool.join("/")}</span>
+          {candidates.length > 0 && (
+            <div style={{fontSize:10,marginTop:2}}>
+              possible: {candidates.map(c => c.name).join(", ")}
+            </div>
+          )}
+        </div>
+      );
+    }
+    const r = resolveSlot(slot, status);
+    if (!r || !r.team) return <span style={{fontSize:12,color:C.mute}}>TBD</span>;
+    return (
+      <div style={{fontSize:13}}>
+        <Flag f={r.team.flag} />
+        <span style={{fontWeight:600,marginLeft:4}}>{r.team.name}</span>
+        <span style={{fontSize:10,fontWeight:700,color:BIDDERS[r.team.owner].color,marginLeft:6}}>
+          {BIDDERS[r.team.owner].short}
+        </span>
+        {r.projected && <span style={{fontSize:9,color:C.mute,marginLeft:4}}>(proj.)</span>}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {Object.entries(tally).map(([owner, c]) => (
+          <div key={owner} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+            <div style={{...disp,fontSize:13,fontWeight:700,letterSpacing:"0.08em",color:BIDDERS[owner].color}}>
+              {owner}
+            </div>
+            <div style={{fontSize:11,color:C.mute,marginTop:4}}>
+              Half 1 <b style={{color:C.text}}>{c.h1}</b> · Half 2 <b style={{color:C.text}}>{c.h2}</b> · Wildcard <b style={{color:C.text}}>{c.wc}</b>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {[1, 2].map(half => (
+          <div key={half} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+            <div className="px-3 py-2" style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
+              <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>HALF {half}</span>
+            </div>
+            {BRACKET_HALVES[half].map((m, idx) => (
+              <div key={idx} className="px-3 py-2"
+                style={{borderBottom: idx < BRACKET_HALVES[half].length - 1 ? `1px solid ${C.line}` : "none"}}>
+                <SlotDisplay slot={m.a} />
+                <div style={{fontSize:9,color:C.mute,margin:"3px 0"}}>vs</div>
+                <SlotDisplay slot={m.b} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div style={{fontSize:10,color:C.mute}}>
+        Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
+        The 8 wildcard berths go to the best 3rd-place teams, but FIFA only finalizes which specific group's 3rd-place team lands in which
+        wildcard match once the full field of advancing thirds is set - "possible" lists current top-8 third-place teams whose group is
+        eligible for that slot.
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -783,6 +877,63 @@ function getCurrentThirdPlace(status) {
   );
 }
 
+// ─── Round-of-32 bracket template (fixed by FIFA regardless of who actually
+// qualifies) ─────────────────────────────────────────────────────────────────
+// A group's winner and runner-up are always routed to opposite halves of the
+// draw, so they can only meet again in the final. Winners of these 6 groups
+// land in Half 1; the other 6 groups' winners land in Half 2 (and each
+// group's runner-up lands in whichever half its own winner did NOT).
+const HALF1_WINNER_GROUPS = ["D","E","F","G","H","I"];
+const isHalf1WinnerGroup  = g => HALF1_WINNER_GROUPS.includes(g);
+
+// The 16 R32 matchups, split by half. "W"/"RU" slots resolve to a specific
+// team from current group standings; "WC" slots are one of the 8 wildcard
+// (best 3rd-place) berths - which exact team lands in which WC slot isn't
+// knowable until the full third-place field is set (FIFA assigns those via
+// an official lookup table keyed on which 8 of 12 groups' thirds advance),
+// so we only show the pool of groups eligible for that slot.
+const BRACKET_HALVES = {
+  1: [
+    { a:{t:"RU",g:"A"},               b:{t:"RU",g:"B"} },
+    { a:{t:"W", g:"E"},               b:{t:"WC",pool:["A","B","C","D","F"]} },
+    { a:{t:"W", g:"F"},               b:{t:"RU",g:"C"} },
+    { a:{t:"W", g:"I"},               b:{t:"WC",pool:["C","D","F","G","H"]} },
+    { a:{t:"W", g:"D"},               b:{t:"WC",pool:["B","E","F","I","J"]} },
+    { a:{t:"W", g:"G"},               b:{t:"WC",pool:["A","E","H","I","J"]} },
+    { a:{t:"RU",g:"K"},               b:{t:"RU",g:"L"} },
+    { a:{t:"W", g:"H"},               b:{t:"RU",g:"J"} },
+  ],
+  2: [
+    { a:{t:"W", g:"C"},               b:{t:"RU",g:"F"} },
+    { a:{t:"RU",g:"E"},               b:{t:"RU",g:"I"} },
+    { a:{t:"W", g:"A"},               b:{t:"WC",pool:["C","E","F","H","I"]} },
+    { a:{t:"W", g:"L"},               b:{t:"WC",pool:["E","H","I","J","K"]} },
+    { a:{t:"W", g:"B"},               b:{t:"WC",pool:["E","F","G","I","J"]} },
+    { a:{t:"W", g:"J"},               b:{t:"RU",g:"H"} },
+    { a:{t:"W", g:"K"},               b:{t:"WC",pool:["D","E","I","J","L"]} },
+    { a:{t:"RU",g:"D"},               b:{t:"RU",g:"G"} },
+  ],
+};
+
+function rankGroup(letter, status) {
+  return GROUPS[letter]
+    .map(name => ({ name, s: status[name] }))
+    .sort((a,b) => b.s.pts-a.s.pts || (b.s.gf-b.s.ga)-(a.s.gf-a.s.ga) || b.s.gf-a.s.gf || a.name.localeCompare(b.name));
+}
+
+// Resolves a bracket slot to a concrete team using current (possibly
+// incomplete) group standings. `projected` flags that the group hasn't
+// finished all 3 matches yet, so this slot could still change.
+function resolveSlot(slot, status) {
+  if (slot.t === "WC") return null;
+  const ranked = rankGroup(slot.g, status);
+  const idx = slot.t === "W" ? 0 : 1;
+  const row = ranked[idx];
+  const team = TEAMS.find(t => t.name === row.name);
+  const projected = ranked.some(r => r.s.p < 3);
+  return { team, projected };
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
   const [tab, setTab]               = useState("fixtures");
@@ -973,7 +1124,7 @@ function PoolDashboard() {
       {/* ── Tabs ── */}
       <div className="max-w-5xl mx-auto px-4 mt-4">
         <div className="flex gap-2 flex-wrap">
-          {[["board","LEADERBOARD"],["groups","GROUPS"],["fixtures","FIXTURES"],["teams","TEAMS"],["upsets","UPSETS"]].map(([id,label]) => (
+          {[["board","LEADERBOARD"],["groups","GROUPS"],["bracket","BRACKET"],["fixtures","FIXTURES"],["teams","TEAMS"],["upsets","UPSETS"]].map(([id,label]) => (
             <button key={id} onClick={()=>setTab(id)}
               style={{...disp,fontSize:14,fontWeight:600,letterSpacing:"0.1em",padding:"8px 18px",
                 borderRadius:6,cursor:"pointer",border:`1px solid ${tab===id?C.gold:C.line}`,
@@ -1140,6 +1291,13 @@ function PoolDashboard() {
             <span><span style={{color:C.green,fontWeight:700}}>1–2</span> auto-qualify · <span style={{color:C.gold,fontWeight:700}}>3rd</span> in best-thirds race</span>
             <span>ROI = locked payout ÷ bid (excludes random $1 draws)</span>
           </div>
+        </div>
+      )}
+
+      {/* ══ BRACKET ══ */}
+      {tab==="bracket" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <BracketPanel status={status} />
         </div>
       )}
 
