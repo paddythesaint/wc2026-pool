@@ -185,6 +185,59 @@ function RoiBadge({ team, st }) {
   );
 }
 
+// ─── Best 3rd-placed teams (live cross-group wildcard race) ──────────────────
+function ThirdPlaceTable({ status }) {
+  const rows = React.useMemo(() => getCurrentThirdPlace(status), [status]);
+  return (
+    <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+      <div className="px-3 py-2 flex items-center justify-between"
+        style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
+        <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>BEST 3RD-PLACED TEAMS</span>
+        <span style={{fontSize:10,color:C.mute}}>P W D L · +/- · GD · PTS</span>
+      </div>
+      {rows.map((r, idx) => {
+        const t = TEAMS.find(tm => tm.name === r.name);
+        const s = r.s;
+        const gd = s.gf - s.ga;
+        const qualifying = idx < 8;
+        return (
+          <div key={r.group} className="px-3 py-2 grid items-center"
+            style={{gridTemplateColumns:"14px minmax(0,1fr) auto 36px 30px auto",gap:6,
+              borderBottom:idx<rows.length-1?`1px solid ${C.line}`:"none",
+              borderLeft:`3px solid ${qualifying?C.green:"transparent"}`,
+              opacity:qualifying?1:0.55}}>
+            <span style={{...disp,fontSize:12,fontWeight:700,color:qualifying?C.green:C.mute}}>{idx+1}</span>
+            <span className="truncate" style={{minWidth:0}}>
+              <span style={{fontSize:10,color:C.mute,marginRight:4}}>{r.group}</span>
+              {t && <span style={{marginRight:5}}><Flag f={t.flag} /></span>}
+              <span style={{fontSize:13,fontWeight:600}}>{r.name}</span>
+              {t && <span style={{fontSize:10,fontWeight:700,letterSpacing:"0.06em",
+                color:BIDDERS[t.owner].color,marginLeft:6}}>
+                {BIDDERS[t.owner].short}
+              </span>}
+            </span>
+            <span style={{fontSize:11,color:C.mute,fontVariantNumeric:"tabular-nums"}}>
+              {s.p>0?`${s.p} ${s.w} ${s.d} ${s.l}`:"0 0 0 0"}
+            </span>
+            <span style={{fontSize:11,color:C.mute,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>
+              {s.gf}-{s.ga}
+            </span>
+            <span style={{fontSize:11,color:C.mute,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>
+              {gd>0?`+${gd}`:gd}
+            </span>
+            <span style={{...disp,fontSize:15,fontWeight:700,color:C.text,textAlign:"right"}}>
+              {s.pts}
+            </span>
+          </div>
+        );
+      })}
+      <div className="px-3 py-2" style={{fontSize:10,color:C.mute,borderTop:`1px solid ${C.line}`}}>
+        <span style={{color:C.green,fontWeight:700}}>Top 8</span> advance to the Round of 32 · updates live as group matches finish · final 8 lock in once every group has played all 3 games.
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -709,6 +762,27 @@ function applyGroupStageElimination(status) {
   }
 }
 
+// Live "best 3rd-placed teams" cross-group leaderboard (mirrors the official
+// in-tournament table) - whoever currently sits 3rd in their own group, win
+// or lose, ranked head-to-head against the other 11 groups' current 3rd-place
+// teams. Unlike applyGroupStageElimination's final cutoff (which only locks
+// once every group has played all 3 matches), this updates continuously so
+// the race for the 8 wildcard spots is visible mid-group-stage too.
+function getCurrentThirdPlace(status) {
+  return Object.entries(GROUPS).map(([letter, names]) => {
+    const ranked = names
+      .map(name => ({ name, s: status[name] }))
+      .sort((a,b) => b.s.pts-a.s.pts || (b.s.gf-b.s.ga)-(a.s.gf-a.s.ga) || b.s.gf-a.s.gf || a.name.localeCompare(b.name));
+    const third = ranked[2];
+    return { group: letter, name: third.name, s: third.s };
+  }).sort((a,b) =>
+    b.s.pts-a.s.pts ||
+    (b.s.gf-b.s.ga)-(a.s.gf-a.s.ga) ||
+    b.s.gf-a.s.gf ||
+    a.name.localeCompare(b.name)
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
   const [tab, setTab]               = useState("fixtures");
@@ -1014,7 +1088,8 @@ function PoolDashboard() {
 
       {/* ══ GROUPS ══ */}
       {tab==="groups" && (
-        <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+          <ThirdPlaceTable status={status} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {Object.entries(GROUPS).map(([letter,members]) => {
               const ranked = members
