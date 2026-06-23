@@ -420,6 +420,71 @@ function QualificationHistoryPanel({ qualHistory }) {
   );
 }
 
+function TitleOddsHistoryPanel({ titleOddsHistory }) {
+  if (!titleOddsHistory || titleOddsHistory.length === 0) {
+    return (
+      <div style={{fontSize:11,color:C.mute}}>
+        Tracking aggregate tournament-winner odds by owner - check back after tomorrow's snapshot.
+      </div>
+    );
+  }
+
+  const owners = Object.keys(BIDDERS);
+  const maxProb = Math.max(0.1, ...titleOddsHistory.flatMap(h => owners.map(o => h.probs[o] || 0)));
+  const W = 600, H = 140, PAD = 4;
+
+  const fmtTime = (iso) => {
+    try {
+      return new Date(iso).toLocaleString("en-US", {
+        month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone:"America/New_York",
+      }) + " ET";
+    } catch { return iso; }
+  };
+  const pct = (v) => `${(v*100).toFixed(1)}%`;
+
+  const latest = titleOddsHistory[titleOddsHistory.length-1];
+  const prev = titleOddsHistory.length >= 2 ? titleOddsHistory[titleOddsHistory.length-2] : null;
+
+  return (
+    <div className="space-y-3">
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+        <div style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em",marginBottom:8}}>
+          AGGREGATE TITLE ODDS BY OWNER
+        </div>
+        {titleOddsHistory.length >= 2 && (
+          <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+            {owners.map(o => {
+              const pts = titleOddsHistory.map((h,i) => [
+                titleOddsHistory.length===1 ? 0 : (i/(titleOddsHistory.length-1))*(W-2*PAD)+PAD,
+                H-PAD - ((h.probs[o]||0)/maxProb)*(H-2*PAD),
+              ]);
+              const path = pts.map((p,i) => `${i===0?"M":"L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+              return <path key={o} d={path} fill="none" stroke={BIDDERS[o].color} strokeWidth="2"/>;
+            })}
+          </svg>
+        )}
+        <div className="flex flex-wrap gap-3 mt-2">
+          {owners.map(o => {
+            const cur = latest.probs[o] || 0;
+            const d = prev ? cur - (prev.probs[o] || 0) : 0;
+            return (
+              <span key={o} style={{fontSize:11,color:C.mute}}>
+                <span style={{color:BIDDERS[o].color,fontWeight:700}}>{BIDDERS[o].short}</span> {pct(cur)}
+                {prev && Math.abs(d) >= 0.001 && (
+                  <b style={{color:d>0?C.green:C.red,marginLeft:4}}>{d>0?"+":""}{(d*100).toFixed(1)}pp</b>
+                )}
+              </span>
+            );
+          })}
+        </div>
+        <div style={{fontSize:10,color:C.mute,marginTop:8}}>
+          Sourced from Polymarket's "World Cup Winner" market, summed across each owner's teams · snapshotted daily.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -1030,6 +1095,7 @@ function PoolDashboard() {
   const [h2h, setH2h]               = useState({});
   const [oddsHistory, setOddsHistory] = useState({});
   const [qualHistory, setQualHistory] = useState([]);
+  const [titleOddsHistory, setTitleOddsHistory] = useState([]);
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
@@ -1100,6 +1166,17 @@ function PoolDashboard() {
   useEffect(() => {
     const run = () => fetch(`data/qualification_history.json?t=${Date.now()}`)
       .then(r => r.json()).then(setQualHistory).catch(() => {});
+    run();
+    const id = setInterval(run, 300000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Tournament title-odds history is snapshotted once a day (~11am ET) by a
+  // separate GitHub Action - re-fetching every 5 min is harmless overkill,
+  // just kept consistent with the other history fetchers.
+  useEffect(() => {
+    const run = () => fetch(`data/title_odds_history.json?t=${Date.now()}`)
+      .then(r => r.json()).then(setTitleOddsHistory).catch(() => {});
     run();
     const id = setInterval(run, 300000);
     return () => clearInterval(id);
@@ -1399,6 +1476,7 @@ function PoolDashboard() {
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
           <BracketPanel status={status} />
           <QualificationHistoryPanel qualHistory={qualHistory} />
+          <TitleOddsHistoryPanel titleOddsHistory={titleOddsHistory} />
         </div>
       )}
 

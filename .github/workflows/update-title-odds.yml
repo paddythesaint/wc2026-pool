@@ -1,0 +1,38 @@
+name: Update Title Odds
+
+on:
+  schedule:
+    # 15:00 UTC = 11am ET during the tournament's June-July window (EDT, UTC-4).
+    - cron: "0 15 * * *"
+  workflow_dispatch:   # manual trigger from the Actions tab
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Snapshot tournament title odds
+        run: python scripts/track_title_odds.py
+
+      - name: Commit & push if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/title_odds_history.json
+          if git diff --staged --quiet; then
+            echo "Title odds unchanged — no commit needed"
+          else
+            git commit -m "chore: update title odds $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin main
+            git push
+          fi
