@@ -444,6 +444,7 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
 
   const latest = titleOddsHistory[titleOddsHistory.length-1];
   const prev = titleOddsHistory.length >= 2 ? titleOddsHistory[titleOddsHistory.length-2] : null;
+  const [expanded, setExpanded] = React.useState(null);
 
   return (
     <div className="space-y-3">
@@ -468,17 +469,46 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
             const cur = latest.probs[o] || 0;
             const d = prev ? cur - (prev.probs[o] || 0) : 0;
             return (
-              <span key={o} style={{fontSize:11,color:C.mute}}>
+              <span key={o} onClick={() => setExpanded(expanded===o ? null : o)}
+                style={{fontSize:11,color:C.mute,cursor: latest.teams ? "pointer" : "default"}}>
                 <span style={{color:BIDDERS[o].color,fontWeight:700}}>{BIDDERS[o].short}</span> {pct(cur)}
                 {prev && Math.abs(d) >= 0.001 && (
                   <b style={{color:d>0?C.green:C.red,marginLeft:4}}>{d>0?"+":""}{(d*100).toFixed(1)}pp</b>
                 )}
+                {latest.teams && <span style={{marginLeft:3,opacity:0.5}}>{expanded===o ? "▲" : "▼"}</span>}
               </span>
             );
           })}
         </div>
+
+        {expanded && latest.teams && (
+          <div style={{marginTop:8,padding:"8px 10px",background:"#0E1830",borderRadius:6,fontSize:11}}>
+            <div style={{color:C.mute,marginBottom:4}}>
+              {expanded}'s teams (Polymarket "Yes" price = implied win probability):
+            </div>
+            {Object.entries(latest.teams)
+              .filter(([team]) => TEAMS.find(t => t.name===team)?.owner === expanded)
+              .sort((a,b) => b[1]-a[1])
+              .map(([team,prob]) => (
+                <div key={team} className="flex justify-between" style={{padding:"2px 0"}}>
+                  <span>{team}</span>
+                  <span style={{color:C.text}}>{pct(prob)}</span>
+                </div>
+              ))}
+            <div className="flex justify-between" style={{borderTop:`1px solid ${C.line}`,marginTop:4,paddingTop:4,fontWeight:700}}>
+              <span>Sum = {expanded}'s aggregate</span>
+              <span>{pct(latest.probs[expanded]||0)}</span>
+            </div>
+          </div>
+        )}
+
         <div style={{fontSize:10,color:C.mute,marginTop:8}}>
-          Sourced from Polymarket's "World Cup Winner" market, summed across each owner's teams · snapshotted daily.
+          <b>How this is calculated:</b> Polymarket's "World Cup Winner" market has one Yes/No
+          contract per team. A contract's Yes price (0-1) is the market's live implied probability
+          of that team winning the tournament - e.g. a $0.20 price means traders price in a 20%
+          chance. Each owner's % is just the sum of their own teams' prices (valid since "team X
+          wins" outcomes are mutually exclusive) - click an owner above to see the per-team prices
+          behind their number. Snapshotted once daily (~11am ET) once Matchday 2 wraps up.
         </div>
       </div>
     </div>
