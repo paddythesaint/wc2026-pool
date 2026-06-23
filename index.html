@@ -515,6 +515,129 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
   );
 }
 
+function PayoutProjectionPanel({ status, groupSchedule, latestTeamPrices, runs = 6000 }) {
+  const [overrides, setOverrides] = React.useState(loadOverrides);
+  const [openOwner, setOpenOwner] = React.useState(null);
+
+  const setMultiplier = (team, mult) => {
+    const next = { ...overrides, [team]: mult };
+    if (mult === 1) delete next[team];
+    setOverrides(next);
+    saveOverrides(next);
+  };
+  const resetAll = () => { setOverrides({}); saveOverrides({}); };
+
+  const summary = React.useMemo(() => {
+    if (!groupSchedule || groupSchedule.length === 0 || !latestTeamPrices) return null;
+    const strengthOf = makeStrengthOf(latestTeamPrices, overrides);
+    const ownerPayouts = runPayoutSimulations(status, groupSchedule, strengthOf, runs);
+    return summarizePayouts(ownerPayouts);
+  }, [status, groupSchedule, latestTeamPrices, overrides, runs]);
+
+  if (!summary) {
+    return (
+      <div style={{fontSize:11,color:C.mute}}>
+        Loading the group-stage schedule needed to run payout projections…
+      </div>
+    );
+  }
+
+  const maxMean = Math.max(1, ...Object.values(summary).map(s => s.p75));
+  const owners = Object.keys(BIDDERS).sort((a, b) => summary[b].mean - summary[a].mean);
+  const overrideCount = Object.keys(overrides).length;
+
+  return (
+    <div className="space-y-3">
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+        <div className="flex items-center justify-between" style={{marginBottom:8}}>
+          <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>
+            PROJECTED PAYOUT BY OWNER
+          </span>
+          <span style={{fontSize:10,color:C.mute}}>{runs.toLocaleString()} simulated tournaments</span>
+        </div>
+
+        {owners.map(o => {
+          const s = summary[o];
+          return (
+            <div key={o} className="mb-3">
+              <div className="flex items-baseline justify-between">
+                <span style={{fontSize:12,fontWeight:700,color:BIDDERS[o].color}}>{o}</span>
+                <span style={{fontSize:11,color:C.mute}}>
+                  expected <b style={{color:C.text}}>${s.mean.toFixed(0)}</b> · most likely <b style={{color:C.gold}}>${s.median.toFixed(0)}</b>
+                </span>
+              </div>
+              <div style={{position:"relative",height:10,background:"#0E1830",borderRadius:5,marginTop:4}}>
+                <div style={{position:"absolute",left:`${s.p25/maxMean*100}%`,width:`${(s.p75-s.p25)/maxMean*100}%`,
+                  height:"100%",background:BIDDERS[o].color,opacity:0.35,borderRadius:5}} />
+                <div style={{position:"absolute",left:`${s.median/maxMean*100}%`,width:2,height:"100%",background:BIDDERS[o].color}} />
+              </div>
+              <div style={{fontSize:9,color:C.mute,marginTop:2}}>
+                p25-p75 range: ${s.p25.toFixed(0)} - ${s.p75.toFixed(0)}
+              </div>
+            </div>
+          );
+        })}
+
+        <div style={{fontSize:10,color:C.mute,marginTop:8}}>
+          <b>How this is calculated:</b> a Monte Carlo simulation - each team's strength is its
+          latest Polymarket title-win price, used in a Bradley-Terry model (P(A beats B) ≈
+          strength_A / (strength_A+strength_B)) with a draw chance in group matches only. We
+          replay the remaining group matches and the entire knockout bracket {runs.toLocaleString()}
+          {" "}times and tally each owner's $ payout every time. "Expected" is the average across
+          all runs; "most likely" is the median (the typical single outcome); the bar is the
+          middle 50% of outcomes (p25-p75).
+        </div>
+      </div>
+
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+        <div className="flex items-center justify-between">
+          <span style={{...disp,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>
+            YOUR LOCAL OVERRIDES{overrideCount > 0 ? ` (${overrideCount})` : ""}
+          </span>
+          {overrideCount > 0 && (
+            <button onClick={resetAll} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer"}}>
+              Reset all
+            </button>
+          )}
+        </div>
+        <div style={{fontSize:10,color:C.mute,margin:"4px 0 8px"}}>
+          Disagree with how the market is pricing a team? Nudge its strength up or down before
+          it feeds the simulation above. This is stored only in your own browser - it's never
+          shared with other pool members or saved to the site.
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {owners.map(o => (
+            <span key={o} onClick={() => setOpenOwner(openOwner === o ? null : o)}
+              style={{fontSize:11,color:C.mute,cursor:"pointer"}}>
+              <span style={{color:BIDDERS[o].color,fontWeight:700}}>{BIDDERS[o].short}</span>
+              <span style={{marginLeft:3,opacity:0.5}}>{openOwner === o ? "▲" : "▼"}</span>
+            </span>
+          ))}
+        </div>
+        {openOwner && (
+          <div style={{marginTop:8}}>
+            {TEAMS.filter(t => t.owner === openOwner).map(t => {
+              const mult = overrides[t.name] ?? 1;
+              return (
+                <div key={t.name} className="flex items-center justify-between" style={{padding:"3px 0",fontSize:11}}>
+                  <span>{t.flag} {t.name}</span>
+                  <span className="flex items-center gap-2">
+                    <button onClick={() => setMultiplier(t.name, Math.max(0.25, Math.round((mult-0.25)*100)/100))}
+                      style={{color:C.mute,background:"none",border:`1px solid ${C.line}`,borderRadius:4,width:20,cursor:"pointer"}}>−</button>
+                    <span style={{width:34,textAlign:"center",color:mult!==1?C.gold:C.mute}}>{mult.toFixed(2)}x</span>
+                    <button onClick={() => setMultiplier(t.name, Math.min(3, Math.round((mult+0.25)*100)/100))}
+                      style={{color:C.mute,background:"none",border:`1px solid ${C.line}`,borderRadius:4,width:20,cursor:"pointer"}}>+</button>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -1117,6 +1240,239 @@ function resolveSlot(slot, status) {
   return { team, projected };
 }
 
+// ─── Monte Carlo payout projection ────────────────────────────────────────────
+// Strength model: a team's Polymarket "World Cup Winner" Yes-price (from the
+// daily title-odds snapshot) is used as a Bradley-Terry strength score -
+// P(A beats B) ≈ strength_A/(strength_A+strength_B). Local override
+// multipliers (per-device, never shared/synced) let a player nudge a team's
+// strength up or down if they disagree with what the market is pricing in.
+const STRENGTH_FLOOR = 0.002;
+
+function makeStrengthOf(latestTeamPrices, overrides) {
+  return (name) => {
+    const base = Math.max(STRENGTH_FLOOR, latestTeamPrices?.[name] ?? STRENGTH_FLOOR);
+    const mult = overrides?.[name] ?? 1;
+    return Math.max(STRENGTH_FLOOR / 4, base * mult);
+  };
+}
+
+const GROUP_BASE_DRAW = 0.28;
+
+// Group matches can draw; knockout matches can't. `r` is A's Bradley-Terry win
+// share - draw odds peak (at GROUP_BASE_DRAW) when r≈0.5 and shrink as the
+// mismatch grows, floored at 0.18 so heavy favorites still can't fully rule a draw out.
+function simulateGroupMatch(a, b, strengthOf) {
+  const sa = strengthOf(a), sb = strengthOf(b);
+  const r = sa / (sa + sb);
+  const d = Math.min(GROUP_BASE_DRAW, Math.max(0.18, GROUP_BASE_DRAW - Math.abs(r - 0.5) * 0.6));
+  const x = Math.random();
+  if (x < d) return "draw";
+  return x < d + (1 - d) * r ? "a" : "b";
+}
+
+function makeProbWin(strengthOf) {
+  return (a, b) => {
+    const sa = strengthOf(a), sb = strengthOf(b);
+    return sa / (sa + sb);
+  };
+}
+
+// Randomly assigns the 8 qualifying wildcard (best 3rd-place) teams into
+// BRACKET_HALVES' 8 "WC" slots, respecting each slot's eligible group pool
+// where possible (falls back to any remaining team if the pool is exhausted -
+// a rare edge case given the pools overlap heavily).
+function assignWildcards(qualifiedThirds) {
+  const slots = [];
+  for (const half of [1, 2]) {
+    BRACKET_HALVES[half].forEach((m, idx) => {
+      if (m.a.t === "WC") slots.push({ half, idx, side: "a", pool: m.a.pool });
+      if (m.b.t === "WC") slots.push({ half, idx, side: "b", pool: m.b.pool });
+    });
+  }
+  for (let i = slots.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [slots[i], slots[j]] = [slots[j], slots[i]];
+  }
+  const remaining = [...qualifiedThirds];
+  const assignment = {};
+  for (const slot of slots) {
+    let candidates = remaining.filter(t => slot.pool.includes(t.group));
+    if (candidates.length === 0) candidates = remaining;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    assignment[`${slot.half}-${slot.idx}-${slot.side}`] = pick.name;
+    remaining.splice(remaining.indexOf(pick), 1);
+  }
+  return assignment;
+}
+
+function resolveHalfPairs(half, st, wcAssignment) {
+  return BRACKET_HALVES[half].map((m, idx) => {
+    const resolve = (slot, side) => {
+      if (slot.t === "WC") return wcAssignment[`${half}-${idx}-${side}`];
+      return rankGroup(slot.g, st)[slot.t === "W" ? 0 : 1].name;
+    };
+    return [resolve(m.a, "a"), resolve(m.b, "b")];
+  });
+}
+
+// Reduces an ordered list of 8 R32 winners down to a single finalist by
+// simulating R16→QF→SF (8→4→2→1), since BRACKET_HALVES only encodes the R32
+// round - deeper rounds are just generic adjacent-pair reduction within a half.
+function advanceHalf(teamNames, st, probWin) {
+  const rounds = ["R16", "QF", "SF"];
+  let current = teamNames;
+  let semifinalLoser = null;
+  for (const round of rounds) {
+    const next = [];
+    for (let i = 0; i < current.length; i += 2) {
+      const a = current[i], b = current[i + 1];
+      const aWins = Math.random() < probWin(a, b);
+      const winner = aWins ? a : b, loser = aWins ? b : a;
+      const outcome = KNOCKOUT_OUTCOME[round];
+      st[winner].st = outcome.win;
+      st[loser].st = outcome.lose;
+      next.push(winner);
+      if (round === "SF") semifinalLoser = loser;
+    }
+    current = next;
+  }
+  return { finalist: current[0], semifinalLoser };
+}
+
+// Runs one full random playout of the remaining group matches + entire
+// knockout bracket from the current real `status`, returning every team's
+// final stage (so FINAL_PAYOUT can be summed per owner).
+function simulateOnce(status, groupSchedule, strengthOf) {
+  const st = {};
+  for (const [name, s] of Object.entries(status)) st[name] = { ...s };
+
+  for (const fx of groupSchedule) {
+    if (fx.completed) continue;
+    const a = st[fx.a], b = st[fx.b];
+    if (!a || !b) continue;
+    const result = simulateGroupMatch(fx.a, fx.b, strengthOf);
+    a.p++; b.p++;
+    if (result === "draw") {
+      a.d++; b.d++; a.pts += 1; b.pts += 1; a.gf += 1; a.ga += 1; b.gf += 1; b.ga += 1;
+    } else {
+      const winner = result === "a" ? a : b, loser = result === "a" ? b : a;
+      winner.w++; winner.pts += 3; winner.gf += 2; winner.ga += 1;
+      loser.l++; loser.gf += 1; loser.ga += 2;
+    }
+  }
+
+  const thirdCandidates = [];
+  for (const letter of Object.keys(GROUPS)) {
+    const ranked = rankGroup(letter, st);
+    st[ranked[0].name].st = "R32";
+    st[ranked[1].name].st = "R32";
+    st[ranked[3].name].st = "EG";
+    const s3 = ranked[2].s;
+    thirdCandidates.push({ name: ranked[2].name, group: letter, pts: s3.pts, gd: s3.gf - s3.ga, gf: s3.gf });
+  }
+  thirdCandidates.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
+  const qualifiedThirds = thirdCandidates.slice(0, 8);
+  for (const t of thirdCandidates.slice(8)) st[t.name].st = "EG";
+  for (const t of qualifiedThirds) st[t.name].st = "R32";
+
+  const wcAssignment = assignWildcards(qualifiedThirds);
+  const probWin = makeProbWin(strengthOf);
+
+  const halfFinalists = {}, semiLosers = {};
+  for (const half of [1, 2]) {
+    const pairs = resolveHalfPairs(half, st, wcAssignment);
+    const r32Winners = pairs.map(([a, b]) => {
+      const aWins = Math.random() < probWin(a, b);
+      const winner = aWins ? a : b, loser = aWins ? b : a;
+      st[winner].st = "R16"; st[loser].st = "E32";
+      return winner;
+    });
+    const { finalist, semifinalLoser } = advanceHalf(r32Winners, st, probWin);
+    halfFinalists[half] = finalist;
+    semiLosers[half] = semifinalLoser;
+  }
+
+  const [f1, f2] = [halfFinalists[1], halfFinalists[2]];
+  const f1Wins = Math.random() < probWin(f1, f2);
+  st[f1Wins ? f1 : f2].st = "CH";
+  st[f1Wins ? f2 : f1].st = "RU";
+
+  const [s1, s2] = [semiLosers[1], semiLosers[2]];
+  const s1Wins = Math.random() < probWin(s1, s2);
+  st[s1Wins ? s1 : s2].st = "3RD";
+  st[s1Wins ? s2 : s1].st = "4TH";
+
+  return st;
+}
+
+function runPayoutSimulations(status, groupSchedule, strengthOf, n) {
+  const owners = Object.keys(BIDDERS);
+  const ownerPayouts = Object.fromEntries(owners.map(o => [o, []]));
+  for (let i = 0; i < n; i++) {
+    const st = simulateOnce(status, groupSchedule, strengthOf);
+    const totals = Object.fromEntries(owners.map(o => [o, 0]));
+    for (const t of TEAMS) totals[t.owner] += FINAL_PAYOUT[st[t.name].st] ?? 0;
+    for (const o of owners) ownerPayouts[o].push(totals[o]);
+  }
+  return ownerPayouts;
+}
+
+function percentile(sorted, p) {
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+function summarizePayouts(ownerPayouts) {
+  return Object.fromEntries(Object.entries(ownerPayouts).map(([o, vals]) => {
+    const sorted = [...vals].sort((a, b) => a - b);
+    const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
+    return [o, {
+      mean,
+      median: percentile(sorted, 0.5),
+      p25: percentile(sorted, 0.25),
+      p75: percentile(sorted, 0.75),
+    }];
+  }));
+}
+
+async function fetchGroupSchedule() {
+  const dates = [];
+  const start = TOURNAMENT_START_DATE;
+  const end = new Date("2026-06-28T00:00:00Z");
+  for (let d = new Date(start); d <= end; d = new Date(d.getTime() + 864e5)) {
+    dates.push(d.toISOString().slice(0, 10).replace(/-/g, ""));
+  }
+  const dayResults = await Promise.all(dates.map(d =>
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}&t=${Date.now()}`)
+      .then(r => r.json()).then(j => j.events || []).catch(() => [])
+  ));
+  const byId = new Map();
+  for (const events of dayResults) for (const ev of events) byId.set(ev.id, ev);
+  const fixtures = [];
+  for (const ev of byId.values()) {
+    const comp = ev.competitions?.[0]; if (!comp) continue;
+    if (!(ev.season?.slug || "").toLowerCase().includes("group")) continue;
+    const cs = comp.competitors || []; if (cs.length < 2) continue;
+    const home = cs.find(c => c.homeAway === "home") || cs[0];
+    const away = cs.find(c => c.homeAway === "away") || cs[1];
+    const A = findTeam(home.team?.displayName);
+    const B = findTeam(away.team?.displayName);
+    if (!A || !B) continue;
+    fixtures.push({ a: A.name, b: B.name, completed: !!comp.status?.type?.completed });
+  }
+  return fixtures;
+}
+
+const OVERRIDES_KEY = "wc26_strength_overrides_v1";
+function loadOverrides() {
+  try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; } catch { return {}; }
+}
+function saveOverrides(overrides) {
+  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides)); } catch {}
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
   const [tab, setTab]               = useState("fixtures");
@@ -1126,6 +1482,7 @@ function PoolDashboard() {
   const [oddsHistory, setOddsHistory] = useState({});
   const [qualHistory, setQualHistory] = useState([]);
   const [titleOddsHistory, setTitleOddsHistory] = useState([]);
+  const [groupSchedule, setGroupSchedule]       = useState([]);
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
@@ -1212,6 +1569,14 @@ function PoolDashboard() {
     return () => clearInterval(id);
   }, []);
 
+  // Full group-stage fixture list (played + still-to-play), needed by the
+  // payout-projection simulator to know exactly which matches remain. Fetched
+  // once - the schedule itself doesn't change, only which games are completed,
+  // and that's already reflected in `status` via the other live fetch above.
+  useEffect(() => {
+    fetchGroupSchedule().then(setGroupSchedule).catch(() => {});
+  }, []);
+
   useEffect(() => {
     const l = document.createElement("link");
     l.rel="stylesheet";
@@ -1225,6 +1590,11 @@ function PoolDashboard() {
   const allMatchday2Done = useMemo(
     () => TEAMS.every(t => (status[t.name]?.p || 0) >= 2),
     [status]
+  );
+
+  const latestTeamPrices = useMemo(
+    () => titleOddsHistory.length ? titleOddsHistory[titleOddsHistory.length-1].teams || null : null,
+    [titleOddsHistory]
   );
 
   const board = useMemo(() => {
@@ -1339,6 +1709,7 @@ function PoolDashboard() {
       <div className="max-w-5xl mx-auto px-4 mt-4">
         <div className="flex gap-2 flex-wrap">
           {[["board","LEADERBOARD"],["groups","GROUPS"],["bracket","BRACKET"],["fixtures","FIXTURES"],["teams","TEAMS"],["upsets","UPSETS"],
+            ["projections","PROJECTIONS"],
             ...(allMatchday2Done ? [["odds","TITLE ODDS"]] : [])].map(([id,label]) => (
             <button key={id} onClick={()=>setTab(id)}
               style={{...disp,fontSize:14,fontWeight:600,letterSpacing:"0.1em",padding:"8px 18px",
@@ -1693,6 +2064,13 @@ function PoolDashboard() {
           <div style={{fontSize:11,color:C.mute,marginTop:8}}>
             Upset = the actual result was less likely than not per the closing betting line · based on tracked odds, may not cover every match
           </div>
+        </div>
+      )}
+
+      {/* ══ PROJECTIONS ══ */}
+      {tab==="projections" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <PayoutProjectionPanel status={status} groupSchedule={groupSchedule} latestTeamPrices={latestTeamPrices} />
         </div>
       )}
 
