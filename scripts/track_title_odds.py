@@ -127,9 +127,15 @@ def main():
         if owner: owner_probs[owner] += prob
     owner_probs = {k: round(v, 4) for k, v in owner_probs.items()}
 
+    # Per-team prices are kept alongside the owner sums so the site can show
+    # exactly which teams' market prices a given owner's % is built from.
+    owned_team_probs = {
+        team: round(prob, 4) for team, prob in team_probs.items() if team in TEAM_OWNERS
+    }
+
     history = load_existing()
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    history.append({"t": now_iso, "probs": owner_probs})
+    history.append({"t": now_iso, "probs": owner_probs, "teams": owned_team_probs})
 
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
