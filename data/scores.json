@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-23T22:07:33.378233+00:00",
+  "updated": "2026-06-24T10:29:03.545442+00:00",
   "status": {
     "Algeria": {
       "p": 2,
@@ -74,19 +74,19 @@
       "st": "G"
     },
     "Colombia": {
-      "p": 1,
-      "w": 1,
+      "p": 2,
+      "w": 2,
       "d": 0,
       "l": 0,
-      "pts": 3,
+      "pts": 6,
       "st": "G"
     },
     "Croatia": {
-      "p": 1,
-      "w": 0,
+      "p": 2,
+      "w": 1,
       "d": 0,
       "l": 1,
-      "pts": 0,
+      "pts": 3,
       "st": "G"
     },
     "Curaçao": {
@@ -106,10 +106,10 @@
       "st": "G"
     },
     "DR Congo": {
-      "p": 1,
+      "p": 2,
       "w": 0,
       "d": 1,
-      "l": 0,
+      "l": 1,
       "pts": 1,
       "st": "G"
     },
@@ -258,10 +258,10 @@
       "st": "G"
     },
     "Panama": {
-      "p": 1,
+      "p": 2,
       "w": 0,
       "d": 0,
-      "l": 1,
+      "l": 2,
       "pts": 0,
       "st": "G"
     },
@@ -388,38 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 22",
-      "k": "",
-      "a": "Argentina",
-      "b": "Austria",
-      "s": "2-0",
-      "g": "Group J"
-    },
-    {
-      "d": "Jun 22",
-      "k": "",
-      "a": "France",
-      "b": "Iraq",
-      "s": "3-0",
-      "g": "Group I"
-    },
-    {
-      "d": "Jun 22",
-      "k": "",
-      "a": "Norway",
-      "b": "Senegal",
-      "s": "3-2",
-      "g": "Group I"
-    },
-    {
-      "d": "Jun 22",
-      "k": "",
-      "a": "Jordan",
-      "b": "Algeria",
-      "s": "1-2",
-      "g": "Group J"
-    },
-    {
       "d": "Jun 23",
       "k": "",
       "a": "Portugal",
@@ -437,29 +405,19 @@
     },
     {
       "d": "Jun 23",
-      "k": "7:00 PM ET",
+      "k": "",
       "a": "Panama",
       "b": "Croatia",
-      "s": "",
-      "g": "Group L",
-      "odds": {
-        "home": 0.13,
-        "draw": 0.21,
-        "away": 0.66
-      }
+      "s": "0-1",
+      "g": "Group L"
     },
     {
       "d": "Jun 23",
-      "k": "10:00 PM ET",
+      "k": "",
       "a": "Colombia",
       "b": "DR Congo",
-      "s": "",
-      "g": "Group K",
-      "odds": {
-        "home": 0.62,
-        "draw": 0.24,
-        "away": 0.14
-      }
+      "s": "1-0",
+      "g": "Group K"
     },
     {
       "d": "Jun 24",
@@ -482,9 +440,9 @@
       "s": "",
       "g": "Group B",
       "odds": {
-        "home": 0.41,
+        "home": 0.4,
         "draw": 0.31,
-        "away": 0.28
+        "away": 0.29
       }
     },
     {
@@ -495,8 +453,8 @@
       "s": "",
       "g": "Group C",
       "odds": {
-        "home": 0.82,
-        "draw": 0.13,
+        "home": 0.8,
+        "draw": 0.14,
         "away": 0.06
       }
     },
@@ -508,9 +466,9 @@
       "s": "",
       "g": "Group C",
       "odds": {
-        "home": 0.13,
-        "draw": 0.18,
-        "away": 0.69
+        "home": 0.1,
+        "draw": 0.17,
+        "away": 0.72
       }
     },
     {
@@ -534,9 +492,87 @@
       "s": "",
       "g": "Group A",
       "odds": {
-        "home": 0.19,
+        "home": 0.18,
         "draw": 0.24,
-        "away": 0.56
+        "away": 0.58
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "4:00 PM ET",
+      "a": "Curaçao",
+      "b": "Cote d'Ivoire",
+      "s": "",
+      "g": "Group E",
+      "odds": {
+        "home": 0.05,
+        "draw": 0.11,
+        "away": 0.83
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "4:00 PM ET",
+      "a": "Ecuador",
+      "b": "Germany",
+      "s": "",
+      "g": "Group E",
+      "odds": {
+        "home": 0.26,
+        "draw": 0.23,
+        "away": 0.51
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "7:00 PM ET",
+      "a": "Japan",
+      "b": "Sweden",
+      "s": "",
+      "g": "Group F",
+      "odds": {
+        "home": 0.51,
+        "draw": 0.27,
+        "away": 0.22
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "7:00 PM ET",
+      "a": "Tunisia",
+      "b": "Netherlands",
+      "s": "",
+      "g": "Group F",
+      "odds": {
+        "home": 0.05,
+        "draw": 0.11,
+        "away": 0.85
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "10:00 PM ET",
+      "a": "Paraguay",
+      "b": "Australia",
+      "s": "",
+      "g": "Group D",
+      "odds": {
+        "home": 0.32,
+        "draw": 0.44,
+        "away": 0.24
+      }
+    },
+    {
+      "d": "Jun 25",
+      "k": "10:00 PM ET",
+      "a": "Turkey",
+      "b": "United States",
+      "s": "",
+      "g": "Group D",
+      "odds": {
+        "home": 0.27,
+        "draw": 0.24,
+        "away": 0.49
       }
     }
   ],
@@ -549,10 +585,10 @@
     "Ben|Sandeep": [
       3,
       2,
-      2
+      3
     ],
     "Ben|Sunny": [
-      2,
+      3,
       1,
       2
     ],
