@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-25T17:34:03.276250+00:00",
+  "updated": "2026-06-25T23:01:10.033213+00:00",
   "status": {
     "Algeria": {
       "p": 2,
@@ -90,10 +90,10 @@
       "st": "G"
     },
     "Curaçao": {
-      "p": 2,
+      "p": 3,
       "w": 0,
       "d": 1,
-      "l": 1,
+      "l": 2,
       "pts": 1,
       "st": "G"
     },
@@ -114,11 +114,11 @@
       "st": "G"
     },
     "Ecuador": {
-      "p": 2,
-      "w": 0,
+      "p": 3,
+      "w": 1,
       "d": 1,
       "l": 1,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "Egypt": {
@@ -146,10 +146,10 @@
       "st": "G"
     },
     "Germany": {
-      "p": 2,
+      "p": 3,
       "w": 2,
       "d": 0,
-      "l": 0,
+      "l": 1,
       "pts": 6,
       "st": "G"
     },
@@ -186,11 +186,11 @@
       "st": "G"
     },
     "Cote d'Ivoire": {
-      "p": 2,
-      "w": 1,
+      "p": 3,
+      "w": 2,
       "d": 0,
       "l": 1,
-      "pts": 3,
+      "pts": 6,
       "st": "G"
     },
     "Japan": {
@@ -437,54 +437,44 @@
     },
     {
       "d": "Jun 25",
-      "k": "4:00 PM ET",
+      "k": "",
       "a": "Curaçao",
       "b": "Cote d'Ivoire",
-      "s": "",
-      "g": "Group E",
-      "odds": {
-        "home": 0.06,
-        "draw": 0.13,
-        "away": 0.81
-      }
+      "s": "0-2",
+      "g": "Group E"
     },
     {
       "d": "Jun 25",
-      "k": "4:00 PM ET",
+      "k": "",
       "a": "Ecuador",
       "b": "Germany",
-      "s": "",
-      "g": "Group E",
-      "odds": {
-        "home": 0.2,
-        "draw": 0.2,
-        "away": 0.6
-      }
+      "s": "2-1",
+      "g": "Group E"
     },
     {
       "d": "Jun 25",
-      "k": "7:00 PM ET",
+      "k": "LIVE",
       "a": "Japan",
       "b": "Sweden",
-      "s": "",
+      "s": "0-0",
       "g": "Group F",
       "odds": {
-        "home": 0.49,
+        "home": 0.4,
         "draw": 0.28,
-        "away": 0.23
+        "away": 0.32
       }
     },
     {
       "d": "Jun 25",
-      "k": "7:00 PM ET",
+      "k": "LIVE",
       "a": "Tunisia",
       "b": "Netherlands",
-      "s": "",
+      "s": "0-0",
       "g": "Group F",
       "odds": {
-        "home": 0.04,
-        "draw": 0.09,
-        "away": 0.87
+        "home": 0.05,
+        "draw": 0.11,
+        "away": 0.84
       }
     },
     {
@@ -495,9 +485,9 @@
       "s": "",
       "g": "Group D",
       "odds": {
-        "home": 0.36,
+        "home": 0.37,
         "draw": 0.42,
-        "away": 0.22
+        "away": 0.21
       }
     },
     {
@@ -508,9 +498,9 @@
       "s": "",
       "g": "Group D",
       "odds": {
-        "home": 0.25,
+        "home": 0.24,
         "draw": 0.23,
-        "away": 0.52
+        "away": 0.54
       }
     },
     {
@@ -522,8 +512,8 @@
       "g": "Group I",
       "odds": {
         "home": 0.19,
-        "draw": 0.22,
-        "away": 0.59
+        "draw": 0.21,
+        "away": 0.6
       }
     },
     {
@@ -534,8 +524,8 @@
       "s": "",
       "g": "Group I",
       "odds": {
-        "home": 0.78,
-        "draw": 0.14,
+        "home": 0.77,
+        "draw": 0.15,
         "away": 0.08
       }
     },
@@ -573,7 +563,7 @@
       "s": "",
       "g": "Group G",
       "odds": {
-        "home": 0.38,
+        "home": 0.39,
         "draw": 0.36,
         "away": 0.25
       }
@@ -596,7 +586,7 @@
     "Ben|Patrick": [
       2,
       3,
-      3
+      4
     ],
     "Ben|Sandeep": [
       4,
@@ -616,7 +606,7 @@
     "Patrick|Sunny": [
       1,
       3,
-      2
+      3
     ],
     "Sandeep|Sunny": [
       4,
