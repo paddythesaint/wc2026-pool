@@ -1829,10 +1829,9 @@ function PoolDashboard() {
           <ThirdPlaceTable status={status} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {Object.entries(GROUPS).map(([letter,members]) => {
-              const ranked = members
-                .map(name => ({team:TEAMS.find(t=>t.name===name), s:status[name]}))
-                .filter(r => r.team)
-                .sort((a,b) => b.s.pts-a.s.pts || b.s.w-a.s.w || a.team.name.localeCompare(b.team.name));
+              const ranked = rankGroup(letter, status)
+                .map(({name, s}) => ({team:TEAMS.find(t=>t.name===name), s}))
+                .filter(r => r.team);
               const anyPlayed = ranked.some(r => r.s.p>0);
               return (
                 <div key={letter} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
