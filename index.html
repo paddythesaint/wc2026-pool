@@ -515,7 +515,7 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
   );
 }
 
-function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, runs = 6000 }) {
+function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, payoutProjection, runs = 6000 }) {
   const [matchupOverrides, setMatchupOverrides] = React.useState(loadMatchupOverrides);
 
   const toggleOverride = (key, team) => {
@@ -545,11 +545,18 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
     return totals;
   }, [projected]);
 
-  const summary = React.useMemo(() => {
-    if (!groupSchedule || groupSchedule.length === 0 || !strengthOf) return null;
+  // Prefer the large nightly server-side simulation (run once after each
+  // day's matches finish - see scripts/run_payout_projection.js) over a live
+  // client-side run, falling back to the latter only until that first
+  // nightly run has landed.
+  const liveSummary = React.useMemo(() => {
+    if (payoutProjection || !groupSchedule || groupSchedule.length === 0 || !strengthOf) return null;
     const ownerPayouts = runPayoutSimulations(status, groupSchedule, strengthOf, runs);
     return summarizePayouts(ownerPayouts);
-  }, [status, groupSchedule, strengthOf, runs]);
+  }, [payoutProjection, status, groupSchedule, strengthOf, runs]);
+
+  const summary = payoutProjection ? payoutProjection.summary : liveSummary;
+  const simRuns = payoutProjection ? payoutProjection.runs : runs;
 
   if (!summary || !projected) {
     return (
@@ -596,7 +603,10 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
           <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>
             PROJECTED PAYOUT BY OWNER
           </span>
-          <span style={{fontSize:10,color:C.mute}}>{runs.toLocaleString()} simulated tournaments</span>
+          <span style={{fontSize:10,color:C.mute}}>
+            {simRuns.toLocaleString()} simulated tournaments
+            {payoutProjection && ` · updated ${new Date(payoutProjection.generated).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}`}
+          </span>
         </div>
 
         <div className="flex flex-wrap gap-3" style={{fontSize:9,color:C.mute,marginBottom:8}}>
@@ -1634,6 +1644,7 @@ function PoolDashboard() {
   const [oddsHistory, setOddsHistory] = useState({});
   const [qualHistory, setQualHistory] = useState([]);
   const [titleOddsHistory, setTitleOddsHistory] = useState([]);
+  const [payoutProjection, setPayoutProjection] = useState(null);
   const [groupSchedule, setGroupSchedule]       = useState([]);
   const [bracketView, setBracketView] = useState("live");
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
@@ -1717,6 +1728,17 @@ function PoolDashboard() {
   useEffect(() => {
     const run = () => fetch(`data/title_odds_history.json?t=${Date.now()}`)
       .then(r => r.json()).then(setTitleOddsHistory).catch(() => {});
+    run();
+    const id = setInterval(run, 300000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Payout-projection Monte Carlo is run server-side once a night (after that
+  // day's matches finish) rather than re-simulated client-side on every page
+  // load - re-fetching every 5 min just picks up the latest nightly run.
+  useEffect(() => {
+    const run = () => fetch(`data/payout_projection.json?t=${Date.now()}`)
+      .then(r => r.json()).then(setPayoutProjection).catch(() => {});
     run();
     const id = setInterval(run, 300000);
     return () => clearInterval(id);
@@ -2041,6 +2063,12 @@ function PoolDashboard() {
                   borderRadius:5,cursor:"pointer",border:`1px solid ${bracketView===id?C.gold:C.line}`,
                   background:bracketView===id?"#1A2438":"transparent",color:bracketView===id?C.gold:C.mute}}>
                 {label}
+                {id==="projected" && (
+                  <span style={{marginLeft:6,fontSize:9,fontWeight:700,letterSpacing:"0.05em",
+                    color:C.mute,border:`1px solid ${C.line}`,borderRadius:4,padding:"1px 4px",verticalAlign:"middle"}}>
+                    BETA
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -2050,7 +2078,7 @@ function PoolDashboard() {
               <QualificationHistoryPanel qualHistory={qualHistory} />
             </React.Fragment>
           ) : (
-            <ProjectedTournamentPanel status={status} groupSchedule={groupSchedule} latestTeamPrices={latestTeamPrices} />
+            <ProjectedTournamentPanel status={status} groupSchedule={groupSchedule} latestTeamPrices={latestTeamPrices} payoutProjection={payoutProjection} />
           )}
         </div>
       )}

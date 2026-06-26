@@ -1,0 +1,43 @@
+name: Update Payout Projection
+
+on:
+  schedule:
+    # 09:00 UTC = 5am ET / 2am PT - well after every match that day has
+    # finished (even late West Coast kickoffs), so the nightly run reflects
+    # a fully up-to-date day's results before the next day's games start.
+    - cron: "0 9 * * *"
+  workflow_dispatch:   # manual trigger from the Actions tab
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run payout projection simulation
+        run: node scripts/run_payout_projection.js
+
+      - name: Commit & push if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/payout_projection.json
+          if git diff --staged --quiet; then
+            echo "Payout projection unchanged — no commit needed"
+          else
+            git commit -m "chore: update payout projection $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin main
+            git push
+          fi
