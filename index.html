@@ -515,39 +515,113 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
   );
 }
 
-function PayoutProjectionPanel({ status, groupSchedule, latestTeamPrices, runs = 6000 }) {
-  const [overrides, setOverrides] = React.useState(loadOverrides);
-  const [openOwner, setOpenOwner] = React.useState(null);
+function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, runs = 6000 }) {
+  const [matchupOverrides, setMatchupOverrides] = React.useState(loadMatchupOverrides);
 
-  const setMultiplier = (team, mult) => {
-    const next = { ...overrides, [team]: mult };
-    if (mult === 1) delete next[team];
-    setOverrides(next);
-    saveOverrides(next);
+  const toggleOverride = (key, team) => {
+    const next = { ...matchupOverrides };
+    if (next[key] === team) delete next[key];
+    else next[key] = team;
+    setMatchupOverrides(next);
+    saveMatchupOverrides(next);
   };
-  const resetAll = () => { setOverrides({}); saveOverrides({}); };
+  const resetAll = () => { setMatchupOverrides({}); saveMatchupOverrides({}); };
+  const overrideCount = Object.keys(matchupOverrides).length;
+
+  const strengthOf = React.useMemo(
+    () => latestTeamPrices ? makeStrengthOf(latestTeamPrices, {}) : null,
+    [latestTeamPrices]
+  );
+
+  const projected = React.useMemo(
+    () => strengthOf ? buildProjectedBracket(status, strengthOf, matchupOverrides) : null,
+    [status, strengthOf, matchupOverrides]
+  );
+
+  const yourPayout = React.useMemo(() => {
+    if (!projected) return null;
+    const totals = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, 0]));
+    for (const t of TEAMS) totals[t.owner] += FINAL_PAYOUT[projected.stage[t.name]] ?? 0;
+    return totals;
+  }, [projected]);
 
   const summary = React.useMemo(() => {
-    if (!groupSchedule || groupSchedule.length === 0 || !latestTeamPrices) return null;
-    const strengthOf = makeStrengthOf(latestTeamPrices, overrides);
+    if (!groupSchedule || groupSchedule.length === 0 || !strengthOf) return null;
     const ownerPayouts = runPayoutSimulations(status, groupSchedule, strengthOf, runs);
     return summarizePayouts(ownerPayouts);
-  }, [status, groupSchedule, latestTeamPrices, overrides, runs]);
+  }, [status, groupSchedule, strengthOf, runs]);
 
-  if (!summary) {
+  if (!summary || !projected) {
     return (
       <div style={{fontSize:11,color:C.mute}}>
-        Loading the group-stage schedule needed to run payout projections…
+        Loading the group-stage schedule and title odds needed to run payout projections…
       </div>
     );
   }
 
-  const maxMean = Math.max(1, ...Object.values(summary).map(s => s.p75));
+  const maxMean = Math.max(1, ...Object.entries(summary).map(([o, s]) => Math.max(s.p75, yourPayout[o] || 0)));
   const owners = Object.keys(BIDDERS).sort((a, b) => summary[b].mean - summary[a].mean);
-  const overrideCount = Object.keys(overrides).length;
+
+  const TeamBox = ({ team, matchKey, isWinner }) => {
+    const forced = matchupOverrides[matchKey] === team;
+    return (
+      <div onClick={() => toggleOverride(matchKey, team)}
+        style={{
+          fontSize:10.5, padding:"3px 5px", cursor:"pointer", borderRadius:4, lineHeight:1.3,
+          background: isWinner ? "#16203A" : "transparent",
+          color: isWinner ? C.text : C.mute,
+          border: forced ? `1px solid ${C.gold}` : "1px solid transparent",
+          fontWeight: isWinner ? 700 : 400,
+        }}>
+        {team}
+      </div>
+    );
+  };
+  const Round = ({ matches, label }) => (
+    <div className="flex flex-col gap-2" style={{minWidth:118}}>
+      <div style={{fontSize:9,color:C.mute,letterSpacing:"0.1em",textAlign:"center"}}>{label}</div>
+      {matches.map(m => (
+        <div key={m.key} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:6,padding:4}}>
+          <TeamBox team={m.a} matchKey={m.key} isWinner={m.winner===m.a} />
+          <TeamBox team={m.b} matchKey={m.key} isWinner={m.winner===m.b} />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-3">
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+        <div className="flex items-center justify-between" style={{marginBottom:4}}>
+          <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>ODDS-BASED BRACKET</span>
+          {overrideCount > 0 && (
+            <button onClick={resetAll} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer"}}>
+              Reset {overrideCount} override{overrideCount>1?"s":""}
+            </button>
+          )}
+        </div>
+        <div style={{fontSize:10,color:C.mute,marginBottom:8}}>
+          Each matchup defaults to whichever team has the better title-win price. Click a team to force them through that matchup -
+          saved only in your browser, never shared with other pool members.
+        </div>
+
+        {[1,2].map(half => (
+          <div key={half} style={{marginBottom:10}}>
+            <div style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.1em",marginBottom:6,color:C.mute}}>HALF {half}</div>
+            <div className="flex gap-3 overflow-x-auto">
+              <Round matches={projected[`half${half}`].rounds[0]} label="ROUND OF 32" />
+              <Round matches={projected[`half${half}`].rounds[1]} label="ROUND OF 16" />
+              <Round matches={projected[`half${half}`].rounds[2]} label="QUARTERFINAL" />
+              <Round matches={projected[`half${half}`].rounds[3]} label="SEMIFINAL" />
+            </div>
+          </div>
+        ))}
+        <div className="flex gap-3">
+          <Round matches={[projected.thirdMatch]} label="3RD PLACE" />
+          <Round matches={[projected.finalMatch]} label="FINAL" />
+        </div>
+      </div>
+
       <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
         <div className="flex items-center justify-between" style={{marginBottom:8}}>
           <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>
@@ -556,20 +630,29 @@ function PayoutProjectionPanel({ status, groupSchedule, latestTeamPrices, runs =
           <span style={{fontSize:10,color:C.mute}}>{runs.toLocaleString()} simulated tournaments</span>
         </div>
 
+        <div className="flex flex-wrap gap-3" style={{fontSize:9,color:C.mute,marginBottom:8}}>
+          <span><span style={{display:"inline-block",width:8,height:8,background:C.text,opacity:0.5,marginRight:3}}/>median</span>
+          <span><span style={{display:"inline-block",width:8,height:8,background:C.gold,marginRight:3}}/>your bracket above</span>
+        </div>
+
         {owners.map(o => {
           const s = summary[o];
+          const mine = yourPayout[o];
           return (
             <div key={o} className="mb-3">
               <div className="flex items-baseline justify-between">
                 <span style={{fontSize:12,fontWeight:700,color:BIDDERS[o].color}}>{o}</span>
                 <span style={{fontSize:11,color:C.mute}}>
-                  expected <b style={{color:C.text}}>${s.mean.toFixed(0)}</b> · most likely <b style={{color:C.gold}}>${s.median.toFixed(0)}</b>
+                  expected <b style={{color:C.text}}>${s.mean.toFixed(0)}</b> · your bracket <b style={{color:C.gold}}>${mine}</b>
                 </span>
               </div>
-              <div style={{position:"relative",height:10,background:"#0E1830",borderRadius:5,marginTop:4}}>
+              <div style={{position:"relative",height:14,background:"#0E1830",borderRadius:5,marginTop:4}}>
                 <div style={{position:"absolute",left:`${s.p25/maxMean*100}%`,width:`${(s.p75-s.p25)/maxMean*100}%`,
                   height:"100%",background:BIDDERS[o].color,opacity:0.35,borderRadius:5}} />
-                <div style={{position:"absolute",left:`${s.median/maxMean*100}%`,width:2,height:"100%",background:BIDDERS[o].color}} />
+                <div style={{position:"absolute",left:`${s.median/maxMean*100}%`,width:2,height:"100%",background:C.text,opacity:0.5}} />
+                <div title={`Your overridden bracket: $${mine}`}
+                  style={{position:"absolute",left:`calc(${mine/maxMean*100}% - 4px)`,top:-2,width:0,height:0,
+                    borderLeft:"4px solid transparent",borderRight:"4px solid transparent",borderTop:`6px solid ${C.gold}`}} />
               </div>
               <div style={{fontSize:9,color:C.mute,marginTop:2}}>
                 p25-p75 range: ${s.p25.toFixed(0)} - ${s.p75.toFixed(0)}
@@ -579,60 +662,14 @@ function PayoutProjectionPanel({ status, groupSchedule, latestTeamPrices, runs =
         })}
 
         <div style={{fontSize:10,color:C.mute,marginTop:8}}>
-          <b>How this is calculated:</b> a Monte Carlo simulation - each team's strength is its
+          <b>How this is calculated:</b> the bars are a Monte Carlo simulation - each team's strength is its
           latest Polymarket title-win price, used in a Bradley-Terry model (P(A beats B) ≈
-          strength_A / (strength_A+strength_B)) with a draw chance in group matches only. We
-          replay the remaining group matches and the entire knockout bracket {runs.toLocaleString()}
-          {" "}times and tally each owner's $ payout every time. "Expected" is the average across
-          all runs; "most likely" is the median (the typical single outcome); the bar is the
-          middle 50% of outcomes (p25-p75).
+          strength_A / (strength_A+strength_B)) with a draw chance in group matches only. We replay the
+          remaining group matches and the entire knockout bracket {runs.toLocaleString()} times and tally each
+          owner's $ payout every time - the shaded bar is the middle 50% of those outcomes (p25-p75), the thin
+          line is the median. The gold triangle is the exact payout for the single bracket above (the model's
+          favorite at every matchup, or your override where you've clicked one) - not an average, one specific outcome.
         </div>
-      </div>
-
-      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
-        <div className="flex items-center justify-between">
-          <span style={{...disp,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>
-            YOUR LOCAL OVERRIDES{overrideCount > 0 ? ` (${overrideCount})` : ""}
-          </span>
-          {overrideCount > 0 && (
-            <button onClick={resetAll} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer"}}>
-              Reset all
-            </button>
-          )}
-        </div>
-        <div style={{fontSize:10,color:C.mute,margin:"4px 0 8px"}}>
-          Disagree with how the market is pricing a team? Nudge its strength up or down before
-          it feeds the simulation above. This is stored only in your own browser - it's never
-          shared with other pool members or saved to the site.
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {owners.map(o => (
-            <span key={o} onClick={() => setOpenOwner(openOwner === o ? null : o)}
-              style={{fontSize:11,color:C.mute,cursor:"pointer"}}>
-              <span style={{color:BIDDERS[o].color,fontWeight:700}}>{BIDDERS[o].short}</span>
-              <span style={{marginLeft:3,opacity:0.5}}>{openOwner === o ? "▲" : "▼"}</span>
-            </span>
-          ))}
-        </div>
-        {openOwner && (
-          <div style={{marginTop:8}}>
-            {TEAMS.filter(t => t.owner === openOwner).map(t => {
-              const mult = overrides[t.name] ?? 1;
-              return (
-                <div key={t.name} className="flex items-center justify-between" style={{padding:"3px 0",fontSize:11}}>
-                  <span>{t.flag} {t.name}</span>
-                  <span className="flex items-center gap-2">
-                    <button onClick={() => setMultiplier(t.name, Math.max(0.25, Math.round((mult-0.25)*100)/100))}
-                      style={{color:C.mute,background:"none",border:`1px solid ${C.line}`,borderRadius:4,width:20,cursor:"pointer"}}>−</button>
-                    <span style={{width:34,textAlign:"center",color:mult!==1?C.gold:C.mute}}>{mult.toFixed(2)}x</span>
-                    <button onClick={() => setMultiplier(t.name, Math.min(3, Math.round((mult+0.25)*100)/100))}
-                      style={{color:C.mute,background:"none",border:`1px solid ${C.line}`,borderRadius:4,width:20,cursor:"pointer"}}>+</button>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -1465,12 +1502,104 @@ async function fetchGroupSchedule() {
   return fixtures;
 }
 
-const OVERRIDES_KEY = "wc26_strength_overrides_v1";
-function loadOverrides() {
-  try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; } catch { return {}; }
+// ─── Deterministic odds-favorite bracket (click-to-override) ─────────────────
+// Distinct from the Monte Carlo engine above: instead of randomizing every
+// matchup thousands of times, this picks a single bracket - whichever team
+// has the better title-odds strength wins each matchup, unless the user has
+// clicked a specific override for that exact matchup (identified by a stable
+// round/half/index key, independent of which teams actually land there).
+function pickWinner(key, a, b, strengthOf, matchupOverrides) {
+  const forced = matchupOverrides[key];
+  if (forced === a || forced === b) return forced;
+  return strengthOf(a) >= strengthOf(b) ? a : b;
 }
-function saveOverrides(overrides) {
-  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides)); } catch {}
+
+function buildProjectedBracket(status, strengthOf, matchupOverrides) {
+  // Group-stage qualification mirrors the live Bracket tab (current
+  // standings, "projected" if a group isn't finished) - the odds model only
+  // drives the knockout rounds, which the live tab doesn't project at all.
+  const top8 = getCurrentThirdPlace(status).slice(0, 8);
+  const top8Names = new Set(top8.map(r => r.name));
+
+  const wcSlots = [];
+  for (const half of [1, 2]) {
+    BRACKET_HALVES[half].forEach((m, idx) => {
+      if (m.a.t === "WC") wcSlots.push({ half, idx, side: "a", pool: m.a.pool });
+      if (m.b.t === "WC") wcSlots.push({ half, idx, side: "b", pool: m.b.pool });
+    });
+  }
+  // FIFA's actual wildcard-to-slot assignment isn't knowable until the full
+  // field is set, so for a single concrete bracket we greedily seat the
+  // strongest qualifying thirds into their eligible slots first.
+  const remainingThirds = [...top8].sort((x, y) => strengthOf(y.name) - strengthOf(x.name));
+  const wcAssignment = {};
+  for (const slot of wcSlots) {
+    if (remainingThirds.length === 0) break;
+    let i = remainingThirds.findIndex(r => slot.pool.includes(r.group));
+    if (i === -1) i = 0;
+    wcAssignment[`${slot.half}-${slot.idx}-${slot.side}`] = remainingThirds.splice(i, 1)[0].name;
+  }
+  const resolveTeam = (slot, half, idx, side) =>
+    slot.t === "WC" ? wcAssignment[`${half}-${idx}-${side}`] : rankGroup(slot.g, status)[slot.t === "W" ? 0 : 1].name;
+
+  function buildHalf(half) {
+    const r32 = BRACKET_HALVES[half].map((m, idx) => {
+      const a = resolveTeam(m.a, half, idx, "a");
+      const b = resolveTeam(m.b, half, idx, "b");
+      const key = `R32-${half}-${idx}`;
+      return { key, round: "R32", a, b, winner: pickWinner(key, a, b, strengthOf, matchupOverrides) };
+    });
+    const rounds = [r32];
+    let teams = r32.map(m => m.winner);
+    for (const roundName of ["R16", "QF", "SF"]) {
+      const matches = [];
+      for (let i = 0; i < teams.length; i += 2) {
+        const key = `${roundName}-${half}-${i / 2}`;
+        const a = teams[i], b = teams[i + 1];
+        matches.push({ key, round: roundName, a, b, winner: pickWinner(key, a, b, strengthOf, matchupOverrides) });
+      }
+      rounds.push(matches);
+      teams = matches.map(m => m.winner);
+    }
+    return { rounds, finalist: teams[0] };
+  }
+
+  const half1 = buildHalf(1), half2 = buildHalf(2);
+  const semifinalLoser = (half) => {
+    const sf = half.rounds[3][0];
+    return sf.winner === sf.a ? sf.b : sf.a;
+  };
+  const s1 = semifinalLoser(half1), s2 = semifinalLoser(half2);
+
+  const finalMatch = { key: "FINAL", round: "FINAL", a: half1.finalist, b: half2.finalist,
+    winner: pickWinner("FINAL", half1.finalist, half2.finalist, strengthOf, matchupOverrides) };
+  const thirdMatch = { key: "THIRD", round: "3RD_PLACE", a: s1, b: s2,
+    winner: pickWinner("THIRD", s1, s2, strengthOf, matchupOverrides) };
+
+  const stage = {};
+  for (const letter of Object.keys(GROUPS)) {
+    const ranked = rankGroup(letter, status);
+    stage[ranked[3].name] = "EG";
+    if (!top8Names.has(ranked[2].name)) stage[ranked[2].name] = "EG";
+  }
+  for (const round of [...half1.rounds, ...half2.rounds, [finalMatch], [thirdMatch]]) {
+    for (const m of round) {
+      const outcome = KNOCKOUT_OUTCOME[m.round];
+      const loser = m.winner === m.a ? m.b : m.a;
+      stage[m.winner] = outcome.win;
+      stage[loser] = outcome.lose;
+    }
+  }
+
+  return { half1, half2, finalMatch, thirdMatch, champion: finalMatch.winner, stage, wcAssignment };
+}
+
+const MATCHUP_OVERRIDES_KEY = "wc26_bracket_matchup_overrides_v1";
+function loadMatchupOverrides() {
+  try { return JSON.parse(localStorage.getItem(MATCHUP_OVERRIDES_KEY)) || {}; } catch { return {}; }
+}
+function saveMatchupOverrides(overrides) {
+  try { localStorage.setItem(MATCHUP_OVERRIDES_KEY, JSON.stringify(overrides)); } catch {}
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -1483,6 +1612,7 @@ function PoolDashboard() {
   const [qualHistory, setQualHistory] = useState([]);
   const [titleOddsHistory, setTitleOddsHistory] = useState([]);
   const [groupSchedule, setGroupSchedule]       = useState([]);
+  const [bracketView, setBracketView] = useState("live");
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
   const [fixturesLive, setFixturesLive] = useState(false);
   const [ownerFilter, setOwnerFilter] = useState("All");
@@ -1882,8 +2012,24 @@ function PoolDashboard() {
       {/* ══ BRACKET ══ */}
       {tab==="bracket" && (
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
-          <BracketPanel status={status} />
-          <QualificationHistoryPanel qualHistory={qualHistory} />
+          <div className="flex gap-2">
+            {[["live","LIVE RESULTS"],["projected","PROJECTED"]].map(([id,label]) => (
+              <button key={id} onClick={()=>setBracketView(id)}
+                style={{fontSize:11,fontWeight:600,letterSpacing:"0.08em",padding:"5px 12px",
+                  borderRadius:5,cursor:"pointer",border:`1px solid ${bracketView===id?C.gold:C.line}`,
+                  background:bracketView===id?"#1A2438":"transparent",color:bracketView===id?C.gold:C.mute}}>
+                {label}
+              </button>
+            ))}
+          </div>
+          {bracketView==="live" ? (
+            <React.Fragment>
+              <BracketPanel status={status} />
+              <QualificationHistoryPanel qualHistory={qualHistory} />
+            </React.Fragment>
+          ) : (
+            <ProjectedTournamentPanel status={status} groupSchedule={groupSchedule} latestTeamPrices={latestTeamPrices} />
+          )}
         </div>
       )}
 
@@ -2063,13 +2209,6 @@ function PoolDashboard() {
           <div style={{fontSize:11,color:C.mute,marginTop:8}}>
             Upset = the actual result was less likely than not per the closing betting line · based on tracked odds, may not cover every match
           </div>
-        </div>
-      )}
-
-      {/* ══ PROJECTIONS ══ */}
-      {tab==="projections" && (
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <PayoutProjectionPanel status={status} groupSchedule={groupSchedule} latestTeamPrices={latestTeamPrices} />
         </div>
       )}
 
