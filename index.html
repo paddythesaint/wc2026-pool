@@ -534,8 +534,8 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
   );
 
   const projected = React.useMemo(
-    () => strengthOf ? buildProjectedBracket(status, strengthOf, matchupOverrides) : null,
-    [status, strengthOf, matchupOverrides]
+    () => strengthOf ? buildProjectedBracket(status, groupSchedule, strengthOf, matchupOverrides) : null,
+    [status, groupSchedule, strengthOf, matchupOverrides]
   );
 
   const yourPayout = React.useMemo(() => {
@@ -1514,10 +1514,33 @@ function pickWinner(key, a, b, strengthOf, matchupOverrides) {
   return strengthOf(a) >= strengthOf(b) ? a : b;
 }
 
-function buildProjectedBracket(status, strengthOf, matchupOverrides) {
-  // Group-stage qualification mirrors the live Bracket tab (current
-  // standings, "projected" if a group isn't finished) - the odds model only
-  // drives the knockout rounds, which the live tab doesn't project at all.
+// Resolves every still-unplayed group match by chalk (no draws - whoever has
+// the better title-odds strength wins 2-1) so the odds-favorite bracket's
+// group-stage qualifiers are decided by the same "favorite always wins" logic
+// as the knockout rounds, instead of freezing on a part-played group's
+// current, still-changing standings.
+function projectGroupStageChalk(status, groupSchedule, strengthOf) {
+  const st = {};
+  for (const [name, s] of Object.entries(status)) st[name] = { ...s };
+  if (!groupSchedule) return st;
+  for (const fx of groupSchedule) {
+    if (fx.completed) continue;
+    const a = st[fx.a], b = st[fx.b];
+    if (!a || !b) continue;
+    const aWins = strengthOf(fx.a) >= strengthOf(fx.b);
+    const winner = aWins ? a : b, loser = aWins ? b : a;
+    winner.p++; loser.p++;
+    winner.w++; winner.pts += 3; winner.gf += 2; winner.ga += 1;
+    loser.l++; loser.gf += 1; loser.ga += 2;
+  }
+  return st;
+}
+
+function buildProjectedBracket(status, groupSchedule, strengthOf, matchupOverrides) {
+  status = projectGroupStageChalk(status, groupSchedule, strengthOf);
+  // Qualification uses the chalk-projected group standings above, so an
+  // unfinished group's qualifiers are decided by the same odds-favorite
+  // logic as the knockout rounds rather than freezing mid-group.
   const top8 = getCurrentThirdPlace(status).slice(0, 8);
   const top8Names = new Set(top8.map(r => r.name));
 
