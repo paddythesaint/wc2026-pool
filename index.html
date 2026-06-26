@@ -562,12 +562,6 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
   const maxMean = Math.max(1, ...Object.entries(summary).map(([o, s]) => Math.max(s.p75, yourPayout[o] || 0)));
   const owners = Object.keys(BIDDERS).sort((a, b) => summary[b].mean - summary[a].mean);
 
-  const spentByOwner = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, 0]));
-  for (const t of TEAMS) spentByOwner[t.owner] += t.bid;
-  const projectedOwners = Object.keys(BIDDERS)
-    .map(o => ({ name: o, payout: yourPayout[o], net: yourPayout[o] - spentByOwner[o] }))
-    .sort((a, b) => b.payout - a.payout);
-
   const TeamBox = ({ team, matchKey, isWinner }) => {
     const forced = matchupOverrides[matchKey] === team;
     return (
@@ -597,25 +591,6 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {projectedOwners.map((o, i) => (
-          <div key={o.name} style={{background:C.panel,border:`1px solid ${C.line}`,
-            borderLeft:`4px solid ${BIDDERS[o.name].color}`,borderRadius:6,padding:"8px 12px"}}>
-            <div className="flex items-center justify-between">
-              <span style={{...disp,fontSize:13,fontWeight:600,letterSpacing:"0.08em"}}>
-                <span style={{color:C.mute}}>{i+1}</span>&nbsp;{o.name.toUpperCase()}
-              </span>
-            </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span style={{...disp,fontSize:20,fontWeight:700,color:o.net>=0?C.green:C.text}}>
-                {o.net>=0?`+$${o.net}`:`−$${Math.abs(o.net)}`}
-              </span>
-              <span style={{fontSize:10,color:C.gold}}>${o.payout} this bracket</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
         <div className="flex items-center justify-between" style={{marginBottom:4}}>
           <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>ODDS-BASED BRACKET</span>
