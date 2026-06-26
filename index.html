@@ -592,37 +592,6 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
   return (
     <div className="space-y-3">
       <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
-        <div className="flex items-center justify-between" style={{marginBottom:4}}>
-          <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>ODDS-BASED BRACKET</span>
-          {overrideCount > 0 && (
-            <button onClick={resetAll} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer"}}>
-              Reset {overrideCount} override{overrideCount>1?"s":""}
-            </button>
-          )}
-        </div>
-        <div style={{fontSize:10,color:C.mute,marginBottom:8}}>
-          Each matchup defaults to whichever team has the better title-win price. Click a team to force them through that matchup -
-          saved only in your browser, never shared with other pool members.
-        </div>
-
-        {[1,2].map(half => (
-          <div key={half} style={{marginBottom:10}}>
-            <div style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.1em",marginBottom:6,color:C.mute}}>HALF {half}</div>
-            <div className="flex gap-3 overflow-x-auto">
-              <Round matches={projected[`half${half}`].rounds[0]} label="ROUND OF 32" />
-              <Round matches={projected[`half${half}`].rounds[1]} label="ROUND OF 16" />
-              <Round matches={projected[`half${half}`].rounds[2]} label="QUARTERFINAL" />
-              <Round matches={projected[`half${half}`].rounds[3]} label="SEMIFINAL" />
-            </div>
-          </div>
-        ))}
-        <div className="flex gap-3">
-          <Round matches={[projected.thirdMatch]} label="3RD PLACE" />
-          <Round matches={[projected.finalMatch]} label="FINAL" />
-        </div>
-      </div>
-
-      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
         <div className="flex items-center justify-between" style={{marginBottom:8}}>
           <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>
             PROJECTED PAYOUT BY OWNER
@@ -632,7 +601,7 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
 
         <div className="flex flex-wrap gap-3" style={{fontSize:9,color:C.mute,marginBottom:8}}>
           <span><span style={{display:"inline-block",width:8,height:8,background:C.text,opacity:0.5,marginRight:3}}/>median</span>
-          <span><span style={{display:"inline-block",width:8,height:8,background:C.gold,marginRight:3}}/>your bracket above</span>
+          <span><span style={{display:"inline-block",width:8,height:8,background:C.gold,marginRight:3}}/>your bracket below</span>
         </div>
 
         {owners.map(o => {
@@ -667,8 +636,39 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, run
           strength_A / (strength_A+strength_B)) with a draw chance in group matches only. We replay the
           remaining group matches and the entire knockout bracket {runs.toLocaleString()} times and tally each
           owner's $ payout every time - the shaded bar is the middle 50% of those outcomes (p25-p75), the thin
-          line is the median. The gold triangle is the exact payout for the single bracket above (the model's
+          line is the median. The gold triangle is the exact payout for the single bracket below (the model's
           favorite at every matchup, or your override where you've clicked one) - not an average, one specific outcome.
+        </div>
+      </div>
+
+      <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"10px 14px"}}>
+        <div className="flex items-center justify-between" style={{marginBottom:4}}>
+          <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>ODDS-BASED BRACKET</span>
+          {overrideCount > 0 && (
+            <button onClick={resetAll} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer"}}>
+              Reset {overrideCount} override{overrideCount>1?"s":""}
+            </button>
+          )}
+        </div>
+        <div style={{fontSize:10,color:C.mute,marginBottom:8}}>
+          Each matchup defaults to whichever team has the better title-win price. Click a team to force them through that matchup -
+          saved only in your browser, never shared with other pool members.
+        </div>
+
+        {[1,2].map(half => (
+          <div key={half} style={{marginBottom:10}}>
+            <div style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.1em",marginBottom:6,color:C.mute}}>HALF {half}</div>
+            <div className="flex gap-3 overflow-x-auto">
+              <Round matches={projected[`half${half}`].rounds[0]} label="ROUND OF 32" />
+              <Round matches={projected[`half${half}`].rounds[1]} label="ROUND OF 16" />
+              <Round matches={projected[`half${half}`].rounds[2]} label="QUARTERFINAL" />
+              <Round matches={projected[`half${half}`].rounds[3]} label="SEMIFINAL" />
+            </div>
+          </div>
+        ))}
+        <div className="flex gap-3">
+          <Round matches={[projected.thirdMatch]} label="3RD PLACE" />
+          <Round matches={[projected.finalMatch]} label="FINAL" />
         </div>
       </div>
     </div>
