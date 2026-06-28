@@ -239,7 +239,7 @@ function ThirdPlaceTable({ status }) {
 }
 
 // ─── Round-of-32 bracket panel ─────────────────────────────────────────────────
-function BracketPanel({ status }) {
+function BracketPanel({ status, knockoutFixtures }) {
   const top8 = React.useMemo(() => getCurrentThirdPlace(status).slice(0, 8), [status]);
 
   const tally = React.useMemo(() => {
@@ -260,8 +260,23 @@ function BracketPanel({ status }) {
     return t;
   }, [status, top8]);
 
-  const SlotDisplay = ({ slot }) => {
+  const SlotDisplay = ({ slot, sibling }) => {
     if (slot.t === "WC") {
+      const siblingTeam = sibling ? resolveSlot(sibling, status)?.team : null;
+      const scheduled = siblingTeam ? knockoutFixtures?.[siblingTeam.name] : null;
+      const drawnTeam = scheduled?.round === "R32" ? TEAMS.find(t => t.name === scheduled.opponent) : null;
+      if (drawnTeam) {
+        return (
+          <div style={{fontSize:13}}>
+            <Flag f={drawnTeam.flag} />
+            <span style={{fontWeight:600,marginLeft:4}}>{drawnTeam.name}</span>
+            <span style={{fontSize:10,fontWeight:700,color:BIDDERS[drawnTeam.owner].color,marginLeft:6}}>
+              {BIDDERS[drawnTeam.owner].short}
+            </span>
+            <span style={{fontSize:9,color:C.mute,marginLeft:4}}>(drawn)</span>
+          </div>
+        );
+      }
       const candidates = top8.filter(r => slot.pool.includes(r.group));
       return (
         <div style={{fontSize:12,color:C.mute}}>
@@ -313,9 +328,9 @@ function BracketPanel({ status }) {
             {BRACKET_HALVES[half].map((m, idx) => (
               <div key={idx} className="px-3 py-2"
                 style={{borderBottom: idx < BRACKET_HALVES[half].length - 1 ? `1px solid ${C.line}` : "none"}}>
-                <SlotDisplay slot={m.a} />
+                <SlotDisplay slot={m.a} sibling={m.b} />
                 <div style={{fontSize:9,color:C.mute,margin:"3px 0"}}>vs</div>
-                <SlotDisplay slot={m.b} />
+                <SlotDisplay slot={m.b} sibling={m.a} />
               </div>
             ))}
           </div>
@@ -324,9 +339,8 @@ function BracketPanel({ status }) {
 
       <div style={{fontSize:10,color:C.mute}}>
         Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
-        The 8 wildcard berths go to the best 3rd-place teams, but FIFA only finalizes which specific group's 3rd-place team lands in which
-        wildcard match once the full field of advancing thirds is set - "possible" lists current top-8 third-place teams whose group is
-        eligible for that slot.
+        The 8 wildcard berths go to the best 3rd-place teams; once FIFA's official Round-of-32 draw is published, the actual opponent appears
+        marked <b>(drawn)</b> - until then, "possible" lists current top-8 third-place teams whose group is eligible for that slot.
       </div>
     </div>
   );
@@ -1077,6 +1091,43 @@ async function fetchAllEspnEvents() {
   return [...byId.values()];
 }
 
+// Once group standings are final, FIFA's official Round-of-32 schedule (who
+// plays whom) already exists in ESPN's data even before kickoff - this looks
+// ahead ~10 days to pick up those scheduled-but-not-yet-played knockout
+// fixtures, so a "wildcard" bracket slot's real opponent can be shown as soon
+// as it's been drawn, instead of just listing the pool of possible teams.
+async function fetchKnockoutFixtures() {
+  const dates = [];
+  const start = new Date(Date.now() - 864e5);
+  const end = new Date(Date.now() + 864e5 * 10);
+  for (let d = new Date(start); d <= end; d = new Date(d.getTime()+864e5)) {
+    dates.push(d.toISOString().slice(0,10).replace(/-/g,""));
+  }
+  const dayResults = await Promise.all(dates.map(d =>
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}&t=${Date.now()}`)
+      .then(r => r.json()).then(j => j.events || []).catch(() => [])
+  ));
+  const byId = new Map();
+  for (const events of dayResults) for (const ev of events) byId.set(ev.id, ev);
+
+  const map = {};
+  for (const ev of byId.values()) {
+    const comp = ev.competitions?.[0]; if (!comp) continue;
+    const round = detectKnockoutRound(ev, comp);
+    if (!round) continue;
+    const cs = comp.competitors || []; if (cs.length < 2) continue;
+    const home = cs.find(c => c.homeAway === "home") || cs[0];
+    const away = cs.find(c => c.homeAway === "away") || cs[1];
+    const A = findTeam(home.team?.displayName);
+    const B = findTeam(away.team?.displayName);
+    if (!A || !B) continue;
+    const completed = !!comp.status?.type?.completed;
+    map[A.name] = { opponent: B.name, round, completed };
+    map[B.name] = { opponent: A.name, round, completed };
+  }
+  return map;
+}
+
 function computeStandingsAndH2H(events) {
   const status = blankStatus();
   const h2h = blankH2H();
@@ -1645,6 +1696,7 @@ function PoolDashboard() {
   const [qualHistory, setQualHistory] = useState([]);
   const [titleOddsHistory, setTitleOddsHistory] = useState([]);
   const [payoutProjection, setPayoutProjection] = useState(null);
+  const [knockoutFixtures, setKnockoutFixtures] = useState({});
   const [groupSchedule, setGroupSchedule]       = useState([]);
   const [bracketView, setBracketView] = useState("live");
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
@@ -1739,6 +1791,16 @@ function PoolDashboard() {
   useEffect(() => {
     const run = () => fetch(`data/payout_projection.json?t=${Date.now()}`)
       .then(r => r.json()).then(setPayoutProjection).catch(() => {});
+    run();
+    const id = setInterval(run, 300000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Once FIFA's Round-of-32 draw is published, it shows up in ESPN's schedule
+  // as concrete (still-to-play) fixtures - poll for it so wildcard bracket
+  // slots can show the real opponent instead of just the eligible pool.
+  useEffect(() => {
+    const run = () => fetchKnockoutFixtures().then(setKnockoutFixtures).catch(() => {});
     run();
     const id = setInterval(run, 300000);
     return () => clearInterval(id);
@@ -2074,7 +2136,7 @@ function PoolDashboard() {
           </div>
           {bracketView==="live" ? (
             <React.Fragment>
-              <BracketPanel status={status} />
+              <BracketPanel status={status} knockoutFixtures={knockoutFixtures} />
               <QualificationHistoryPanel qualHistory={qualHistory} />
             </React.Fragment>
           ) : (
