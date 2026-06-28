@@ -1,20 +1,20 @@
 {
-  "updated": "2026-06-28T00:16:39.458296+00:00",
+  "updated": "2026-06-28T10:16:39.445386+00:00",
   "status": {
     "Algeria": {
-      "p": 2,
+      "p": 3,
       "w": 1,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 3,
+      "pts": 4,
       "st": "G"
     },
     "Argentina": {
-      "p": 2,
-      "w": 2,
+      "p": 3,
+      "w": 3,
       "d": 0,
       "l": 0,
-      "pts": 6,
+      "pts": 9,
       "st": "G"
     },
     "Australia": {
@@ -26,11 +26,11 @@
       "st": "G"
     },
     "Austria": {
-      "p": 2,
+      "p": 3,
       "w": 1,
-      "d": 0,
+      "d": 1,
       "l": 1,
-      "pts": 3,
+      "pts": 4,
       "st": "G"
     },
     "Belgium": {
@@ -74,11 +74,11 @@
       "st": "G"
     },
     "Colombia": {
-      "p": 2,
+      "p": 3,
       "w": 2,
-      "d": 0,
+      "d": 1,
       "l": 0,
-      "pts": 6,
+      "pts": 7,
       "st": "G"
     },
     "Croatia": {
@@ -106,11 +106,11 @@
       "st": "G"
     },
     "DR Congo": {
-      "p": 2,
-      "w": 0,
+      "p": 3,
+      "w": 1,
       "d": 1,
       "l": 1,
-      "pts": 1,
+      "pts": 4,
       "st": "G"
     },
     "Ecuador": {
@@ -202,10 +202,10 @@
       "st": "G"
     },
     "Jordan": {
-      "p": 2,
+      "p": 3,
       "w": 0,
       "d": 0,
-      "l": 2,
+      "l": 3,
       "pts": 0,
       "st": "G"
     },
@@ -274,11 +274,11 @@
       "st": "G"
     },
     "Portugal": {
-      "p": 2,
+      "p": 3,
       "w": 1,
-      "d": 1,
+      "d": 2,
       "l": 0,
-      "pts": 4,
+      "pts": 5,
       "st": "G"
     },
     "Qatar": {
@@ -378,63 +378,15 @@
       "st": "G"
     },
     "Uzbekistan": {
-      "p": 2,
+      "p": 3,
       "w": 0,
       "d": 0,
-      "l": 2,
+      "l": 3,
       "pts": 0,
       "st": "G"
     }
   },
   "fixtures": [
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "Norway",
-      "b": "France",
-      "s": "1-4",
-      "g": "Group I"
-    },
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "Senegal",
-      "b": "Iraq",
-      "s": "5-0",
-      "g": "Group I"
-    },
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "Cape Verde",
-      "b": "Saudi Arabia",
-      "s": "0-0",
-      "g": "Group H"
-    },
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "Uruguay",
-      "b": "Spain",
-      "s": "0-1",
-      "g": "Group H"
-    },
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "Egypt",
-      "b": "Iran",
-      "s": "1-1",
-      "g": "Group G"
-    },
-    {
-      "d": "Jun 26",
-      "k": "",
-      "a": "New Zealand",
-      "b": "Belgium",
-      "s": "1-5",
-      "g": "Group G"
-    },
     {
       "d": "Jun 27",
       "k": "",
@@ -453,55 +405,35 @@
     },
     {
       "d": "Jun 27",
-      "k": "LIVE",
+      "k": "",
       "a": "Colombia",
       "b": "Portugal",
       "s": "0-0",
-      "g": "Group K",
-      "odds": {
-        "home": 0.23,
-        "draw": 0.24,
-        "away": 0.53
-      }
+      "g": "Group K"
     },
     {
       "d": "Jun 27",
-      "k": "LIVE",
+      "k": "",
       "a": "DR Congo",
       "b": "Uzbekistan",
-      "s": "0-1",
-      "g": "Group K",
-      "odds": {
-        "home": 0.57,
-        "draw": 0.25,
-        "away": 0.18
-      }
+      "s": "3-1",
+      "g": "Group K"
     },
     {
       "d": "Jun 27",
-      "k": "10:00 PM ET",
+      "k": "",
       "a": "Algeria",
       "b": "Austria",
-      "s": "",
-      "g": "Group J",
-      "odds": {
-        "home": 0.26,
-        "draw": 0.48,
-        "away": 0.26
-      }
+      "s": "3-3",
+      "g": "Group J"
     },
     {
       "d": "Jun 27",
-      "k": "10:00 PM ET",
+      "k": "",
       "a": "Jordan",
       "b": "Argentina",
-      "s": "",
-      "g": "Group J",
-      "odds": {
-        "home": 0.05,
-        "draw": 0.11,
-        "away": 0.84
-      }
+      "s": "1-3",
+      "g": "Group J"
     },
     {
       "d": "Jun 28",
@@ -513,19 +445,58 @@
       "odds": {
         "home": 0.17,
         "draw": 0.26,
-        "away": 0.57
+        "away": 0.58
+      }
+    },
+    {
+      "d": "Jun 29",
+      "k": "1:00 PM ET",
+      "a": "Brazil",
+      "b": "Japan",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.56,
+        "draw": 0.24,
+        "away": 0.19
+      }
+    },
+    {
+      "d": "Jun 29",
+      "k": "4:30 PM ET",
+      "a": "Germany",
+      "b": "Paraguay",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.7,
+        "draw": 0.19,
+        "away": 0.11
+      }
+    },
+    {
+      "d": "Jun 29",
+      "k": "9:00 PM ET",
+      "a": "Netherlands",
+      "b": "Morocco",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.45,
+        "draw": 0.29,
+        "away": 0.26
       }
     }
   ],
   "h2h": {
     "Ben|Patrick": [
-      2,
+      3,
       3,
       4
     ],
     "Ben|Sandeep": [
       4,
-      3,
+      4,
       4
     ],
     "Ben|Sunny": [
