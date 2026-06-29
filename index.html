@@ -337,11 +337,76 @@ function BracketPanel({ status, knockoutFixtures }) {
         ))}
       </div>
 
+      <KnockoutRoundsPanel knockoutFixtures={knockoutFixtures} />
+
       <div style={{fontSize:10,color:C.mute}}>
         Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
         The 8 wildcard berths go to the best 3rd-place teams; once FIFA's official Round-of-32 draw is published, the actual opponent appears
         marked <b>(drawn)</b> - until then, "possible" lists current top-8 third-place teams whose group is eligible for that slot.
+        Later rounds (Round of 16 onward) appear above automatically as soon as FIFA schedules them, with scores once played.
       </div>
+    </div>
+  );
+}
+
+// Round of 16 onward can't be templated in advance the way the Round-of-32
+// draw can - each round's matchups only exist once the previous round's
+// results are in and FIFA schedules the next fixtures. So unlike the R32
+// grid above, this reads `knockoutFixtures` (ESPN's schedule) directly
+// rather than any hardcoded bracket tree, and simply renders nothing for a
+// round until ESPN actually has fixtures for it.
+function KnockoutRoundsPanel({ knockoutFixtures }) {
+  const ROUND_LABELS = { R16: "ROUND OF 16", QF: "QUARTERFINALS", SF: "SEMIFINALS", FINAL: "FINAL", "3RD_PLACE": "3RD PLACE MATCH" };
+  const ROUNDS = ["R16", "QF", "SF", "FINAL", "3RD_PLACE"];
+
+  const byRound = React.useMemo(() => {
+    const out = Object.fromEntries(ROUNDS.map(r => [r, []]));
+    const seen = new Set();
+    for (const [name, info] of Object.entries(knockoutFixtures || {})) {
+      if (!ROUNDS.includes(info.round)) continue;
+      const key = info.round + "|" + [name, info.opponent].sort().join("|");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const teamA = TEAMS.find(t => t.name === name);
+      const teamB = TEAMS.find(t => t.name === info.opponent);
+      if (!teamA || !teamB) continue;
+      out[info.round].push({ teamA, teamB, info });
+    }
+    return out;
+  }, [knockoutFixtures]);
+
+  const activeRounds = ROUNDS.filter(r => byRound[r].length > 0);
+  if (activeRounds.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      {activeRounds.map(round => (
+        <div key={round} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+          <div className="px-3 py-2" style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
+            <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>{ROUND_LABELS[round]}</span>
+          </div>
+          {byRound[round].map(({ teamA, teamB, info }, idx) => (
+            <div key={idx} className="px-3 py-2"
+              style={{borderBottom: idx < byRound[round].length - 1 ? `1px solid ${C.line}` : "none"}}>
+              {[[teamA, info.won, info.gf], [teamB, info.completed ? !info.won : null, info.ga]].map(([t, won, score], i) => (
+                <div key={i} style={{fontSize:13,display:"flex",alignItems:"center",justifyContent:"space-between",
+                  opacity: info.completed && !won ? 0.55 : 1, marginTop: i===1 ? 3 : 0}}>
+                  <span>
+                    <Flag f={t.flag} />
+                    <span style={{fontWeight: won ? 700 : 600, marginLeft:4}}>{t.name}</span>
+                    <span style={{fontSize:10,fontWeight:700,color:BIDDERS[t.owner].color,marginLeft:6}}>
+                      {BIDDERS[t.owner].short}
+                    </span>
+                  </span>
+                  {info.completed
+                    ? <span style={{...disp,fontSize:13,fontWeight:700}}>{score}</span>
+                    : <span style={{fontSize:9,color:C.mute}}>scheduled</span>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -1122,8 +1187,12 @@ async function fetchKnockoutFixtures() {
     const B = findTeam(away.team?.displayName);
     if (!A || !B) continue;
     const completed = !!comp.status?.type?.completed;
-    map[A.name] = { opponent: B.name, round, completed };
-    map[B.name] = { opponent: A.name, round, completed };
+    const ga = Number(home.score ?? 0), gb = Number(away.score ?? 0);
+    const aWon = completed
+      ? ((typeof home.winner === "boolean" || typeof away.winner === "boolean") ? !!home.winner : ga > gb)
+      : null;
+    map[A.name] = { opponent: B.name, round, completed, date: ev.date, gf: ga, ga: gb, won: aWon };
+    map[B.name] = { opponent: A.name, round, completed, date: ev.date, gf: gb, ga: ga, won: completed ? !aWon : null };
   }
   return map;
 }
