@@ -1170,9 +1170,13 @@ async function fetchAllEspnEvents() {
 // ahead ~10 days to pick up those scheduled-but-not-yet-played knockout
 // fixtures, so a "wildcard" bracket slot's real opponent can be shown as soon
 // as it's been drawn, instead of just listing the pool of possible teams.
+// The backward bound goes all the way to tournament start (not just
+// "yesterday") - otherwise a completed knockout result ages out of the
+// window after a day and its ADVANCED/OUT and "(drawn)" tags would vanish
+// even though the result is still the one that matters.
 async function fetchKnockoutFixtures() {
   const dates = [];
-  const start = new Date(Date.now() - 864e5);
+  const start = new Date(TOURNAMENT_START_DATE);
   const end = new Date(Date.now() + 864e5 * 10);
   for (let d = new Date(start); d <= end; d = new Date(d.getTime()+864e5)) {
     dates.push(d.toISOString().slice(0,10).replace(/-/g,""));
