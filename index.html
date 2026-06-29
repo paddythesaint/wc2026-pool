@@ -260,22 +260,39 @@ function BracketPanel({ status, knockoutFixtures }) {
     return t;
   }, [status, top8]);
 
+  // A team's R32 fixture (once ESPN has it) tells us whether they've won or
+  // lost that match - "won" highlights them as having advanced, "lost"
+  // greys/strikes them out, and null (not played, or no fixture yet) leaves
+  // the slot exactly as before. Updates automatically as results come in.
+  const r32Fate = (teamName) => {
+    const f = knockoutFixtures?.[teamName];
+    if (!f || f.round !== "R32" || !f.completed) return null;
+    return f.won ? "won" : "lost";
+  };
+
+  const TeamLine = ({ team, tag, fate }) => {
+    const eliminated = fate === "lost";
+    return (
+      <div style={{fontSize:13,opacity:eliminated?0.55:1}}>
+        <Flag f={team.flag} />
+        <span style={{fontWeight:600,marginLeft:4,textDecoration:eliminated?"line-through":"none"}}>{team.name}</span>
+        <span style={{fontSize:10,fontWeight:700,color:BIDDERS[team.owner].color,marginLeft:6}}>
+          {BIDDERS[team.owner].short}
+        </span>
+        {tag && <span style={{fontSize:9,color:C.mute,marginLeft:4}}>{tag}</span>}
+        {fate === "won" && <span style={{fontSize:9,fontWeight:700,color:C.green,marginLeft:4}}>ADVANCED</span>}
+        {fate === "lost" && <span style={{fontSize:9,fontWeight:700,color:C.mute,marginLeft:4}}>OUT</span>}
+      </div>
+    );
+  };
+
   const SlotDisplay = ({ slot, sibling }) => {
     if (slot.t === "WC") {
       const siblingTeam = sibling ? resolveSlot(sibling, status)?.team : null;
       const scheduled = siblingTeam ? knockoutFixtures?.[siblingTeam.name] : null;
       const drawnTeam = scheduled?.round === "R32" ? TEAMS.find(t => t.name === scheduled.opponent) : null;
       if (drawnTeam) {
-        return (
-          <div style={{fontSize:13}}>
-            <Flag f={drawnTeam.flag} />
-            <span style={{fontWeight:600,marginLeft:4}}>{drawnTeam.name}</span>
-            <span style={{fontSize:10,fontWeight:700,color:BIDDERS[drawnTeam.owner].color,marginLeft:6}}>
-              {BIDDERS[drawnTeam.owner].short}
-            </span>
-            <span style={{fontSize:9,color:C.mute,marginLeft:4}}>(drawn)</span>
-          </div>
-        );
+        return <TeamLine team={drawnTeam} tag="(drawn)" fate={r32Fate(drawnTeam.name)} />;
       }
       const candidates = top8.filter(r => slot.pool.includes(r.group));
       return (
@@ -292,16 +309,7 @@ function BracketPanel({ status, knockoutFixtures }) {
     }
     const r = resolveSlot(slot, status);
     if (!r || !r.team) return <span style={{fontSize:12,color:C.mute}}>TBD</span>;
-    return (
-      <div style={{fontSize:13}}>
-        <Flag f={r.team.flag} />
-        <span style={{fontWeight:600,marginLeft:4}}>{r.team.name}</span>
-        <span style={{fontSize:10,fontWeight:700,color:BIDDERS[r.team.owner].color,marginLeft:6}}>
-          {BIDDERS[r.team.owner].short}
-        </span>
-        {r.projected && <span style={{fontSize:9,color:C.mute,marginLeft:4}}>(proj.)</span>}
-      </div>
-    );
+    return <TeamLine team={r.team} tag={r.projected ? "(proj.)" : null} fate={r32Fate(r.team.name)} />;
   };
 
   return (
@@ -343,6 +351,7 @@ function BracketPanel({ status, knockoutFixtures }) {
         Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
         The 8 wildcard berths go to the best 3rd-place teams; once FIFA's official Round-of-32 draw is published, the actual opponent appears
         marked <b>(drawn)</b> - until then, "possible" lists current top-8 third-place teams whose group is eligible for that slot.
+        Once a Round of 32 match is final, the winner is marked <b style={{color:C.green}}>ADVANCED</b> and the loser is greyed out and marked <b>OUT</b>.
         Later rounds (Round of 16 onward) appear above automatically as soon as FIFA schedules them, with scores once played.
       </div>
     </div>
