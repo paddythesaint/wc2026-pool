@@ -27,7 +27,7 @@ function loadAppExports() {
   const source = match[1] + `
 globalThis.__EXPORT = {
   BIDDERS, makeStrengthOf, runPayoutSimulations, summarizePayouts,
-  fetchAllEspnEvents, computeStandingsAndH2H, fetchGroupSchedule,
+  fetchAllEspnEvents, computeStandingsAndH2H, fetchGroupSchedule, fetchKnockoutFixtures,
 };
 `;
   const { code } = babel.transformSync(source, {
@@ -55,7 +55,7 @@ globalThis.__EXPORT = {
 async function main() {
   const {
     BIDDERS, makeStrengthOf, runPayoutSimulations, summarizePayouts,
-    fetchAllEspnEvents, computeStandingsAndH2H, fetchGroupSchedule,
+    fetchAllEspnEvents, computeStandingsAndH2H, fetchGroupSchedule, fetchKnockoutFixtures,
   } = loadAppExports();
 
   const events = await fetchAllEspnEvents();
@@ -68,7 +68,10 @@ async function main() {
   const groupSchedule = await fetchGroupSchedule();
   console.log(`[run_payout_projection] schedule: ${groupSchedule.length} fixtures, ${groupSchedule.filter((f) => f.completed).length} completed`);
 
-  const ownerPayouts = runPayoutSimulations(status, groupSchedule, strengthOf, RUNS);
+  const knockoutFixtures = await fetchKnockoutFixtures();
+  console.log(`[run_payout_projection] knockout fixtures known for ${Object.keys(knockoutFixtures).length} teams`);
+
+  const ownerPayouts = runPayoutSimulations(status, groupSchedule, strengthOf, RUNS, knockoutFixtures);
   const summary = summarizePayouts(ownerPayouts);
 
   const output = {
