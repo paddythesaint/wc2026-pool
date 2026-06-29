@@ -657,33 +657,96 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, pay
   const maxMean = Math.max(1, ...Object.entries(summary).map(([o, s]) => Math.max(s.p75, yourPayout[o] || 0)));
   const owners = Object.keys(BIDDERS).sort((a, b) => summary[b].mean - summary[a].mean);
 
-  const TeamBox = ({ team, matchKey, isWinner, final }) => {
+  // ── Bracket tree geometry ──────────────────────────────────────────────
+  // Classic CSS bracket trick: every round column is the same fixed height
+  // and uses justify-content:space-around, so a round-r match's vertical
+  // center is always exactly the midpoint of the two round-(r-1) matches
+  // that feed it - no JS layout/measurement needed. Half 2 is rendered as a
+  // mirror image (scaleX(-1) on the half, scaleX(-1) again on each team row
+  // to un-flip the text) so both halves visually converge on the final in
+  // the middle, like a real printed bracket.
+  const TREE_GAP = 22, BOX_W = 116, HALF_H = 460;
+
+  const TeamRow = ({ team, matchKey, isWinner, final, mirrored }) => {
+    const t = TEAMS.find(x => x.name === team);
     const forced = matchupOverrides[matchKey] === team;
     return (
       <div onClick={() => !final && toggleOverride(matchKey, team)}
         style={{
-          fontSize:10.5, padding:"3px 5px", cursor: final ? "default" : "pointer", borderRadius:4, lineHeight:1.3,
+          transform: mirrored ? "scaleX(-1)" : undefined,
+          display:"flex", alignItems:"center", gap:4, fontSize:10, padding:"2px 5px",
+          cursor: final ? "default" : "pointer", borderRadius:4, lineHeight:1.3,
           background: isWinner ? "#16203A" : "transparent",
           color: isWinner ? C.text : C.mute,
-          border: forced ? `1px solid ${C.gold}` : final && isWinner ? `1px solid ${C.green}` : "1px solid transparent",
+          border: forced ? `1px solid ${C.gold}` : "1px solid transparent",
           fontWeight: isWinner ? 700 : 400,
         }}>
-        {team}
+        <span style={{width:3,height:11,borderRadius:2,flexShrink:0,background:t?BIDDERS[t.owner].color:C.mute}} />
+        <Flag f={t?.flag} size={12} />
+        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{team}</span>
       </div>
     );
   };
-  const Round = ({ matches, label }) => (
-    <div className="flex flex-col gap-2" style={{minWidth:118}}>
-      <div style={{fontSize:9,color:C.mute,letterSpacing:"0.1em",textAlign:"center"}}>{label}</div>
-      {matches.map(m => (
-        <div key={m.key} style={{background:C.panel,border:`1px solid ${m.final ? C.green : C.line}`,borderRadius:6,padding:4}}
-          title={m.final ? "Actual result - already decided" : "Odds-based projection"}>
-          <TeamBox team={m.a} matchKey={m.key} isWinner={m.winner===m.a} final={m.final} />
-          <TeamBox team={m.b} matchKey={m.key} isWinner={m.winner===m.b} final={m.final} />
+
+  const MatchBox = ({ m, roundIndex, isLast, matchesInRound, idx, mirrored }) => {
+    const vertPx = HALF_H / (2 * matchesInRound);
+    return (
+      <div style={{position:"relative", width:BOX_W, background:C.panel,
+        border:`1px solid ${m.final ? C.green : C.line}`, borderRadius:6, padding:3}}
+        title={m.final ? "Actual result - already decided" : "Odds-based projection"}>
+        {roundIndex > 0 && (
+          <div style={{position:"absolute", left:-TREE_GAP/2, top:"50%", width:TREE_GAP/2, height:1, background:C.line}} />
+        )}
+        <TeamRow team={m.a} matchKey={m.key} isWinner={m.winner===m.a} final={m.final} mirrored={mirrored} />
+        <TeamRow team={m.b} matchKey={m.key} isWinner={m.winner===m.b} final={m.final} mirrored={mirrored} />
+        {!isLast && (
+          <>
+            <div style={{position:"absolute", right:-TREE_GAP/2, top:"50%", width:TREE_GAP/2, height:1, background:C.line}} />
+            <div style={{position:"absolute", right:-TREE_GAP/2, width:1, background:C.line,
+              top: idx % 2 === 0 ? "50%" : `calc(50% - ${vertPx}px)`, height:vertPx}} />
+          </>
+        )}
+        {isLast && (
+          <div style={{position:"absolute", right:-TREE_GAP, top:"50%", width:TREE_GAP, height:1, background:C.line}} />
+        )}
+      </div>
+    );
+  };
+
+  const HalfTree = ({ half, mirrored }) => (
+    <div style={{display:"flex", gap:TREE_GAP, height:HALF_H, transform: mirrored ? "scaleX(-1)" : undefined}}>
+      {half.rounds.map((matches, ri) => (
+        <div key={ri} style={{display:"flex", flexDirection:"column", justifyContent:"space-around", height:"100%"}}>
+          {matches.map((m, idx) => (
+            <MatchBox key={m.key} m={m} roundIndex={ri} isLast={ri === half.rounds.length - 1}
+              matchesInRound={matches.length} idx={idx} mirrored={mirrored} />
+          ))}
         </div>
       ))}
     </div>
   );
+
+  const FinalColumn = ({ finalMatch, thirdMatch }) => (
+    <div style={{position:"relative", width:BOX_W, height:HALF_H}}>
+      <div style={{position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:BOX_W,
+        background:C.panel, border:`1px solid ${finalMatch.final ? C.green : C.gold}`, borderRadius:6, padding:3}}
+        title={finalMatch.final ? "Actual result - already decided" : "Odds-based projection"}>
+        <TeamRow team={finalMatch.a} matchKey={finalMatch.key} isWinner={finalMatch.winner===finalMatch.a} final={finalMatch.final} />
+        <TeamRow team={finalMatch.b} matchKey={finalMatch.key} isWinner={finalMatch.winner===finalMatch.b} final={finalMatch.final} />
+      </div>
+      <div style={{position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:BOX_W, textAlign:"center"}}>
+        <div style={{fontSize:8,color:C.mute,letterSpacing:"0.1em",marginBottom:3}}>3RD PLACE</div>
+        <div style={{background:C.panel,border:`1px solid ${thirdMatch.final ? C.green : C.line}`,borderRadius:6,padding:3}}
+          title={thirdMatch.final ? "Actual result - already decided" : "Odds-based projection"}>
+          <TeamRow team={thirdMatch.a} matchKey={thirdMatch.key} isWinner={thirdMatch.winner===thirdMatch.a} final={thirdMatch.final} />
+          <TeamRow team={thirdMatch.b} matchKey={thirdMatch.key} isWinner={thirdMatch.winner===thirdMatch.b} final={thirdMatch.final} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const ROUND_LABELS = ["ROUND OF 32", "ROUND OF 16", "QUARTERFINAL", "SEMIFINAL"];
+  const treeLabels = [...ROUND_LABELS, "FINAL", ...ROUND_LABELS.slice().reverse()];
 
   return (
     <div className="space-y-3">
@@ -751,23 +814,21 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, pay
         </div>
         <div style={{fontSize:10,color:C.mute,marginBottom:8}}>
           Each matchup defaults to whichever team has the better title-win price. Click a team to force them through that matchup -
-          saved only in your browser, never shared with other pool members.
+          saved only in your browser, never shared with other pool members. The colored bar on each team is their owner;
+          a <span style={{color:C.green}}>green border</span> means that match has already actually been played and locks in the real result.
         </div>
 
-        {[1,2].map(half => (
-          <div key={half} style={{marginBottom:10}}>
-            <div style={{...disp,fontSize:11,fontWeight:700,letterSpacing:"0.1em",marginBottom:6,color:C.mute}}>HALF {half}</div>
-            <div className="flex gap-3 overflow-x-auto">
-              <Round matches={projected[`half${half}`].rounds[0]} label="ROUND OF 32" />
-              <Round matches={projected[`half${half}`].rounds[1]} label="ROUND OF 16" />
-              <Round matches={projected[`half${half}`].rounds[2]} label="QUARTERFINAL" />
-              <Round matches={projected[`half${half}`].rounds[3]} label="SEMIFINAL" />
-            </div>
+        <div style={{overflowX:"auto", paddingBottom:6}}>
+          <div style={{display:"flex", gap:TREE_GAP, width:"max-content", marginBottom:6}}>
+            {treeLabels.map((label, i) => (
+              <div key={i} style={{width:BOX_W,fontSize:8,color:C.mute,letterSpacing:"0.08em",textAlign:"center"}}>{label}</div>
+            ))}
           </div>
-        ))}
-        <div className="flex gap-3">
-          <Round matches={[projected.thirdMatch]} label="3RD PLACE" />
-          <Round matches={[projected.finalMatch]} label="FINAL" />
+          <div style={{display:"flex", gap:TREE_GAP, width:"max-content"}}>
+            <HalfTree half={projected.half1} mirrored={false} />
+            <FinalColumn finalMatch={projected.finalMatch} thirdMatch={projected.thirdMatch} />
+            <HalfTree half={projected.half2} mirrored={true} />
+          </div>
         </div>
       </div>
     </div>
