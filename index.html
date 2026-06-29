@@ -1945,7 +1945,7 @@ function PoolDashboard() {
       {/* ── Tabs ── */}
       <div className="max-w-5xl mx-auto px-4 mt-4">
         <div className="flex gap-2 flex-wrap">
-          {[["board","LEADERBOARD"],["groups","GROUPS"],["bracket","BRACKET"],["fixtures","FIXTURES"],["teams","TEAMS"],["upsets","UPSETS"],
+          {[["board","LEADERBOARD"],["bracket","BRACKET"],["fixtures","FIXTURES"],["groups","GROUPS"],["teams","TEAMS"],["upsets","UPSETS"],
             ...(allMatchday2Done ? [["odds","TITLE ODDS"]] : [])].map(([id,label]) => (
             <button key={id} onClick={()=>setTab(id)}
               style={{...disp,fontSize:14,fontWeight:600,letterSpacing:"0.1em",padding:"8px 18px",
