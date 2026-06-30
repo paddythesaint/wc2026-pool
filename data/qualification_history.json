@@ -1,1 +1,65 @@
-[]
+[
+  {
+    "t": "2026-06-22T23:11:49+00:00",
+    "counts": {
+      "Ben": 8,
+      "Patrick": 9,
+      "Sandeep": 7,
+      "Sunny": 8
+    }
+  },
+  {
+    "t": "2026-06-23T10:48:39+00:00",
+    "counts": {
+      "Ben": 8,
+      "Patrick": 9,
+      "Sandeep": 8,
+      "Sunny": 7
+    }
+  },
+  {
+    "t": "2026-06-25T10:21:10+00:00",
+    "counts": {
+      "Ben": 8,
+      "Patrick": 10,
+      "Sandeep": 8,
+      "Sunny": 6
+    }
+  },
+  {
+    "t": "2026-06-25T23:01:11+00:00",
+    "counts": {
+      "Ben": 7,
+      "Patrick": 10,
+      "Sandeep": 8,
+      "Sunny": 7
+    }
+  },
+  {
+    "t": "2026-06-26T21:51:12+00:00",
+    "counts": {
+      "Ben": 6,
+      "Patrick": 10,
+      "Sandeep": 9,
+      "Sunny": 7
+    }
+  },
+  {
+    "t": "2026-06-27T08:10:24+00:00",
+    "counts": {
+      "Ben": 7,
+      "Patrick": 9,
+      "Sandeep": 8,
+      "Sunny": 8
+    }
+  },
+  {
+    "t": "2026-06-28T10:16:40+00:00",
+    "counts": {
+      "Ben": 8,
+      "Patrick": 8,
+      "Sandeep": 8,
+      "Sunny": 8
+    }
+  }
+]
