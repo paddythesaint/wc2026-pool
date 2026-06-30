@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-30T08:46:29.231297+00:00",
+  "updated": "2026-06-30T21:23:58.733616+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -146,11 +146,11 @@
       "st": "G"
     },
     "Germany": {
-      "p": 3,
-      "w": 2,
+      "p": 6,
+      "w": 4,
       "d": 0,
-      "l": 1,
-      "pts": 6,
+      "l": 2,
+      "pts": 12,
       "st": "E32"
     },
     "Ghana": {
@@ -234,11 +234,11 @@
       "st": "G"
     },
     "Netherlands": {
-      "p": 3,
-      "w": 2,
-      "d": 1,
+      "p": 6,
+      "w": 4,
+      "d": 2,
       "l": 0,
-      "pts": 7,
+      "pts": 14,
       "st": "E32"
     },
     "New Zealand": {
@@ -413,27 +413,22 @@
     },
     {
       "d": "Jun 30",
-      "k": "1:00 PM ET",
+      "k": "",
       "a": "Cote d'Ivoire",
       "b": "Norway",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.28,
-        "draw": 0.28,
-        "away": 0.45
-      }
+      "s": "1-2",
+      "g": "Round of 32"
     },
     {
       "d": "Jun 30",
-      "k": "5:00 PM ET",
+      "k": "LIVE",
       "a": "France",
       "b": "Sweden",
-      "s": "",
+      "s": "0-0",
       "g": "Round of 32",
       "odds": {
         "home": 0.74,
-        "draw": 0.17,
+        "draw": 0.16,
         "away": 0.1
       }
     },
@@ -445,9 +440,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.42,
+        "home": 0.44,
         "draw": 0.33,
-        "away": 0.25
+        "away": 0.23
       }
     },
     {
@@ -458,8 +453,8 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.75,
-        "draw": 0.17,
+        "home": 0.74,
+        "draw": 0.18,
         "away": 0.07
       }
     },
@@ -471,9 +466,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.43,
-        "draw": 0.3,
-        "away": 0.28
+        "home": 0.44,
+        "draw": 0.29,
+        "away": 0.27
       }
     },
     {
@@ -484,7 +479,7 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.7,
+        "home": 0.69,
         "draw": 0.2,
         "away": 0.11
       }
@@ -514,7 +509,7 @@
     "Patrick|Sunny": [
       2,
       3,
-      4
+      5
     ],
     "Sandeep|Sunny": [
       6,
