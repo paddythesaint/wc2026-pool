@@ -10,6 +10,9 @@ import json, os, re, sys
 from datetime import datetime, timezone
 from urllib.request import urlopen, Request
 
+SCORES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "scores.json")
+ELIMINATED_STATUSES = {"EG", "E32", "E16", "EQF", "4TH", "3RD", "RU", "CH"}
+
 SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_FILE  = os.path.join(SCRIPT_DIR, "..", "data", "title_odds_history.json")
 POLYMARKET_URL = "https://gamma-api.polymarket.com/events?slug=world-cup-winner"
@@ -110,6 +113,16 @@ def load_existing():
         with open(OUTPUT_FILE, encoding="utf-8") as f: return json.load(f)
     except Exception: return []
 
+def load_eliminated_teams():
+    """Return set of team names that have been eliminated from the tournament."""
+    try:
+        with open(SCORES_FILE, encoding="utf-8") as f:
+            scores = json.load(f)
+        return {t for t, rec in scores.get("status", {}).items()
+                if rec.get("st", "G") in ELIMINATED_STATUSES}
+    except Exception:
+        return set()
+
 def main():
     try:
         team_probs = fetch_team_probs()
@@ -120,6 +133,14 @@ def main():
     if not team_probs:
         print("[done] no usable team odds parsed from Polymarket response", file=sys.stderr)
         return
+
+    eliminated = load_eliminated_teams()
+    if eliminated:
+        zeroed = [t for t in eliminated if team_probs.get(t, 0) > 0]
+        for t in eliminated:
+            team_probs[t] = 0.0
+        if zeroed:
+            print(f"[info] zeroed eliminated teams: {zeroed}", file=sys.stderr)
 
     owner_probs = {p: 0.0 for p in PLAYERS}
     for team, prob in team_probs.items():
