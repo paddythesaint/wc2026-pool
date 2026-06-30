@@ -2,10 +2,11 @@ name: Update Scores
 
 on:
   schedule:
-    # Every 15 minutes, all day — widened from the noon-2AM ET match window
-    # to also catch late-finishing group games during the 2AM-noon ET gap.
-    # TODO: narrow this back to match windows once the group stage wraps up.
-    - cron: "*/15 * * * *"
+    # Every 15 minutes during WC2026 match windows (covers noon–2 AM ET all days)
+    # 16:00–23:59 UTC = noon–8 PM ET
+    - cron: "*/15 16-23 * * *"
+    # 00:00–06:00 UTC = 8 PM–2 AM ET
+    - cron: "*/15 0-6 * * *"
   workflow_dispatch:   # manual trigger from the Actions tab
 
 jobs:
@@ -26,14 +27,11 @@ jobs:
       - name: Fetch live scores
         run: python scripts/update_scores.py
 
-      - name: Track projected qualification counts
-        run: python scripts/track_qualification.py
-
       - name: Commit & push if data changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/scores.json data/qualification_history.json
+          git add data/scores.json
           if git diff --staged --quiet; then
             echo "Scores unchanged — no commit needed"
           else
