@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-29T20:58:56.963974+00:00",
+  "updated": "2026-06-30T08:46:29.231297+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -388,14 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 28",
-      "k": "",
-      "a": "South Africa",
-      "b": "Canada",
-      "s": "0-1",
-      "g": "Round of 32"
-    },
-    {
       "d": "Jun 29",
       "k": "",
       "a": "Brazil",
@@ -405,29 +397,19 @@
     },
     {
       "d": "Jun 29",
-      "k": "LIVE",
+      "k": "",
       "a": "Germany",
       "b": "Paraguay",
-      "s": "0-0",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.72,
-        "draw": 0.19,
-        "away": 0.09
-      }
+      "s": "1-1",
+      "g": "Round of 32"
     },
     {
       "d": "Jun 29",
-      "k": "9:00 PM ET",
+      "k": "",
       "a": "Netherlands",
       "b": "Morocco",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.4,
-        "draw": 0.31,
-        "away": 0.29
-      }
+      "s": "1-1",
+      "g": "Round of 32"
     },
     {
       "d": "Jun 30",
@@ -437,7 +419,7 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.27,
+        "home": 0.28,
         "draw": 0.28,
         "away": 0.45
       }
@@ -450,9 +432,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.76,
-        "draw": 0.15,
-        "away": 0.09
+        "home": 0.74,
+        "draw": 0.17,
+        "away": 0.1
       }
     },
     {
@@ -463,9 +445,48 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.43,
+        "home": 0.42,
         "draw": 0.33,
-        "away": 0.24
+        "away": 0.25
+      }
+    },
+    {
+      "d": "Jul 1",
+      "k": "12:00 PM ET",
+      "a": "England",
+      "b": "DR Congo",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.75,
+        "draw": 0.17,
+        "away": 0.07
+      }
+    },
+    {
+      "d": "Jul 1",
+      "k": "4:00 PM ET",
+      "a": "Belgium",
+      "b": "Senegal",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.43,
+        "draw": 0.3,
+        "away": 0.28
+      }
+    },
+    {
+      "d": "Jul 1",
+      "k": "8:00 PM ET",
+      "a": "United States",
+      "b": "Bosnia and Herzegovina",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.7,
+        "draw": 0.2,
+        "away": 0.11
       }
     }
   ],
@@ -487,7 +508,7 @@
     ],
     "Patrick|Sandeep": [
       3,
-      1,
+      2,
       2
     ],
     "Patrick|Sunny": [
