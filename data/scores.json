@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-30T21:23:58.733616+00:00",
+  "updated": "2026-07-01T10:52:27.085036+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -146,11 +146,11 @@
       "st": "G"
     },
     "Germany": {
-      "p": 6,
-      "w": 4,
+      "p": 9,
+      "w": 6,
       "d": 0,
-      "l": 2,
-      "pts": 12,
+      "l": 3,
+      "pts": 18,
       "st": "E32"
     },
     "Ghana": {
@@ -234,11 +234,11 @@
       "st": "G"
     },
     "Netherlands": {
-      "p": 6,
-      "w": 4,
-      "d": 2,
+      "p": 9,
+      "w": 6,
+      "d": 3,
       "l": 0,
-      "pts": 14,
+      "pts": 21,
       "st": "E32"
     },
     "New Zealand": {
@@ -388,30 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 29",
-      "k": "",
-      "a": "Brazil",
-      "b": "Japan",
-      "s": "2-1",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jun 29",
-      "k": "",
-      "a": "Germany",
-      "b": "Paraguay",
-      "s": "1-1",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jun 29",
-      "k": "",
-      "a": "Netherlands",
-      "b": "Morocco",
-      "s": "1-1",
-      "g": "Round of 32"
-    },
-    {
       "d": "Jun 30",
       "k": "",
       "a": "Cote d'Ivoire",
@@ -421,29 +397,19 @@
     },
     {
       "d": "Jun 30",
-      "k": "LIVE",
+      "k": "",
       "a": "France",
       "b": "Sweden",
-      "s": "0-0",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.74,
-        "draw": 0.16,
-        "away": 0.1
-      }
+      "s": "3-0",
+      "g": "Round of 32"
     },
     {
       "d": "Jun 30",
-      "k": "9:00 PM ET",
+      "k": "",
       "a": "Mexico",
       "b": "Ecuador",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.44,
-        "draw": 0.33,
-        "away": 0.23
-      }
+      "s": "2-0",
+      "g": "Round of 32"
     },
     {
       "d": "Jul 1",
@@ -466,9 +432,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.44,
+        "home": 0.45,
         "draw": 0.29,
-        "away": 0.27
+        "away": 0.26
       }
     },
     {
@@ -483,6 +449,45 @@
         "draw": 0.2,
         "away": 0.11
       }
+    },
+    {
+      "d": "Jul 2",
+      "k": "3:00 PM ET",
+      "a": "Spain",
+      "b": "Austria",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.72,
+        "draw": 0.18,
+        "away": 0.1
+      }
+    },
+    {
+      "d": "Jul 2",
+      "k": "7:00 PM ET",
+      "a": "Portugal",
+      "b": "Croatia",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.53,
+        "draw": 0.27,
+        "away": 0.2
+      }
+    },
+    {
+      "d": "Jul 2",
+      "k": "11:00 PM ET",
+      "a": "Switzerland",
+      "b": "Algeria",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.47,
+        "draw": 0.29,
+        "away": 0.24
+      }
     }
   ],
   "h2h": {
@@ -494,10 +499,10 @@
     "Ben|Sandeep": [
       5,
       4,
-      4
+      5
     ],
     "Ben|Sunny": [
-      5,
+      6,
       1,
       2
     ],
