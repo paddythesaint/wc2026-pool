@@ -3,7 +3,7 @@ Fetch live 2026 FIFA World Cup data from ESPN's public scoreboard API.
 Computes standings, H2H records, and betting odds from match data.
 No API key required. Runs in GitHub Actions on a cron schedule.
 """
-import json, os, sys
+import json, os, re, sys
 from datetime import datetime, timezone, timedelta
 from urllib.request import urlopen, Request
 
