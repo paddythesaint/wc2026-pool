@@ -193,12 +193,40 @@ def main():
         print("[done] ESPN returned no events — keeping existing data unchanged", file=sys.stderr)
         return
 
+    KNOCKOUT_ROUND_PATTERNS = [
+        ("3RD_PLACE", re.compile(r"third.?place", re.I)),
+        ("SF",        re.compile(r"semi.?final", re.I)),
+        ("QF",        re.compile(r"quarter.?final", re.I)),
+        ("R16",       re.compile(r"round.of.16", re.I)),
+        ("R32",       re.compile(r"round.of.32", re.I)),
+        ("FINAL",     re.compile(r"\bfinal\b", re.I)),
+    ]
+    KNOCKOUT_OUTCOME = {
+        "R32":       ("R16",  "E32"),
+        "R16":       ("QF",   "E16"),
+        "QF":        ("SF",   "EQF"),
+        "SF":        ("F",    "SF"),
+        "FINAL":     ("CH",   "RU"),
+        "3RD_PLACE": ("3RD",  "4TH"),
+    }
+
+    def detect_knockout_round(ev, comp):
+        text = f"{comp.get('altGameNote','')} {ev.get('season',{}).get('slug','')} {ev.get('name','')}"
+        for key, pattern in KNOCKOUT_ROUND_PATTERNS:
+            if pattern.search(text):
+                return key
+        return None
+
     # ── Compute group-stage standings from completed results ──────────────────
     status = blank_status()
-    # Preserve any known knockout statuses from existing file
+    # Preserve any known knockout statuses from existing file (copy as new dict
+    # to avoid mutating the loaded JSON object, which would accumulate group
+    # stats on each run for teams already in the knockout stage).
+    knockout_teams = set()
     for team, rec in existing.get("status", {}).items():
         if team in status and rec.get("st","G") not in ("G","EG"):
-            status[team] = rec
+            status[team] = dict(rec)   # shallow copy — safe since values are scalars
+            knockout_teams.add(team)
 
     for ev in all_events:
         comp, home, away = get_competitors(ev)
@@ -215,13 +243,44 @@ def main():
             ga, gb = int(home.get("score",0)), int(away.get("score",0))
         except: continue
 
-        for name, gf, gc in [(name_a, ga, gb), (name_b, gb, ga)]:   # ← fixed tuple (3 items)
-            if name not in status: continue
+        for name, gf, gc in [(name_a, ga, gb), (name_b, gb, ga)]:
+            if name not in status or name in knockout_teams: continue
             s = status[name]
             s["p"] += 1
             if gf > gc:   s["w"] += 1; s["pts"] += 3
             elif gf == gc: s["d"] += 1; s["pts"] += 1
             else:          s["l"] += 1
+
+    # ── Apply completed knockout results to update team stages ────────────────
+    for ev in all_events:
+        comp, home, away = get_competitors(ev)
+        if comp is None: continue
+        if not comp.get("status",{}).get("type",{}).get("completed", False): continue
+        round_key = detect_knockout_round(ev, comp)
+        if not round_key or round_key not in KNOCKOUT_OUTCOME: continue
+
+        name_a = map_team(home.get("team",{}).get("displayName",""))
+        name_b = map_team(away.get("team",{}).get("displayName",""))
+        if not name_a or not name_b: continue
+        try:
+            ga, gb = int(home.get("score",0)), int(away.get("score",0))
+        except: continue
+
+        # Determine winner; for draws use the "winner" flag if ESPN provides it
+        home_winner = home.get("winner")
+        if isinstance(home_winner, bool):
+            a_won = home_winner
+        else:
+            a_won = ga > gb  # may be wrong for penalty shootouts, but good enough
+
+        win_st, lose_st = KNOCKOUT_OUTCOME[round_key]
+        winner, loser = (name_a, name_b) if a_won else (name_b, name_a)
+        if winner in status:
+            status[winner]["st"] = win_st
+            knockout_teams.add(winner)
+        if loser in status:
+            status[loser]["st"] = lose_st
+            knockout_teams.add(loser)
 
     # ── Compute H2H records across all completed matches ─────────────────────
     h2h = {f"{p1}|{p2}": [0,0,0] for i,p1 in enumerate(PLAYERS)
