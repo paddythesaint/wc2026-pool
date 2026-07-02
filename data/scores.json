@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-01T21:12:59.564446+00:00",
+  "updated": "2026-07-02T08:30:54.026096+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -39,7 +39,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "E32"
+      "st": "R16"
     },
     "Bosnia and Herzegovina": {
       "p": 3,
@@ -311,7 +311,7 @@
       "d": 0,
       "l": 2,
       "pts": 3,
-      "st": "R16"
+      "st": "E32"
     },
     "South Africa": {
       "p": 3,
@@ -388,30 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jun 30",
-      "k": "",
-      "a": "Cote d'Ivoire",
-      "b": "Norway",
-      "s": "1-2",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jun 30",
-      "k": "",
-      "a": "France",
-      "b": "Sweden",
-      "s": "3-0",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jun 30",
-      "k": "",
-      "a": "Mexico",
-      "b": "Ecuador",
-      "s": "2-0",
-      "g": "Round of 32"
-    },
-    {
       "d": "Jul 1",
       "k": "",
       "a": "England",
@@ -424,7 +400,7 @@
       "k": "",
       "a": "Belgium",
       "b": "Senegal",
-      "s": "0-1",
+      "s": "3-2",
       "g": "Round of 32"
     },
     {
@@ -432,7 +408,7 @@
       "k": "",
       "a": "United States",
       "b": "Bosnia and Herzegovina",
-      "s": "1-0",
+      "s": "2-0",
       "g": "Round of 32"
     },
     {
@@ -456,9 +432,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.53,
-        "draw": 0.27,
-        "away": 0.2
+        "home": 0.55,
+        "draw": 0.26,
+        "away": 0.19
       }
     },
     {
@@ -469,9 +445,48 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.47,
+        "home": 0.48,
         "draw": 0.29,
-        "away": 0.24
+        "away": 0.23
+      }
+    },
+    {
+      "d": "Jul 3",
+      "k": "2:00 PM ET",
+      "a": "Australia",
+      "b": "Egypt",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.29,
+        "draw": 0.33,
+        "away": 0.38
+      }
+    },
+    {
+      "d": "Jul 3",
+      "k": "6:00 PM ET",
+      "a": "Argentina",
+      "b": "Cape Verde",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.83,
+        "draw": 0.12,
+        "away": 0.05
+      }
+    },
+    {
+      "d": "Jul 3",
+      "k": "9:30 PM ET",
+      "a": "Colombia",
+      "b": "Ghana",
+      "s": "",
+      "g": "Round of 32",
+      "odds": {
+        "home": 0.63,
+        "draw": 0.23,
+        "away": 0.14
       }
     }
   ],
@@ -504,7 +519,7 @@
     "Sandeep|Sunny": [
       6,
       1,
-      4
+      5
     ]
   }
 }
