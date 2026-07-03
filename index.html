@@ -1221,7 +1221,10 @@ function blankH2H() {
 
 async function fetchAllEspnEvents() {
   const dates = [];
-  const end = new Date(Date.now() + 864e5);
+  // Reach ~10 days ahead so already-scheduled (not-yet-played) knockout
+  // fixtures are captured too - the bracket derives its matchups from these
+  // same events, so a drawn opponent shows up as soon as ESPN has it.
+  const end = new Date(Date.now() + 864e5 * 10);
   for (let d = new Date(TOURNAMENT_START_DATE); d <= end; d = new Date(d.getTime()+864e5)) {
     dates.push(d.toISOString().slice(0,10).replace(/-/g,""));
   }
@@ -1243,22 +1246,15 @@ async function fetchAllEspnEvents() {
 // "yesterday") - otherwise a completed knockout result ages out of the
 // window after a day and its ADVANCED/OUT and "(drawn)" tags would vanish
 // even though the result is still the one that matters.
-async function fetchKnockoutFixtures() {
-  const dates = [];
-  const start = new Date(TOURNAMENT_START_DATE);
-  const end = new Date(Date.now() + 864e5 * 10);
-  for (let d = new Date(start); d <= end; d = new Date(d.getTime()+864e5)) {
-    dates.push(d.toISOString().slice(0,10).replace(/-/g,""));
-  }
-  const dayResults = await Promise.all(dates.map(d =>
-    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}&t=${Date.now()}`)
-      .then(r => r.json()).then(j => j.events || []).catch(() => [])
-  ));
-  const byId = new Map();
-  for (const events of dayResults) for (const ev of events) byId.set(ev.id, ev);
-
+// Builds the {teamName: {opponent, round, completed, won, ...}} map the bracket
+// reads, from an already-fetched ESPN event list. Kept separate from the fetch
+// so the live standings poll and the bracket can share ONE set of events -
+// otherwise a second, independent fetch can come back partially (ESPN rate-
+// limits the ~30 daily requests), leaving some knockout games missing from the
+// bracket even though the standings that drive the same page are complete.
+function knockoutFixturesFromEvents(events) {
   const map = {};
-  for (const ev of byId.values()) {
+  for (const ev of events) {
     const comp = ev.competitions?.[0]; if (!comp) continue;
     const round = detectKnockoutRound(ev, comp);
     if (!round) continue;
@@ -1978,6 +1974,10 @@ function PoolDashboard() {
           const { status: s, h2h: h } = computeStandingsAndH2H(events);
           setStatus(s);
           setH2h(h);
+          // Derive the bracket's knockout matchups from these SAME events so it
+          // is always exactly as complete as the standings above (one fetch,
+          // not two that can disagree).
+          setKnockoutFixtures(knockoutFixturesFromEvents(events));
         }
       })
       .catch(() => {});
@@ -2039,15 +2039,9 @@ function PoolDashboard() {
     return () => clearInterval(id);
   }, []);
 
-  // Once FIFA's Round-of-32 draw is published, it shows up in ESPN's schedule
-  // as concrete (still-to-play) fixtures - poll for it so wildcard bracket
-  // slots can show the real opponent instead of just the eligible pool.
-  useEffect(() => {
-    const run = () => fetchKnockoutFixtures().then(setKnockoutFixtures).catch(() => {});
-    run();
-    const id = setInterval(run, 300000);
-    return () => clearInterval(id);
-  }, []);
+  // (Knockout bracket matchups are derived from the same ESPN events as the
+  // live standings above - see that effect - so they can never come back less
+  // complete than the standings that share the page.)
 
   // Full group-stage fixture list (played + still-to-play), needed by the
   // payout-projection simulator to know exactly which matches remain. Fetched
