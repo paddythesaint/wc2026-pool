@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T20:42:43.545259+00:00",
+  "updated": "2026-07-03T08:37:08.818971+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -7,7 +7,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "G"
+      "st": "E32"
     },
     "Argentina": {
       "p": 3,
@@ -31,7 +31,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "G"
+      "st": "E32"
     },
     "Belgium": {
       "p": 3,
@@ -87,7 +87,7 @@
       "d": 0,
       "l": 1,
       "pts": 6,
-      "st": "G"
+      "st": "E32"
     },
     "Curaçao": {
       "p": 3,
@@ -279,7 +279,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "G"
+      "st": "R16"
     },
     "Qatar": {
       "p": 3,
@@ -327,7 +327,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "G"
+      "st": "R16"
     },
     "Sweden": {
       "p": 3,
@@ -343,7 +343,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "G"
+      "st": "R16"
     },
     "Tunisia": {
       "p": 3,
@@ -388,67 +388,28 @@
   },
   "fixtures": [
     {
-      "d": "Jul 1",
+      "d": "Jul 2",
       "k": "",
-      "a": "England",
-      "b": "DR Congo",
+      "a": "Spain",
+      "b": "Austria",
+      "s": "3-0",
+      "g": "Round of 32"
+    },
+    {
+      "d": "Jul 2",
+      "k": "",
+      "a": "Portugal",
+      "b": "Croatia",
       "s": "2-1",
       "g": "Round of 32"
     },
     {
-      "d": "Jul 1",
+      "d": "Jul 2",
       "k": "",
-      "a": "Belgium",
-      "b": "Senegal",
-      "s": "3-2",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jul 1",
-      "k": "",
-      "a": "United States",
-      "b": "Bosnia and Herzegovina",
-      "s": "2-0",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jul 2",
-      "k": "LIVE",
-      "a": "Spain",
-      "b": "Austria",
-      "s": "2-0",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.71,
-        "draw": 0.19,
-        "away": 0.1
-      }
-    },
-    {
-      "d": "Jul 2",
-      "k": "7:00 PM ET",
-      "a": "Portugal",
-      "b": "Croatia",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.57,
-        "draw": 0.25,
-        "away": 0.17
-      }
-    },
-    {
-      "d": "Jul 2",
-      "k": "11:00 PM ET",
       "a": "Switzerland",
       "b": "Algeria",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.49,
-        "draw": 0.29,
-        "away": 0.22
-      }
+      "s": "2-0",
+      "g": "Round of 32"
     },
     {
       "d": "Jul 3",
@@ -458,9 +419,9 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.29,
+        "home": 0.26,
         "draw": 0.33,
-        "away": 0.38
+        "away": 0.41
       }
     },
     {
@@ -484,9 +445,35 @@
       "s": "",
       "g": "Round of 32",
       "odds": {
-        "home": 0.66,
+        "home": 0.67,
         "draw": 0.22,
         "away": 0.11
+      }
+    },
+    {
+      "d": "Jul 4",
+      "k": "1:00 PM ET",
+      "a": "Canada",
+      "b": "Morocco",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.19,
+        "draw": 0.27,
+        "away": 0.53
+      }
+    },
+    {
+      "d": "Jul 4",
+      "k": "5:00 PM ET",
+      "a": "Paraguay",
+      "b": "France",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.05,
+        "draw": 0.14,
+        "away": 0.81
       }
     }
   ],
@@ -497,7 +484,7 @@
       4
     ],
     "Ben|Sandeep": [
-      5,
+      6,
       4,
       5
     ],
@@ -507,7 +494,7 @@
       3
     ],
     "Patrick|Sandeep": [
-      3,
+      4,
       2,
       2
     ],
