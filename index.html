@@ -1823,11 +1823,46 @@ function buildProjectedBracket(status, groupSchedule, strengthOf, matchupOverrid
   const resolveTeam = (slot, half, idx, side) =>
     slot.t === "WC" ? wcAssignment[`${half}-${idx}-${side}`] : rankGroup(slot.g, status)[slot.t === "W" ? 0 : 1].name;
 
+  // Pre-seat each Round-of-32 slot from ESPN's real draw. We anchor on the
+  // reliable group-position (non-wildcard) side of each template match and
+  // pull that team's actual opponent and result, so the displayed matchup,
+  // winner and "decided" (green) state reflect reality rather than however the
+  // wildcard pools happen to seat (the seating is only a pre-draw guess and can
+  // mislabel opponents). The `claimed` set guarantees no real fixture is placed
+  // in two slots - e.g. a real Winner-vs-Runner-up game whose both ends are
+  // template anchors - falling back to the template projection for any slot we
+  // can't confidently fill.
+  const r32RealByKey = {};
+  const claimed = new Set();
+  for (const half of [1, 2]) {
+    BRACKET_HALVES[half].forEach((m, idx) => {
+      const anchorSide = m.a.t !== "WC" ? "a" : "b";
+      const anchor = resolveTeam(m[anchorSide], half, idx, anchorSide);
+      const fx = knockoutFixtures?.[anchor];
+      if (!fx || fx.round !== "R32" || !TEAMS.some(t => t.name === fx.opponent)) return;
+      if (claimed.has(anchor) || claimed.has(fx.opponent)) return;
+      claimed.add(anchor); claimed.add(fx.opponent);
+      r32RealByKey[`R32-${half}-${idx}`] = {
+        a: anchor, b: fx.opponent, completed: !!fx.completed,
+        winner: fx.completed ? (fx.won ? anchor : fx.opponent) : null,
+      };
+    });
+  }
+
   function buildHalf(half) {
     const r32 = BRACKET_HALVES[half].map((m, idx) => {
+      const key = `R32-${half}-${idx}`;
+      const real = r32RealByKey[key];
+      if (real) {
+        const { a, b } = real;
+        const winner = real.completed
+          ? real.winner
+          : pickWinner(key, a, b, strengthOf, matchupOverrides, "R32", knockoutFixtures);
+        return { key, round: "R32", a, b, winner, final: real.completed };
+      }
+      // Pre-draw / no ESPN fixture yet: fall back to the template projection.
       const a = resolveTeam(m.a, half, idx, "a");
       const b = resolveTeam(m.b, half, idx, "b");
-      const key = `R32-${half}-${idx}`;
       const winner = pickWinner(key, a, b, strengthOf, matchupOverrides, "R32", knockoutFixtures);
       return { key, round: "R32", a, b, winner, final: !!realKnockoutWinner(a, b, "R32", knockoutFixtures) };
     });
