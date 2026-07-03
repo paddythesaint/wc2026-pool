@@ -727,7 +727,7 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, pay
           fontSize:10.5, padding:"3px 5px", cursor: final ? "default" : "pointer", borderRadius:4, lineHeight:1.3,
           background: isWinner ? "#16203A" : "transparent",
           color: isWinner ? C.text : C.mute,
-          border: forced ? `1px solid ${C.gold}` : isWinner ? `1px solid ${C.green}` : "1px solid transparent",
+          border: forced ? `1px solid ${C.gold}` : final && isWinner ? `1px solid ${C.green}` : "1px solid transparent",
           fontWeight: isWinner ? 700 : 400,
         }}>
         {team}
@@ -818,9 +818,8 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, pay
         </div>
         <div style={{fontSize:10,color:C.mute,marginBottom:8}}>
           Each matchup defaults to whichever team has the better title-win price. Click a team to force them through that matchup -
-          saved only in your browser, never shared with other pool members. The team advancing each match is boxed in
-          <b style={{color:C.green}}> green</b> (<b style={{color:C.gold}}>gold</b> where you've forced an override); a green outline
-          around the whole match means that result is already final.
+          saved only in your browser, never shared with other pool members. Winners of matches that are already final are boxed in
+          <b style={{color:C.green}}> green</b>; a team you've forced through is boxed in <b style={{color:C.gold}}>gold</b>.
         </div>
 
         {[1,2].map(half => (
