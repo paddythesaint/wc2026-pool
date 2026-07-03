@@ -242,6 +242,16 @@ function ThirdPlaceTable({ status }) {
 function BracketPanel({ status, knockoutFixtures }) {
   const top8 = React.useMemo(() => getCurrentThirdPlace(status).slice(0, 8), [status]);
 
+  // Once ESPN has the real Round-of-32 fixtures, we render those actual
+  // matchups (via KnockoutRoundsPanel below) instead of the group-standings
+  // half-draw template - the static BRACKET_HALVES slot pairing is only a
+  // pre-draw projection and won't match FIFA's real draw, so hide it as soon
+  // as reality is available.
+  const hasR32 = React.useMemo(
+    () => Object.values(knockoutFixtures || {}).some(f => f.round === "R32"),
+    [knockoutFixtures]
+  );
+
   const tally = React.useMemo(() => {
     const t = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, { h1: 0, h2: 0, wc: 0 }]));
     for (const g of Object.keys(GROUPS)) {
@@ -327,32 +337,39 @@ function BracketPanel({ status, knockoutFixtures }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {[1, 2].map(half => (
-          <div key={half} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
-            <div className="px-3 py-2" style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
-              <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>HALF {half}</span>
-            </div>
-            {BRACKET_HALVES[half].map((m, idx) => (
-              <div key={idx} className="px-3 py-2"
-                style={{borderBottom: idx < BRACKET_HALVES[half].length - 1 ? `1px solid ${C.line}` : "none"}}>
-                <SlotDisplay slot={m.a} sibling={m.b} />
-                <div style={{fontSize:9,color:C.mute,margin:"3px 0"}}>vs</div>
-                <SlotDisplay slot={m.b} sibling={m.a} />
+      {!hasR32 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[1, 2].map(half => (
+            <div key={half} style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,overflow:"hidden"}}>
+              <div className="px-3 py-2" style={{borderBottom:`1px solid ${C.line}`,background:"#16203A"}}>
+                <span style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>HALF {half}</span>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
+              {BRACKET_HALVES[half].map((m, idx) => (
+                <div key={idx} className="px-3 py-2"
+                  style={{borderBottom: idx < BRACKET_HALVES[half].length - 1 ? `1px solid ${C.line}` : "none"}}>
+                  <SlotDisplay slot={m.a} sibling={m.b} />
+                  <div style={{fontSize:9,color:C.mute,margin:"3px 0"}}>vs</div>
+                  <SlotDisplay slot={m.b} sibling={m.a} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
 
       <KnockoutRoundsPanel knockoutFixtures={knockoutFixtures} />
 
       <div style={{fontSize:10,color:C.mute}}>
-        Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
-        The 8 wildcard berths go to the best 3rd-place teams; once FIFA's official Round-of-32 draw is published, the actual opponent appears
-        marked <b>(drawn)</b> - until then, "possible" lists current top-8 third-place teams whose group is eligible for that slot.
-        Once a Round of 32 match is final, the winner is marked <b style={{color:C.green}}>ADVANCED</b> and the loser is greyed out and marked <b>OUT</b>.
-        Later rounds (Round of 16 onward) appear above automatically as soon as FIFA schedules them, with scores once played.
+        {hasR32 ? (
+          <>Knockout matchups above are FIFA's real draw as reported by ESPN. The winner of each completed
+          match is shown in <b>bold</b>; the loser is greyed out and knocked out. Rounds appear automatically
+          as soon as FIFA schedules them, with live scores once played.</>
+        ) : (
+          <>Winner/runner-up slots use current group standings (marked <b>proj.</b> while that group still has games left - these can still change).
+          The 8 wildcard berths go to the best 3rd-place teams; once FIFA's official Round-of-32 draw is published, the actual opponent appears
+          marked <b>(drawn)</b> - until then, "possible" lists current top-8 third-place teams whose group is eligible for that slot.
+          Later rounds appear above automatically as soon as FIFA schedules them, with scores once played.</>
+        )}
       </div>
     </div>
   );
@@ -365,8 +382,8 @@ function BracketPanel({ status, knockoutFixtures }) {
 // rather than any hardcoded bracket tree, and simply renders nothing for a
 // round until ESPN actually has fixtures for it.
 function KnockoutRoundsPanel({ knockoutFixtures }) {
-  const ROUND_LABELS = { R16: "ROUND OF 16", QF: "QUARTERFINALS", SF: "SEMIFINALS", FINAL: "FINAL", "3RD_PLACE": "3RD PLACE MATCH" };
-  const ROUNDS = ["R16", "QF", "SF", "FINAL", "3RD_PLACE"];
+  const ROUND_LABELS = { R32: "ROUND OF 32", R16: "ROUND OF 16", QF: "QUARTERFINALS", SF: "SEMIFINALS", FINAL: "FINAL", "3RD_PLACE": "3RD PLACE MATCH" };
+  const ROUNDS = ["R32", "R16", "QF", "SF", "FINAL", "3RD_PLACE"];
 
   const byRound = React.useMemo(() => {
     const out = Object.fromEntries(ROUNDS.map(r => [r, []]));
