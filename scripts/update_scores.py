@@ -164,9 +164,10 @@ def load_existing():
         with open(OUTPUT_FILE, encoding="utf-8") as f: return json.load(f)
     except: return {}
 
-def data_changed(existing, new_status, new_fixtures, new_h2h):
+def data_changed(existing, new_status, new_fixtures, new_h2h, new_knockout):
     if new_status != existing.get("status"): return True
     if new_h2h    != existing.get("h2h"):    return True
+    if new_knockout != existing.get("knockout", []): return True
     old_fx = existing.get("fixtures", [])
     if len(new_fixtures) != len(old_fx): return True
     for nf, of in zip(new_fixtures, old_fx):
@@ -282,6 +283,39 @@ def main():
             status[loser]["st"] = lose_st
             knockout_teams.add(loser)
 
+    # ── Collect the full knockout bracket (every round, matchups + results) ───
+    # so the client can render it straight from this committed file instead of
+    # re-fetching ~40 days of ESPN itself. That client-side fetch is unreliable
+    # from some networks (ESPN rate-limits the many daily requests), which left
+    # later knockout games missing from the bracket; this file is produced
+    # server-side where the fetch is reliable and is served straight off Pages.
+    knockout = []
+    seen_ko = set()
+    for ev in all_events:
+        comp, home, away = get_competitors(ev)
+        if comp is None: continue
+        round_key = detect_knockout_round(ev, comp)
+        if not round_key: continue
+        name_a = map_team(home.get("team",{}).get("displayName",""))
+        name_b = map_team(away.get("team",{}).get("displayName",""))
+        if not name_a or not name_b: continue
+        dedup = round_key + "|" + "|".join(sorted([name_a, name_b]))
+        if dedup in seen_ko: continue
+        seen_ko.add(dedup)
+        st_type   = comp.get("status",{}).get("type",{})
+        completed = bool(st_type.get("completed", False))
+        try:
+            ga, gb = int(home.get("score",0)), int(away.get("score",0))
+        except:
+            ga, gb = 0, 0
+        home_winner = home.get("winner")
+        a_won = home_winner if isinstance(home_winner, bool) else ga > gb
+        knockout.append({
+            "a": name_a, "b": name_b, "round": round_key,
+            "completed": completed, "aScore": ga, "bScore": gb,
+            "winner": (name_a if a_won else name_b) if completed else None,
+        })
+
     # ── Compute H2H records across all completed matches ─────────────────────
     h2h = {f"{p1}|{p2}": [0,0,0] for i,p1 in enumerate(PLAYERS)
            for p2 in PLAYERS[i+1:]}   # [p1 wins, draws, p2 wins]
@@ -359,11 +393,11 @@ def main():
         print("[fixtures] ESPN returned nothing — keeping existing", file=sys.stderr)
 
     # ── Only write if something actually changed ──────────────────────────────
-    if not data_changed(existing, status, fixtures, h2h):
+    if not data_changed(existing, status, fixtures, h2h, knockout):
         print("[done] no changes detected — skipping write")
         return
 
-    output = {"updated": now_utc.isoformat(), "status": status, "fixtures": fixtures, "h2h": h2h}
+    output = {"updated": now_utc.isoformat(), "status": status, "fixtures": fixtures, "h2h": h2h, "knockout": knockout}
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
