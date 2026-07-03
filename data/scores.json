@@ -508,5 +508,169 @@
       1,
       5
     ]
-  }
+  },
+  "knockout": [
+    {
+      "a": "South Africa",
+      "b": "Canada",
+      "round": "R32",
+      "completed": true,
+      "aScore": 0,
+      "bScore": 1,
+      "winner": "Canada"
+    },
+    {
+      "a": "Germany",
+      "b": "Paraguay",
+      "round": "R32",
+      "completed": true,
+      "aScore": 0,
+      "bScore": 1,
+      "winner": "Paraguay"
+    },
+    {
+      "a": "Netherlands",
+      "b": "Morocco",
+      "round": "R32",
+      "completed": true,
+      "aScore": 0,
+      "bScore": 1,
+      "winner": "Morocco"
+    },
+    {
+      "a": "France",
+      "b": "Sweden",
+      "round": "R32",
+      "completed": true,
+      "aScore": 3,
+      "bScore": 0,
+      "winner": "France"
+    },
+    {
+      "a": "Cote d'Ivoire",
+      "b": "Norway",
+      "round": "R32",
+      "completed": true,
+      "aScore": 1,
+      "bScore": 2,
+      "winner": "Norway"
+    },
+    {
+      "a": "Mexico",
+      "b": "Ecuador",
+      "round": "R32",
+      "completed": true,
+      "aScore": 2,
+      "bScore": 0,
+      "winner": "Mexico"
+    },
+    {
+      "a": "United States",
+      "b": "Bosnia and Herzegovina",
+      "round": "R32",
+      "completed": true,
+      "aScore": 1,
+      "bScore": 0,
+      "winner": "United States"
+    },
+    {
+      "a": "Belgium",
+      "b": "Senegal",
+      "round": "R32",
+      "completed": true,
+      "aScore": 0,
+      "bScore": 1,
+      "winner": "Senegal"
+    },
+    {
+      "a": "England",
+      "b": "DR Congo",
+      "round": "R32",
+      "completed": true,
+      "aScore": 2,
+      "bScore": 1,
+      "winner": "England"
+    },
+    {
+      "a": "Brazil",
+      "b": "Japan",
+      "round": "R32",
+      "completed": true,
+      "aScore": 2,
+      "bScore": 1,
+      "winner": "Brazil"
+    },
+    {
+      "a": "Portugal",
+      "b": "Croatia",
+      "round": "R32",
+      "completed": true,
+      "aScore": 2,
+      "bScore": 1,
+      "winner": "Portugal"
+    },
+    {
+      "a": "Spain",
+      "b": "Austria",
+      "round": "R32",
+      "completed": true,
+      "aScore": 3,
+      "bScore": 0,
+      "winner": "Spain"
+    },
+    {
+      "a": "Switzerland",
+      "b": "Algeria",
+      "round": "R32",
+      "completed": true,
+      "aScore": 2,
+      "bScore": 0,
+      "winner": "Switzerland"
+    },
+    {
+      "a": "Australia",
+      "b": "Egypt",
+      "round": "R32",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Argentina",
+      "b": "Cape Verde",
+      "round": "R32",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Colombia",
+      "b": "Ghana",
+      "round": "R32",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Canada",
+      "b": "Morocco",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Paraguay",
+      "b": "France",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    }
+  ]
 }

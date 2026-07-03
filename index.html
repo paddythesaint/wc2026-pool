@@ -254,7 +254,7 @@ function BracketPanel({ status, knockoutFixtures }) {
   // pre-draw projection and won't match FIFA's real draw, so hide it as soon
   // as reality is available.
   const hasR32 = React.useMemo(
-    () => Object.values(knockoutFixtures || {}).some(f => f.round === "R32"),
+    () => Object.values(knockoutFixtures || {}).some(byRound => byRound.R32),
     [knockoutFixtures]
   );
 
@@ -281,8 +281,8 @@ function BracketPanel({ status, knockoutFixtures }) {
   // greys/strikes them out, and null (not played, or no fixture yet) leaves
   // the slot exactly as before. Updates automatically as results come in.
   const r32Fate = (teamName) => {
-    const f = knockoutFixtures?.[teamName];
-    if (!f || f.round !== "R32" || !f.completed) return null;
+    const f = knockoutFixtures?.[teamName]?.R32;
+    if (!f || !f.completed) return null;
     return f.won ? "won" : "lost";
   };
 
@@ -305,8 +305,8 @@ function BracketPanel({ status, knockoutFixtures }) {
   const SlotDisplay = ({ slot, sibling }) => {
     if (slot.t === "WC") {
       const siblingTeam = sibling ? resolveSlot(sibling, status)?.team : null;
-      const scheduled = siblingTeam ? knockoutFixtures?.[siblingTeam.name] : null;
-      const drawnTeam = scheduled?.round === "R32" ? TEAMS.find(t => t.name === scheduled.opponent) : null;
+      const scheduled = siblingTeam ? knockoutFixtures?.[siblingTeam.name]?.R32 : null;
+      const drawnTeam = scheduled ? TEAMS.find(t => t.name === scheduled.opponent) : null;
       if (drawnTeam) {
         return <TeamLine team={drawnTeam} tag="(drawn)" fate={r32Fate(drawnTeam.name)} />;
       }
@@ -394,15 +394,17 @@ function KnockoutRoundsPanel({ knockoutFixtures }) {
   const byRound = React.useMemo(() => {
     const out = Object.fromEntries(ROUNDS.map(r => [r, []]));
     const seen = new Set();
-    for (const [name, info] of Object.entries(knockoutFixtures || {})) {
-      if (!ROUNDS.includes(info.round)) continue;
-      const key = info.round + "|" + [name, info.opponent].sort().join("|");
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const teamA = TEAMS.find(t => t.name === name);
-      const teamB = TEAMS.find(t => t.name === info.opponent);
-      if (!teamA || !teamB) continue;
-      out[info.round].push({ teamA, teamB, info });
+    for (const [name, roundMap] of Object.entries(knockoutFixtures || {})) {
+      for (const info of Object.values(roundMap)) {
+        if (!ROUNDS.includes(info.round)) continue;
+        const key = info.round + "|" + [name, info.opponent].sort().join("|");
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const teamA = TEAMS.find(t => t.name === name);
+        const teamB = TEAMS.find(t => t.name === info.opponent);
+        if (!teamA || !teamB) continue;
+        out[info.round].push({ teamA, teamB, info });
+      }
     }
     return out;
   }, [knockoutFixtures]);
@@ -1258,6 +1260,11 @@ async function fetchAllEspnEvents() {
 // otherwise a second, independent fetch can come back partially (ESPN rate-
 // limits the ~30 daily requests), leaving some knockout games missing from the
 // bracket even though the standings that drive the same page are complete.
+//
+// Shape: { teamName: { R32: entry, R16: entry, ... } } - keyed by BOTH team and
+// round, because a team that keeps winning appears in several rounds and a flat
+// team->entry map would let its later round clobber the earlier one (which broke
+// the Round-of-32 bracket seating once Round-of-16 fixtures showed up).
 function knockoutFixturesFromEvents(events) {
   const map = {};
   for (const ev of events) {
@@ -1275,8 +1282,26 @@ function knockoutFixturesFromEvents(events) {
     const aWon = completed
       ? ((typeof home.winner === "boolean" || typeof away.winner === "boolean") ? !!home.winner : ga > gb)
       : null;
-    map[A.name] = { opponent: B.name, round, completed, date: ev.date, gf: ga, ga: gb, won: aWon };
-    map[B.name] = { opponent: A.name, round, completed, date: ev.date, gf: gb, ga: ga, won: completed ? !aWon : null };
+    (map[A.name] = map[A.name] || {})[round] = { opponent: B.name, round, completed, date: ev.date, gf: ga, ga: gb, won: aWon };
+    (map[B.name] = map[B.name] || {})[round] = { opponent: A.name, round, completed, date: ev.date, gf: gb, ga: ga, won: completed ? !aWon : null };
+  }
+  return map;
+}
+
+// Same { teamName: { round: entry } } shape, built from the committed `knockout`
+// array in data/scores.json (produced server-side by the update-scores cron,
+// where the ESPN fetch is reliable). This is the dependable source of truth for
+// the bracket - the client's own live ESPN fetch above can come back partial on
+// some networks, so we use this file as the base and overlay any live results.
+function knockoutFixturesFromFile(knockout) {
+  const map = {};
+  for (const k of (knockout || [])) {
+    const A = findTeam(k.a), B = findTeam(k.b);
+    if (!A || !B) continue;
+    const completed = !!k.completed;
+    const aWon = completed ? k.winner === A.name : null;
+    (map[A.name] = map[A.name] || {})[k.round] = { opponent: B.name, round: k.round, completed, date: null, gf: k.aScore ?? 0, ga: k.bScore ?? 0, won: aWon };
+    (map[B.name] = map[B.name] || {})[k.round] = { opponent: A.name, round: k.round, completed, date: null, gf: k.bScore ?? 0, ga: k.aScore ?? 0, won: completed ? !aWon : null };
   }
   return map;
 }
@@ -1533,8 +1558,8 @@ function makeProbWin(strengthOf) {
 // otherwise null. Consulted ahead of any random/strength-based guess so
 // real results are never silently overridden in projections or simulations.
 function realKnockoutWinner(a, b, round, knockoutFixtures) {
-  const fx = knockoutFixtures?.[a];
-  if (fx && fx.opponent === b && fx.round === round && fx.completed) {
+  const fx = knockoutFixtures?.[a]?.[round];
+  if (fx && fx.opponent === b && fx.completed) {
     return fx.won ? a : b;
   }
   return null;
@@ -1556,8 +1581,8 @@ function knownWildcardAssignment(status, knockoutFixtures) {
         if (slot.t !== "WC") continue;
         const sibling = m[side === "a" ? "b" : "a"];
         const siblingTeam = rankGroup(sibling.g, status)[sibling.t === "W" ? 0 : 1].name;
-        const fx = knockoutFixtures[siblingTeam];
-        if (fx && fx.round === "R32") {
+        const fx = knockoutFixtures[siblingTeam]?.R32;
+        if (fx) {
           assignment[`${half}-${idx}-${side}`] = fx.opponent;
         }
       }
@@ -1847,8 +1872,8 @@ function buildProjectedBracket(status, groupSchedule, strengthOf, matchupOverrid
     BRACKET_HALVES[half].forEach((m, idx) => {
       const anchorSide = m.a.t !== "WC" ? "a" : "b";
       const anchor = resolveTeam(m[anchorSide], half, idx, anchorSide);
-      const fx = knockoutFixtures?.[anchor];
-      if (!fx || fx.round !== "R32" || !TEAMS.some(t => t.name === fx.opponent)) return;
+      const fx = knockoutFixtures?.[anchor]?.R32;
+      if (!fx || !TEAMS.some(t => t.name === fx.opponent)) return;
       if (claimed.has(anchor) || claimed.has(fx.opponent)) return;
       claimed.add(anchor); claimed.add(fx.opponent);
       r32RealByKey[`R32-${half}-${idx}`] = {
@@ -1941,7 +1966,19 @@ function PoolDashboard() {
   const [qualHistory, setQualHistory] = useState([]);
   const [titleOddsHistory, setTitleOddsHistory] = useState([]);
   const [payoutProjection, setPayoutProjection] = useState(null);
-  const [knockoutFixtures, setKnockoutFixtures] = useState({});
+  // Knockout bracket data comes from two sources: the committed data/scores.json
+  // `knockout` array (reliable, complete - the base) and the client's own live
+  // ESPN events (fresher, but can be partial on some networks - an overlay).
+  const [fileKnockout, setFileKnockout] = useState({});
+  const [liveKnockout, setLiveKnockout] = useState({});
+  // Deep-merge per round so a live result overlays the file's entry for that
+  // same round without dropping other rounds only one source happens to have.
+  const knockoutFixtures = React.useMemo(() => {
+    const merged = {};
+    for (const [team, byRound] of Object.entries(fileKnockout)) merged[team] = { ...byRound };
+    for (const [team, byRound] of Object.entries(liveKnockout)) merged[team] = { ...(merged[team] || {}), ...byRound };
+    return merged;
+  }, [fileKnockout, liveKnockout]);
   const [groupSchedule, setGroupSchedule]       = useState([]);
   const [bracketView, setBracketView] = useState("live");
   const [updated, setUpdated]       = useState(new Date(SEED_DATE));
@@ -1980,10 +2017,10 @@ function PoolDashboard() {
           const { status: s, h2h: h } = computeStandingsAndH2H(events);
           setStatus(s);
           setH2h(h);
-          // Derive the bracket's knockout matchups from these SAME events so it
-          // is always exactly as complete as the standings above (one fetch,
-          // not two that can disagree).
-          setKnockoutFixtures(knockoutFixturesFromEvents(events));
+          // Live knockout results from these events overlay the committed file
+          // below - they're fresher, but may be partial if ESPN throttled some
+          // of the day fetches, which is exactly why the file is the base.
+          setLiveKnockout(knockoutFixturesFromEvents(events));
         }
       })
       .catch(() => {});
@@ -2045,9 +2082,20 @@ function PoolDashboard() {
     return () => clearInterval(id);
   }, []);
 
-  // (Knockout bracket matchups are derived from the same ESPN events as the
-  // live standings above - see that effect - so they can never come back less
-  // complete than the standings that share the page.)
+  // The committed data/scores.json carries a complete `knockout` array built
+  // server-side by the update-scores cron (where the ESPN fetch is reliable).
+  // This is the bracket's dependable base - the client's own live ESPN fetch
+  // can come back partial on some networks, so we always have this to fall back
+  // on. Re-fetched every 60s (cache-busted) to pick up new results.
+  useEffect(() => {
+    const run = () => fetch(`data/scores.json?t=${Date.now()}`)
+      .then(r => r.json())
+      .then(d => setFileKnockout(knockoutFixturesFromFile(d.knockout)))
+      .catch(() => {});
+    run();
+    const id = setInterval(run, 60000);
+    return () => clearInterval(id);
+  }, []);
 
   // Full group-stage fixture list (played + still-to-play), needed by the
   // payout-projection simulator to know exactly which matches remain. Fetched
