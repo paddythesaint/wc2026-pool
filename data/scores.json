@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-04T20:15:01.520512+00:00",
+  "updated": "2026-07-04T23:46:21.150087+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -143,7 +143,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "R16"
+      "st": "QF"
     },
     "Germany": {
       "p": 3,
@@ -271,7 +271,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "R16"
+      "st": "E16"
     },
     "Portugal": {
       "p": 3,
@@ -421,16 +421,11 @@
     },
     {
       "d": "Jul 4",
-      "k": "5:00 PM ET",
+      "k": "",
       "a": "Paraguay",
       "b": "France",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.05,
-        "draw": 0.15,
-        "away": 0.8
-      }
+      "s": "0-1",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 5",
@@ -440,9 +435,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.52,
+        "home": 0.53,
         "draw": 0.25,
-        "away": 0.23
+        "away": 0.22
       }
     },
     {
@@ -453,9 +448,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.31,
+        "home": 0.3,
         "draw": 0.3,
-        "away": 0.39
+        "away": 0.4
       }
     }
   ],
@@ -478,7 +473,7 @@
     "Patrick|Sandeep": [
       4,
       2,
-      2
+      3
     ],
     "Patrick|Sunny": [
       2,
@@ -649,10 +644,10 @@
       "a": "Paraguay",
       "b": "France",
       "round": "R16",
-      "completed": false,
+      "completed": true,
       "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "bScore": 1,
+      "winner": "France"
     },
     {
       "a": "Brazil",
