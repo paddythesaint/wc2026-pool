@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-04T09:10:02.405895+00:00",
+  "updated": "2026-07-04T20:15:01.520512+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -63,7 +63,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "R16"
+      "st": "E16"
     },
     "Cape Verde": {
       "p": 3,
@@ -231,7 +231,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "QF"
     },
     "Netherlands": {
       "p": 3,
@@ -413,16 +413,11 @@
     },
     {
       "d": "Jul 4",
-      "k": "1:00 PM ET",
+      "k": "",
       "a": "Canada",
       "b": "Morocco",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.19,
-        "draw": 0.27,
-        "away": 0.54
-      }
+      "s": "0-3",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 4",
@@ -445,7 +440,7 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.53,
+        "home": 0.52,
         "draw": 0.25,
         "away": 0.23
       }
@@ -645,10 +640,10 @@
       "a": "Canada",
       "b": "Morocco",
       "round": "R16",
-      "completed": false,
+      "completed": true,
       "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "bScore": 3,
+      "winner": "Morocco"
     },
     {
       "a": "Paraguay",
