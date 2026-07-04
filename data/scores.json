@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-04T00:17:35.107232+00:00",
+  "updated": "2026-07-04T09:10:02.405895+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -15,7 +15,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "G"
+      "st": "R16"
     },
     "Australia": {
       "p": 3,
@@ -71,7 +71,7 @@
       "d": 3,
       "l": 0,
       "pts": 3,
-      "st": "G"
+      "st": "E32"
     },
     "Colombia": {
       "p": 3,
@@ -79,7 +79,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "G"
+      "st": "R16"
     },
     "Croatia": {
       "p": 3,
@@ -159,7 +159,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "G"
+      "st": "E32"
     },
     "Haiti": {
       "p": 3,
@@ -388,30 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 2",
-      "k": "",
-      "a": "Spain",
-      "b": "Austria",
-      "s": "3-0",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jul 2",
-      "k": "",
-      "a": "Portugal",
-      "b": "Croatia",
-      "s": "2-1",
-      "g": "Round of 32"
-    },
-    {
-      "d": "Jul 2",
-      "k": "",
-      "a": "Switzerland",
-      "b": "Algeria",
-      "s": "2-0",
-      "g": "Round of 32"
-    },
-    {
       "d": "Jul 3",
       "k": "",
       "a": "Australia",
@@ -421,29 +397,19 @@
     },
     {
       "d": "Jul 3",
-      "k": "LIVE",
+      "k": "",
       "a": "Argentina",
       "b": "Cape Verde",
-      "s": "2-1",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.83,
-        "draw": 0.12,
-        "away": 0.05
-      }
+      "s": "3-2",
+      "g": "Round of 32"
     },
     {
       "d": "Jul 3",
-      "k": "9:30 PM ET",
+      "k": "",
       "a": "Colombia",
       "b": "Ghana",
-      "s": "",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.67,
-        "draw": 0.22,
-        "away": 0.11
-      }
+      "s": "1-0",
+      "g": "Round of 32"
     },
     {
       "d": "Jul 4",
@@ -453,9 +419,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.21,
-        "draw": 0.28,
-        "away": 0.51
+        "home": 0.19,
+        "draw": 0.27,
+        "away": 0.54
       }
     },
     {
@@ -466,9 +432,35 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.06,
+        "home": 0.05,
         "draw": 0.15,
         "away": 0.8
+      }
+    },
+    {
+      "d": "Jul 5",
+      "k": "4:00 PM ET",
+      "a": "Brazil",
+      "b": "Norway",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.53,
+        "draw": 0.25,
+        "away": 0.23
+      }
+    },
+    {
+      "d": "Jul 5",
+      "k": "8:00 PM ET",
+      "a": "Mexico",
+      "b": "England",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.31,
+        "draw": 0.3,
+        "away": 0.39
       }
     }
   ],
@@ -486,7 +478,7 @@
     "Ben|Sunny": [
       6,
       1,
-      3
+      4
     ],
     "Patrick|Sandeep": [
       4,
@@ -499,7 +491,7 @@
       5
     ],
     "Sandeep|Sunny": [
-      6,
+      7,
       1,
       5
     ]
@@ -635,19 +627,19 @@
       "a": "Argentina",
       "b": "Cape Verde",
       "round": "R32",
-      "completed": false,
-      "aScore": 2,
-      "bScore": 1,
-      "winner": null
+      "completed": true,
+      "aScore": 3,
+      "bScore": 2,
+      "winner": "Argentina"
     },
     {
       "a": "Colombia",
       "b": "Ghana",
       "round": "R32",
-      "completed": false,
-      "aScore": 0,
+      "completed": true,
+      "aScore": 1,
       "bScore": 0,
-      "winner": null
+      "winner": "Colombia"
     },
     {
       "a": "Canada",
