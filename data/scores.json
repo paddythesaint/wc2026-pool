@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-03T20:21:31.009193+00:00",
+  "updated": "2026-07-04T00:17:35.107232+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -23,7 +23,7 @@
       "d": 1,
       "l": 1,
       "pts": 4,
-      "st": "G"
+      "st": "E32"
     },
     "Austria": {
       "p": 3,
@@ -127,7 +127,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "G"
+      "st": "R16"
     },
     "England": {
       "p": 3,
@@ -413,23 +413,18 @@
     },
     {
       "d": "Jul 3",
-      "k": "LIVE",
+      "k": "",
       "a": "Australia",
       "b": "Egypt",
       "s": "1-1",
-      "g": "Round of 32",
-      "odds": {
-        "home": 0.27,
-        "draw": 0.35,
-        "away": 0.38
-      }
+      "g": "Round of 32"
     },
     {
       "d": "Jul 3",
-      "k": "6:00 PM ET",
+      "k": "LIVE",
       "a": "Argentina",
       "b": "Cape Verde",
-      "s": "",
+      "s": "2-1",
       "g": "Round of 32",
       "odds": {
         "home": 0.83,
@@ -459,8 +454,8 @@
       "g": "Round of 16",
       "odds": {
         "home": 0.21,
-        "draw": 0.27,
-        "away": 0.52
+        "draw": 0.28,
+        "away": 0.51
       }
     },
     {
@@ -471,7 +466,7 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.05,
+        "home": 0.06,
         "draw": 0.15,
         "away": 0.8
       }
@@ -631,18 +626,18 @@
       "a": "Australia",
       "b": "Egypt",
       "round": "R32",
-      "completed": false,
+      "completed": true,
       "aScore": 1,
       "bScore": 1,
-      "winner": null
+      "winner": "Egypt"
     },
     {
       "a": "Argentina",
       "b": "Cape Verde",
       "round": "R32",
       "completed": false,
-      "aScore": 0,
-      "bScore": 0,
+      "aScore": 2,
+      "bScore": 1,
       "winner": null
     },
     {
@@ -666,6 +661,24 @@
     {
       "a": "Paraguay",
       "b": "France",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Brazil",
+      "b": "Norway",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Mexico",
+      "b": "England",
       "round": "R16",
       "completed": false,
       "aScore": 0,
