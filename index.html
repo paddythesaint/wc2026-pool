@@ -1565,6 +1565,33 @@ function realKnockoutWinner(a, b, round, knockoutFixtures) {
   return null;
 }
 
+// Pairs a round's teams into matches, preferring FIFA's REAL scheduled
+// matchups (from knockoutFixtures) over the template's adjacent-pair
+// assumption. The static bracket template's adjacency does not match the real
+// 2026 bracket tree (e.g. it paired Canada vs Paraguay in the R16 when FIFA's
+// actual bracket has Canada vs Morocco), so once ESPN has a round's fixtures
+// we pair by those; teams whose fixture isn't known yet fall back to pairing
+// with the next unpaired team in template order.
+function pairByRealFixtures(teams, round, knockoutFixtures) {
+  const used = new Set();
+  const pairs = [];
+  for (const a of teams) {
+    if (a == null || used.has(a)) continue;
+    used.add(a);
+    let b = null;
+    const fx = knockoutFixtures?.[a]?.[round];
+    if (fx && teams.includes(fx.opponent) && !used.has(fx.opponent)) {
+      b = fx.opponent;
+    } else {
+      b = teams.find(t => t != null && !used.has(t));
+    }
+    if (b == null) break;
+    used.add(b);
+    pairs.push([a, b]);
+  }
+  return pairs;
+}
+
 // Once FIFA's official Round-of-32 draw is published, a WC slot's opponent
 // (the sibling W/RU slot in the same match) already shows that wildcard's
 // name in its `knockoutFixtures` entry - this walks BRACKET_HALVES and locks
@@ -1641,8 +1668,7 @@ function advanceHalf(teamNames, st, probWin, knockoutFixtures) {
   let semifinalLoser = null;
   for (const round of rounds) {
     const next = [];
-    for (let i = 0; i < current.length; i += 2) {
-      const a = current[i], b = current[i + 1];
+    for (const [a, b] of pairByRealFixtures(current, round, knockoutFixtures)) {
       const real = realKnockoutWinner(a, b, round, knockoutFixtures);
       const aWins = real ? real === a : Math.random() < probWin(a, b);
       const winner = aWins ? a : b, loser = aWins ? b : a;
@@ -1903,13 +1929,13 @@ function buildProjectedBracket(status, groupSchedule, strengthOf, matchupOverrid
     const rounds = [r32];
     let teams = r32.map(m => m.winner);
     for (const roundName of ["R16", "QF", "SF"]) {
-      const matches = [];
-      for (let i = 0; i < teams.length; i += 2) {
-        const key = `${roundName}-${half}-${i / 2}`;
-        const a = teams[i], b = teams[i + 1];
+      // Pair by FIFA's real scheduled matchups where known (the template's
+      // adjacent-pair assumption doesn't match the real bracket tree).
+      const matches = pairByRealFixtures(teams, roundName, knockoutFixtures).map(([a, b], i) => {
+        const key = `${roundName}-${half}-${i}`;
         const winner = pickWinner(key, a, b, strengthOf, matchupOverrides, roundName, knockoutFixtures);
-        matches.push({ key, round: roundName, a, b, winner, final: !!realKnockoutWinner(a, b, roundName, knockoutFixtures) });
-      }
+        return { key, round: roundName, a, b, winner, final: !!realKnockoutWinner(a, b, roundName, knockoutFixtures) };
+      });
       rounds.push(matches);
       teams = matches.map(m => m.winner);
     }
