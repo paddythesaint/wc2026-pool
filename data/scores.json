@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T00:16:13.781405+00:00",
+  "updated": "2026-07-06T14:07:10.007836+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -135,7 +135,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "QF"
     },
     "France": {
       "p": 3,
@@ -223,7 +223,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "R16"
+      "st": "E16"
     },
     "Morocco": {
       "p": 3,
@@ -388,22 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 4",
-      "k": "",
-      "a": "Canada",
-      "b": "Morocco",
-      "s": "0-3",
-      "g": "Round of 16"
-    },
-    {
-      "d": "Jul 4",
-      "k": "",
-      "a": "Paraguay",
-      "b": "France",
-      "s": "0-1",
-      "g": "Round of 16"
-    },
-    {
       "d": "Jul 5",
       "k": "",
       "a": "Brazil",
@@ -413,16 +397,11 @@
     },
     {
       "d": "Jul 5",
-      "k": "9:00 PM ET",
+      "k": "",
       "a": "Mexico",
       "b": "England",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.31,
-        "draw": 0.32,
-        "away": 0.37
-      }
+      "s": "2-3",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 6",
@@ -445,9 +424,35 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.36,
+        "home": 0.39,
         "draw": 0.28,
-        "away": 0.37
+        "away": 0.33
+      }
+    },
+    {
+      "d": "Jul 7",
+      "k": "12:00 PM ET",
+      "a": "Argentina",
+      "b": "Egypt",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.7,
+        "draw": 0.2,
+        "away": 0.11
+      }
+    },
+    {
+      "d": "Jul 7",
+      "k": "4:00 PM ET",
+      "a": "Switzerland",
+      "b": "Colombia",
+      "s": "",
+      "g": "Round of 16",
+      "odds": {
+        "home": 0.28,
+        "draw": 0.31,
+        "away": 0.41
       }
     }
   ],
@@ -465,7 +470,7 @@
     "Ben|Sunny": [
       6,
       1,
-      5
+      6
     ],
     "Patrick|Sandeep": [
       4,
@@ -659,10 +664,10 @@
       "a": "Mexico",
       "b": "England",
       "round": "R16",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 2,
+      "bScore": 3,
+      "winner": "England"
     },
     {
       "a": "Portugal",
