@@ -533,7 +533,7 @@ function QualificationHistoryPanel({ qualHistory }) {
   );
 }
 
-function TitleOddsHistoryPanel({ titleOddsHistory }) {
+function TitleOddsHistoryPanel({ titleOddsHistory, status }) {
   if (!titleOddsHistory || titleOddsHistory.length === 0) {
     return (
       <div style={{fontSize:11,color:C.mute}}>
@@ -555,7 +555,26 @@ function TitleOddsHistoryPanel({ titleOddsHistory }) {
   };
   const pct = (v) => `${(v*100).toFixed(1)}%`;
 
-  const latest = titleOddsHistory[titleOddsHistory.length-1];
+  // The odds snapshot is taken once daily, so a team eliminated since the last
+  // snapshot would otherwise keep showing its final market price (e.g. Brazil
+  // still at 7% the morning after losing in the R16). Zero out any team the
+  // live standings say is already out, and rebuild the owner sums, so the
+  // headline numbers and ALL TEAMS list are always current between snapshots.
+  const ELIMINATED_ST = ["EG","E32","E16","EQF","4TH","3RD","RU"];
+  const zeroEliminated = (snap) => {
+    if (!snap?.teams || !status) return snap;
+    let changed = false;
+    const teams = { ...snap.teams };
+    for (const t of Object.keys(teams)) {
+      if (teams[t] > 0 && ELIMINATED_ST.includes(status[t]?.st)) { teams[t] = 0; changed = true; }
+    }
+    if (!changed) return snap;
+    const probs = Object.fromEntries(Object.keys(BIDDERS).map(o => [o, 0]));
+    for (const tm of TEAMS) probs[tm.owner] = +(probs[tm.owner] + (teams[tm.name] ?? 0)).toFixed(4);
+    return { ...snap, probs, teams };
+  };
+
+  const latest = zeroEliminated(titleOddsHistory[titleOddsHistory.length-1]);
   const prev = titleOddsHistory.length >= 2 ? titleOddsHistory[titleOddsHistory.length-2] : null;
   const [expanded, setExpanded] = React.useState(null);
   const [showAllTeams, setShowAllTeams] = React.useState(true);
@@ -2644,7 +2663,7 @@ function PoolDashboard() {
       {/* ══ TITLE ODDS ══ */}
       {tab==="odds" && allMatchday2Done && (
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <TitleOddsHistoryPanel titleOddsHistory={titleOddsHistory} />
+          <TitleOddsHistoryPanel titleOddsHistory={titleOddsHistory} status={status} />
         </div>
       )}
 
