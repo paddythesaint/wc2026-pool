@@ -869,6 +869,73 @@ function ProjectedTournamentPanel({ status, groupSchedule, latestTeamPrices, pay
   );
 }
 
+// ─── Auction skill (random draws excluded) ────────────────────────────────────
+// The four $1 "random draw" teams (Argentina, France, Spain, Portugal) were
+// assigned by lottery, not chosen - and with the payout structure so top-heavy
+// they dominate the raw leaderboard. This strips them out to compare how each
+// owner's ACTUAL auction picks are doing: what they spent, what those picks
+// have locked in so far (still-alive teams at their guaranteed floor), and how
+// much title-winning chance the picks still carry per the market.
+function AuctionSkillPanel({ status, latestTeamPrices }) {
+  const ELIMINATED_ST = ["EG","E32","E16","EQF","4TH","3RD","RU"];
+  const rows = Object.keys(BIDDERS).map(name => {
+    const picks  = TEAMS.filter(t => t.owner === name && !t.random);
+    const spent  = picks.reduce((s,t) => s + t.bid, 0);
+    const locked = picks.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+    const alive  = picks.filter(t => isAlive(status[t.name].st));
+    const titleEq = latestTeamPrices
+      ? picks.reduce((s,t) => s + (ELIMINATED_ST.includes(status[t.name].st) ? 0 : (latestTeamPrices[t.name] ?? 0)), 0)
+      : null;
+    return { name, picks, spent, locked, net: locked - spent, alive, titleEq };
+  }).sort((a,b) => b.net - a.net || (b.titleEq ?? 0) - (a.titleEq ?? 0) || b.locked - a.locked);
+
+  const randoms = TEAMS.filter(t => t.random).map(t => t.name);
+
+  return (
+    <div style={{background:C.panel,border:`1px solid ${C.line}`,borderRadius:8,padding:"12px 14px"}}>
+      <div style={{...disp,fontSize:14,fontWeight:700,letterSpacing:"0.12em"}}>
+        AUCTION SKILL — RANDOM DRAWS EXCLUDED
+      </div>
+      <div style={{fontSize:10,color:C.mute,margin:"4px 0 10px"}}>
+        The four top seeds ({randoms.join(", ")}) were $1 lottery assignments, not picks — this ranks owners on the
+        11 teams they actually chose and paid for. Net = payout locked so far minus auction spend; still-alive teams
+        count at their guaranteed floor, so nets can only improve from here. "Title odds" is the market's combined
+        win chance across an owner's still-alive picks.
+      </div>
+      {rows.map((r, i) => (
+        <div key={r.name} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",
+          borderTop: i > 0 ? `1px solid ${C.line}` : "none"}}>
+          <span style={{...disp,fontSize:16,fontWeight:700,color:C.mute,width:18}}>{i+1}</span>
+          <div style={{flex:1,minWidth:0}}>
+            <span style={{fontSize:13,fontWeight:700,color:BIDDERS[r.name].color}}>{r.name}</span>
+            <span style={{fontSize:10,color:C.mute,marginLeft:6}}>
+              ${r.spent} on {r.picks.length} picks · {r.alive.length} alive
+              {r.titleEq != null && <> · title odds <b style={{color:C.text}}>{(r.titleEq*100).toFixed(1)}%</b></>}
+            </span>
+            <div style={{marginTop:3,display:"flex",flexWrap:"wrap",gap:2}}>
+              {r.picks.slice().sort((a,b) => b.bid - a.bid).map(t => {
+                const out = !isAlive(status[t.name].st);
+                return (
+                  <span key={t.name} title={`${t.name} · $${t.bid} bid → $${payoutLocked(status[t.name].st)} locked`}
+                    style={{fontSize:13,opacity:out?0.3:1,filter:out?"grayscale(1)":"none"}}>
+                    <Flag f={t.flag} size={13} />
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+          <div className="text-right">
+            <div style={{...disp,fontSize:17,fontWeight:700,color:r.net>=0?C.green:C.text}}>
+              {r.net>=0?`+$${r.net}`:`−$${Math.abs(r.net)}`}
+            </div>
+            <div style={{fontSize:9,color:C.mute}}>${r.locked} back on ${r.spent}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Scenario bar ─────────────────────────────────────────────────────────────
 function ScenarioBar({ floor, ceiling, spent }) {
   const BAR_MAX = 700; // visual ceiling for bar scale
@@ -2336,6 +2403,8 @@ function PoolDashboard() {
               </div>
             </div>
           ))}
+
+          <AuctionSkillPanel status={status} latestTeamPrices={latestTeamPrices} />
 
           {/* Superlatives */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
