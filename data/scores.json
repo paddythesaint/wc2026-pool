@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T14:07:10.007836+00:00",
+  "updated": "2026-07-06T21:15:55.965448+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -279,7 +279,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "R16"
+      "st": "E16"
     },
     "Qatar": {
       "p": 3,
@@ -327,7 +327,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "QF"
     },
     "Sweden": {
       "p": 3,
@@ -405,16 +405,11 @@
     },
     {
       "d": "Jul 6",
-      "k": "3:00 PM ET",
+      "k": "",
       "a": "Portugal",
       "b": "Spain",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.24,
-        "draw": 0.26,
-        "away": 0.5
-      }
+      "s": "0-1",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 6",
@@ -424,9 +419,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.39,
+        "home": 0.37,
         "draw": 0.28,
-        "away": 0.33
+        "away": 0.35
       }
     },
     {
@@ -460,7 +455,7 @@
     "Ben|Patrick": [
       3,
       3,
-      4
+      5
     ],
     "Ben|Sandeep": [
       6,
@@ -673,10 +668,10 @@
       "a": "Portugal",
       "b": "Spain",
       "round": "R16",
-      "completed": false,
+      "completed": true,
       "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "bScore": 1,
+      "winner": "Spain"
     },
     {
       "a": "United States",
