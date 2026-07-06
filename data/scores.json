@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-05T20:20:38.576088+00:00",
+  "updated": "2026-07-06T00:16:13.781405+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -55,7 +55,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "E16"
     },
     "Canada": {
       "p": 3,
@@ -255,7 +255,7 @@
       "d": 0,
       "l": 1,
       "pts": 6,
-      "st": "R16"
+      "st": "QF"
     },
     "Panama": {
       "p": 3,
@@ -405,27 +405,22 @@
     },
     {
       "d": "Jul 5",
-      "k": "LIVE",
+      "k": "",
       "a": "Brazil",
       "b": "Norway",
-      "s": "0-0",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.54,
-        "draw": 0.26,
-        "away": 0.2
-      }
+      "s": "1-2",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 5",
-      "k": "8:00 PM ET",
+      "k": "9:00 PM ET",
       "a": "Mexico",
       "b": "England",
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.32,
-        "draw": 0.31,
+        "home": 0.31,
+        "draw": 0.32,
         "away": 0.37
       }
     },
@@ -437,9 +432,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.25,
+        "home": 0.24,
         "draw": 0.26,
-        "away": 0.49
+        "away": 0.5
       }
     },
     {
@@ -450,9 +445,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.37,
+        "home": 0.36,
         "draw": 0.28,
-        "away": 0.35
+        "away": 0.37
       }
     }
   ],
@@ -470,7 +465,7 @@
     "Ben|Sunny": [
       6,
       1,
-      4
+      5
     ],
     "Patrick|Sandeep": [
       4,
@@ -655,10 +650,10 @@
       "a": "Brazil",
       "b": "Norway",
       "round": "R16",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 1,
+      "bScore": 2,
+      "winner": "Norway"
     },
     {
       "a": "Mexico",
@@ -681,6 +676,24 @@
     {
       "a": "United States",
       "b": "Belgium",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Argentina",
+      "b": "Egypt",
+      "round": "R16",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Switzerland",
+      "b": "Colombia",
       "round": "R16",
       "completed": false,
       "aScore": 0,
