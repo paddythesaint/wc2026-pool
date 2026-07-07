@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T11:22:09.983622+00:00",
+  "updated": "2026-07-07T21:10:34.268794+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -15,7 +15,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "R16"
+      "st": "QF"
     },
     "Australia": {
       "p": 3,
@@ -127,7 +127,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "R16"
+      "st": "E16"
     },
     "England": {
       "p": 3,
@@ -405,28 +405,23 @@
     },
     {
       "d": "Jul 7",
-      "k": "12:00 PM ET",
+      "k": "",
       "a": "Argentina",
       "b": "Egypt",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.72,
-        "draw": 0.19,
-        "away": 0.09
-      }
+      "s": "3-2",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 7",
-      "k": "4:00 PM ET",
+      "k": "LIVE",
       "a": "Switzerland",
       "b": "Colombia",
-      "s": "",
+      "s": "0-0",
       "g": "Round of 16",
       "odds": {
         "home": 0.27,
-        "draw": 0.31,
-        "away": 0.42
+        "draw": 0.33,
+        "away": 0.4
       }
     }
   ],
@@ -454,7 +449,7 @@
     "Patrick|Sunny": [
       2,
       3,
-      5
+      6
     ],
     "Sandeep|Sunny": [
       7,
@@ -665,10 +660,10 @@
       "a": "Argentina",
       "b": "Egypt",
       "round": "R16",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 3,
+      "bScore": 2,
+      "winner": "Argentina"
     },
     {
       "a": "Switzerland",
