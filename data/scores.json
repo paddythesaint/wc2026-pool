@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-06T21:15:55.965448+00:00",
+  "updated": "2026-07-07T10:31:06.138851+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -39,7 +39,7 @@
       "d": 2,
       "l": 0,
       "pts": 5,
-      "st": "R16"
+      "st": "QF"
     },
     "Bosnia and Herzegovina": {
       "p": 3,
@@ -367,7 +367,7 @@
       "d": 0,
       "l": 1,
       "pts": 6,
-      "st": "R16"
+      "st": "E16"
     },
     "Uruguay": {
       "p": 3,
@@ -388,22 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 5",
-      "k": "",
-      "a": "Brazil",
-      "b": "Norway",
-      "s": "1-2",
-      "g": "Round of 16"
-    },
-    {
-      "d": "Jul 5",
-      "k": "",
-      "a": "Mexico",
-      "b": "England",
-      "s": "2-3",
-      "g": "Round of 16"
-    },
-    {
       "d": "Jul 6",
       "k": "",
       "a": "Portugal",
@@ -413,16 +397,11 @@
     },
     {
       "d": "Jul 6",
-      "k": "8:00 PM ET",
+      "k": "",
       "a": "United States",
       "b": "Belgium",
-      "s": "",
-      "g": "Round of 16",
-      "odds": {
-        "home": 0.37,
-        "draw": 0.28,
-        "away": 0.35
-      }
+      "s": "1-4",
+      "g": "Round of 16"
     },
     {
       "d": "Jul 7",
@@ -432,9 +411,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.7,
-        "draw": 0.2,
-        "away": 0.11
+        "home": 0.71,
+        "draw": 0.19,
+        "away": 0.09
       }
     },
     {
@@ -445,9 +424,9 @@
       "s": "",
       "g": "Round of 16",
       "odds": {
-        "home": 0.28,
+        "home": 0.27,
         "draw": 0.31,
-        "away": 0.41
+        "away": 0.42
       }
     }
   ],
@@ -677,10 +656,10 @@
       "a": "United States",
       "b": "Belgium",
       "round": "R16",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 1,
+      "bScore": 4,
+      "winner": "Belgium"
     },
     {
       "a": "Argentina",
