@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-07T21:10:34.268794+00:00",
+  "updated": "2026-07-08T06:37:25.963828+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -79,7 +79,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "E16"
     },
     "Croatia": {
       "p": 3,
@@ -343,7 +343,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "R16"
+      "st": "QF"
     },
     "Tunisia": {
       "p": 3,
@@ -388,22 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 6",
-      "k": "",
-      "a": "Portugal",
-      "b": "Spain",
-      "s": "0-1",
-      "g": "Round of 16"
-    },
-    {
-      "d": "Jul 6",
-      "k": "",
-      "a": "United States",
-      "b": "Belgium",
-      "s": "1-4",
-      "g": "Round of 16"
-    },
-    {
       "d": "Jul 7",
       "k": "",
       "a": "Argentina",
@@ -413,15 +397,23 @@
     },
     {
       "d": "Jul 7",
-      "k": "LIVE",
+      "k": "",
       "a": "Switzerland",
       "b": "Colombia",
       "s": "0-0",
-      "g": "Round of 16",
+      "g": "Round of 16"
+    },
+    {
+      "d": "Jul 9",
+      "k": "4:00 PM ET",
+      "a": "France",
+      "b": "Morocco",
+      "s": "",
+      "g": "Quarterfinals",
       "odds": {
-        "home": 0.27,
-        "draw": 0.33,
-        "away": 0.4
+        "home": 0.6,
+        "draw": 0.25,
+        "away": 0.16
       }
     }
   ],
@@ -433,7 +425,7 @@
     ],
     "Ben|Sandeep": [
       6,
-      4,
+      5,
       5
     ],
     "Ben|Sunny": [
@@ -669,6 +661,15 @@
       "a": "Switzerland",
       "b": "Colombia",
       "round": "R16",
+      "completed": true,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": "Switzerland"
+    },
+    {
+      "a": "France",
+      "b": "Morocco",
+      "round": "QF",
       "completed": false,
       "aScore": 0,
       "bScore": 0,
