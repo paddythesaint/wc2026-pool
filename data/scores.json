@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-08T20:40:12.871708+00:00",
+  "updated": "2026-07-09T08:55:06.750528+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -388,22 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 7",
-      "k": "",
-      "a": "Argentina",
-      "b": "Egypt",
-      "s": "3-2",
-      "g": "Round of 16"
-    },
-    {
-      "d": "Jul 7",
-      "k": "",
-      "a": "Switzerland",
-      "b": "Colombia",
-      "s": "0-0",
-      "g": "Round of 16"
-    },
-    {
       "d": "Jul 9",
       "k": "4:00 PM ET",
       "a": "France",
@@ -411,9 +395,22 @@
       "s": "",
       "g": "Quarterfinals",
       "odds": {
-        "home": 0.61,
-        "draw": 0.24,
+        "home": 0.6,
+        "draw": 0.25,
         "away": 0.15
+      }
+    },
+    {
+      "d": "Jul 10",
+      "k": "3:00 PM ET",
+      "a": "Spain",
+      "b": "Belgium",
+      "s": "",
+      "g": "Quarterfinals",
+      "odds": {
+        "home": 0.58,
+        "draw": 0.24,
+        "away": 0.18
       }
     }
   ],
@@ -669,6 +666,15 @@
     {
       "a": "France",
       "b": "Morocco",
+      "round": "QF",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "Spain",
+      "b": "Belgium",
       "round": "QF",
       "completed": false,
       "aScore": 0,
