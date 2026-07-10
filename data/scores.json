@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-10T08:53:29.074053+00:00",
+  "updated": "2026-07-10T20:51:13.701477+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -397,10 +397,10 @@
     },
     {
       "d": "Jul 10",
-      "k": "3:00 PM ET",
+      "k": "LIVE",
       "a": "Spain",
       "b": "Belgium",
-      "s": "",
+      "s": "2-1",
       "g": "Quarterfinals",
       "odds": {
         "home": 0.59,
@@ -416,9 +416,9 @@
       "s": "",
       "g": "Quarterfinals",
       "odds": {
-        "home": 0.23,
+        "home": 0.24,
         "draw": 0.26,
-        "away": 0.51
+        "away": 0.5
       }
     },
     {
@@ -698,8 +698,8 @@
       "b": "Belgium",
       "round": "QF",
       "completed": false,
-      "aScore": 0,
-      "bScore": 0,
+      "aScore": 2,
+      "bScore": 1,
       "winner": null
     },
     {
