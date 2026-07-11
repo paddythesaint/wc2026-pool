@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-11T00:12:49.564564+00:00",
+  "updated": "2026-07-11T07:22:31.437124+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -388,14 +388,6 @@
   },
   "fixtures": [
     {
-      "d": "Jul 9",
-      "k": "",
-      "a": "France",
-      "b": "Morocco",
-      "s": "2-0",
-      "g": "Quarterfinals"
-    },
-    {
       "d": "Jul 10",
       "k": "",
       "a": "Spain",
@@ -411,9 +403,9 @@
       "s": "",
       "g": "Quarterfinals",
       "odds": {
-        "home": 0.24,
+        "home": 0.25,
         "draw": 0.26,
-        "away": 0.5
+        "away": 0.49
       }
     },
     {
