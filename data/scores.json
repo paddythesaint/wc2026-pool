@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-11T21:34:12.984653+00:00",
+  "updated": "2026-07-12T07:20:20.816754+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -15,7 +15,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "QF"
+      "st": "SF"
     },
     "Australia": {
       "p": 3,
@@ -135,7 +135,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "QF"
+      "st": "SF"
     },
     "France": {
       "p": 3,
@@ -255,7 +255,7 @@
       "d": 0,
       "l": 1,
       "pts": 6,
-      "st": "QF"
+      "st": "EQF"
     },
     "Panama": {
       "p": 3,
@@ -343,7 +343,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "QF"
+      "st": "EQF"
     },
     "Tunisia": {
       "p": 3,
@@ -388,38 +388,20 @@
   },
   "fixtures": [
     {
-      "d": "Jul 10",
+      "d": "Jul 11",
       "k": "",
-      "a": "Spain",
-      "b": "Belgium",
-      "s": "2-1",
+      "a": "Norway",
+      "b": "England",
+      "s": "1-2",
       "g": "Quarterfinals"
     },
     {
       "d": "Jul 11",
-      "k": "LIVE",
-      "a": "Norway",
-      "b": "England",
-      "s": "0-0",
-      "g": "Quarterfinals",
-      "odds": {
-        "home": 0.22,
-        "draw": 0.25,
-        "away": 0.53
-      }
-    },
-    {
-      "d": "Jul 11",
-      "k": "9:00 PM ET",
+      "k": "",
       "a": "Argentina",
       "b": "Switzerland",
-      "s": "",
-      "g": "Quarterfinals",
-      "odds": {
-        "home": 0.56,
-        "draw": 0.27,
-        "away": 0.17
-      }
+      "s": "3-1",
+      "g": "Quarterfinals"
     }
   ],
   "h2h": {
@@ -436,7 +418,7 @@
     "Ben|Sunny": [
       6,
       1,
-      6
+      7
     ],
     "Patrick|Sandeep": [
       4,
@@ -693,19 +675,19 @@
       "a": "Norway",
       "b": "England",
       "round": "QF",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 1,
+      "bScore": 2,
+      "winner": "England"
     },
     {
       "a": "Argentina",
       "b": "Switzerland",
       "round": "QF",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
+      "completed": true,
+      "aScore": 3,
+      "bScore": 1,
+      "winner": "Argentina"
     }
   ]
 }
