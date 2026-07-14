@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-13T20:35:57.896450+00:00",
+  "updated": "2026-07-14T07:22:03.397287+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -399,6 +399,19 @@
         "draw": 0.3,
         "away": 0.3
       }
+    },
+    {
+      "d": "Jul 15",
+      "k": "3:00 PM ET",
+      "a": "England",
+      "b": "Argentina",
+      "s": "",
+      "g": "Semifinals",
+      "odds": {
+        "home": 0.36,
+        "draw": 0.33,
+        "away": 0.32
+      }
     }
   ],
   "h2h": {
@@ -689,6 +702,15 @@
     {
       "a": "France",
       "b": "Spain",
+      "round": "SF",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
+    },
+    {
+      "a": "England",
+      "b": "Argentina",
       "round": "SF",
       "completed": false,
       "aScore": 0,
