@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-14T20:20:39.316022+00:00",
+  "updated": "2026-07-14T21:30:03.225494+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -327,7 +327,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "SF"
+      "st": "F"
     },
     "Sweden": {
       "p": 3,
@@ -389,16 +389,11 @@
   "fixtures": [
     {
       "d": "Jul 14",
-      "k": "LIVE",
+      "k": "",
       "a": "France",
       "b": "Spain",
       "s": "0-2",
-      "g": "Semifinals",
-      "odds": {
-        "home": 0.37,
-        "draw": 0.33,
-        "away": 0.31
-      }
+      "g": "Semifinals"
     },
     {
       "d": "Jul 15",
@@ -431,7 +426,7 @@
       7
     ],
     "Patrick|Sandeep": [
-      4,
+      5,
       2,
       3
     ],
@@ -703,10 +698,10 @@
       "a": "France",
       "b": "Spain",
       "round": "SF",
-      "completed": false,
+      "completed": true,
       "aScore": 0,
       "bScore": 2,
-      "winner": null
+      "winner": "Spain"
     },
     {
       "a": "England",
