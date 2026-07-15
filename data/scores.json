@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-15T20:57:31.572483+00:00",
+  "updated": "2026-07-15T22:04:56.086809+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -15,7 +15,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "SF"
+      "st": "F"
     },
     "Australia": {
       "p": 3,
@@ -397,16 +397,11 @@
     },
     {
       "d": "Jul 15",
-      "k": "LIVE",
+      "k": "",
       "a": "England",
       "b": "Argentina",
       "s": "1-2",
-      "g": "Semifinals",
-      "odds": {
-        "home": 0.35,
-        "draw": 0.34,
-        "away": 0.31
-      }
+      "g": "Semifinals"
     }
   ],
   "h2h": {
@@ -707,10 +702,10 @@
       "a": "England",
       "b": "Argentina",
       "round": "SF",
-      "completed": false,
+      "completed": true,
       "aScore": 1,
       "bScore": 2,
-      "winner": null
+      "winner": "Argentina"
     }
   ]
 }
