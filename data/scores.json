@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-15T19:50:19.195864+00:00",
+  "updated": "2026-07-15T20:57:31.572483+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -400,7 +400,7 @@
       "k": "LIVE",
       "a": "England",
       "b": "Argentina",
-      "s": "0-0",
+      "s": "1-2",
       "g": "Semifinals",
       "odds": {
         "home": 0.35,
@@ -708,8 +708,8 @@
       "b": "Argentina",
       "round": "SF",
       "completed": false,
-      "aScore": 0,
-      "bScore": 0,
+      "aScore": 1,
+      "bScore": 2,
       "winner": null
     }
   ]
