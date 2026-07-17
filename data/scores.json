@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-16T05:27:33.582432+00:00",
+  "updated": "2026-07-17T05:29:24.905145+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -388,12 +388,17 @@
   },
   "fixtures": [
     {
-      "d": "Jul 15",
-      "k": "",
-      "a": "England",
-      "b": "Argentina",
-      "s": "1-2",
-      "g": "Semifinals"
+      "d": "Jul 18",
+      "k": "5:00 PM ET",
+      "a": "France",
+      "b": "England",
+      "s": "",
+      "g": "3rd-Place Match",
+      "odds": {
+        "home": 0.5,
+        "draw": 0.25,
+        "away": 0.26
+      }
     }
   ],
   "h2h": {
