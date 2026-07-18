@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-18T20:06:40.053139+00:00",
+  "updated": "2026-07-18T21:05:36.927089+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -389,15 +389,15 @@
   "fixtures": [
     {
       "d": "Jul 18",
-      "k": "5:00 PM ET",
+      "k": "LIVE",
       "a": "France",
       "b": "England",
-      "s": "",
+      "s": "0-1",
       "g": "3rd-Place Match",
       "odds": {
-        "home": 0.54,
-        "draw": 0.24,
-        "away": 0.23
+        "home": 0.56,
+        "draw": 0.23,
+        "away": 0.21
       }
     },
     {
