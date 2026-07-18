@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-17T05:29:24.905145+00:00",
+  "updated": "2026-07-18T01:05:17.393529+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -703,6 +703,15 @@
       "aScore": 1,
       "bScore": 2,
       "winner": "Argentina"
+    },
+    {
+      "a": "Spain",
+      "b": "Argentina",
+      "round": "FINAL",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
     }
   ]
 }
