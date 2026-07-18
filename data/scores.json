@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-18T22:06:25.976434+00:00",
+  "updated": "2026-07-18T23:09:52.271181+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -389,16 +389,11 @@
   "fixtures": [
     {
       "d": "Jul 18",
-      "k": "LIVE",
+      "k": "",
       "a": "France",
       "b": "England",
-      "s": "0-4",
-      "g": "3rd-Place Match",
-      "odds": {
-        "home": 0.56,
-        "draw": 0.23,
-        "away": 0.21
-      }
+      "s": "4-6",
+      "g": "3rd-Place Match"
     },
     {
       "d": "Jul 19",
@@ -443,7 +438,7 @@
     "Sandeep|Sunny": [
       7,
       1,
-      5
+      6
     ]
   },
   "knockout": [
