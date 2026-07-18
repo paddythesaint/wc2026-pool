@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-18T01:05:17.393529+00:00",
+  "updated": "2026-07-18T05:08:21.422897+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -395,9 +395,22 @@
       "s": "",
       "g": "3rd-Place Match",
       "odds": {
-        "home": 0.5,
-        "draw": 0.25,
-        "away": 0.26
+        "home": 0.51,
+        "draw": 0.24,
+        "away": 0.25
+      }
+    },
+    {
+      "d": "Jul 19",
+      "k": "3:00 PM ET",
+      "a": "Spain",
+      "b": "Argentina",
+      "s": "",
+      "g": "Final",
+      "odds": {
+        "home": 0.42,
+        "draw": 0.31,
+        "away": 0.27
       }
     }
   ],
