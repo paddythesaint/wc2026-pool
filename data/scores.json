@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-19T19:09:34.476758+00:00",
+  "updated": "2026-07-19T22:08:08.424794+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -15,7 +15,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "F"
+      "st": "RU"
     },
     "Australia": {
       "p": 3,
@@ -327,7 +327,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "F"
+      "st": "CH"
     },
     "Sweden": {
       "p": 3,
@@ -397,16 +397,11 @@
     },
     {
       "d": "Jul 19",
-      "k": "LIVE",
+      "k": "",
       "a": "Spain",
       "b": "Argentina",
-      "s": "0-0",
-      "g": "Final",
-      "odds": {
-        "home": 0.42,
-        "draw": 0.31,
-        "away": 0.26
-      }
+      "s": "1-0",
+      "g": "Final"
     }
   ],
   "h2h": {
@@ -431,7 +426,7 @@
       3
     ],
     "Patrick|Sunny": [
-      3,
+      4,
       3,
       6
     ],
@@ -725,10 +720,10 @@
       "a": "Spain",
       "b": "Argentina",
       "round": "FINAL",
-      "completed": false,
-      "aScore": 0,
+      "completed": true,
+      "aScore": 1,
       "bScore": 0,
-      "winner": null
+      "winner": "Spain"
     }
   ]
 }
