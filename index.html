@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>body{margin:0}</style>
 </head>
 <body>
@@ -932,6 +933,338 @@ function AuctionSkillPanel({ status, latestTeamPrices }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─── Tournament recap reel ────────────────────────────────────────────────────
+// A swipeable series of story-format (9:16-ish) cards recapping the pool:
+// finale/champion card, one "Wrapped" card per owner, the token-draw story,
+// the biggest upsets, and the rivalry grid. Every card is data-driven (so the
+// set finalizes itself once the final ends) and saveable as a PNG via
+// html2canvas for sharing in the group chat.
+function saveCardImage(elId, filename) {
+  const el = document.getElementById(elId);
+  if (!el || !window.html2canvas) return;
+  window.html2canvas(el, { backgroundColor: "#0B1220", scale: 3, useCORS: true }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+function RecapCard({ id, children, filename, accent }) {
+  return (
+    <div style={{scrollSnapAlign:"center",flex:"0 0 auto"}}>
+      <div id={id} style={{width:320,height:568,background:"linear-gradient(160deg,#121C2E 0%,#0B1220 70%)",
+        border:`1px solid ${C.line}`,borderTop:`4px solid ${accent||C.gold}`,borderRadius:12,
+        padding:"18px 18px 12px",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        {children}
+        <div style={{marginTop:"auto",paddingTop:8,fontSize:8,color:C.mute,letterSpacing:"0.12em",...disp}}>
+          WC26 AUCTION POOL · paddythesaint.github.io
+        </div>
+      </div>
+      <button onClick={() => saveCardImage(id, filename)}
+        style={{display:"block",margin:"8px auto 0",fontSize:10,fontWeight:600,letterSpacing:"0.08em",
+          color:C.gold,background:"none",border:`1px solid ${C.line}`,borderRadius:5,
+          padding:"4px 12px",cursor:"pointer"}}>
+        ⬇ SAVE IMAGE
+      </button>
+    </div>
+  );
+}
+
+function RecapPanel({ status, h2h, titleOddsHistory, oddsHistory }) {
+  const owners = Object.keys(BIDDERS);
+  const D = React.useMemo(() => {
+    const champTeam = TEAMS.find(t => status[t.name]?.st === "CH") || null;
+    const ruTeam    = TEAMS.find(t => status[t.name]?.st === "RU") || null;
+    const finalists = TEAMS.filter(t => ["F","CH","RU"].includes(status[t.name]?.st));
+
+    // Days each owner led the aggregate title odds (strict leader per snapshot)
+    const daysLed = Object.fromEntries(owners.map(o => [o, 0]));
+    for (const snap of (titleOddsHistory || [])) {
+      const vals = owners.map(o => snap.probs?.[o] || 0);
+      const mx = Math.max(...vals);
+      const leaders = owners.filter(o => (snap.probs?.[o] || 0) === mx && mx > 0);
+      if (leaders.length === 1) daysLed[leaders[0]]++;
+    }
+
+    const upsets = computeUpsets(oddsHistory || {});
+    const upsetBenefit = Object.fromEntries(owners.map(o => [o, 0]));
+    for (const u of upsets) if (u.benefitTeam) upsetBenefit[u.benefitTeam.owner] += u.benefitSwing;
+
+    const perOwner = owners.map(name => {
+      const mine   = TEAMS.filter(t => t.owner === name);
+      const picks  = mine.filter(t => !t.random);
+      const token  = mine.find(t => t.random);
+      const spent  = mine.reduce((s,t) => s + t.bid, 0);
+      const locked = mine.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+      const pickSpent  = picks.reduce((s,t) => s + t.bid, 0);
+      const pickLocked = picks.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+      const deepest = mine.slice().sort((a,b) => payoutLocked(status[b.name].st) - payoutLocked(status[a.name].st))[0];
+      const bestPick = picks.filter(t => payoutLocked(status[t.name].st) > 0)
+        .sort((a,b) => payoutLocked(status[b.name].st)/b.bid - payoutLocked(status[a.name].st)/a.bid)[0] || null;
+      const bust = picks.slice().sort((a,b) =>
+        (b.bid - payoutLocked(status[b.name].st)) - (a.bid - payoutLocked(status[a.name].st)))[0] || null;
+      let hw = 0, hd = 0, hl = 0;
+      for (const [key, rec] of Object.entries(h2h || {})) {
+        const [p1] = key.split("|");
+        if (!key.includes(name)) continue;
+        if (p1 === name) { hw += rec[0]; hd += rec[1]; hl += rec[2]; }
+        else             { hw += rec[2]; hd += rec[1]; hl += rec[0]; }
+      }
+      const peak = Math.max(0, ...(titleOddsHistory || []).map(s => s.probs?.[name] || 0));
+      return { name, spent, locked, net: locked - spent, pickSpent, pickLocked,
+               pickNet: pickLocked - pickSpent, token, deepest, bestPick, bust,
+               h2h: { w: hw, d: hd, l: hl }, daysLed: daysLed[name], peak,
+               upsetBenefit: upsetBenefit[name] };
+    }).sort((a,b) => b.net - a.net);
+
+    // One distinct persona headline per owner. Each rule ranks all owners and
+    // claims the best-placed owner who doesn't have a label yet, so every card
+    // gets a real story even when one owner tops several categories.
+    const persona = {};
+    const takeFirst = (ranked, label, lineFn) => {
+      const s = ranked.find(o => o && !persona[o.name]);
+      if (s) persona[s.name] = { label, line: lineFn(s) };
+    };
+    if (champTeam) takeFirst(perOwner.filter(o => o.name === champTeam.owner),
+      "THE CHAMPION 🏆", () => `${champTeam.name} won it all — a token random draw.`);
+    if (ruTeam) takeFirst(perOwner.filter(o => o.name === ruTeam.owner),
+      "SO CLOSE 🥈", () => `${ruTeam.name} fell at the final hurdle.`);
+    takeFirst([...perOwner].sort((a,b) => b.pickNet - a.pickNet),
+      "SHARPEST SHOPPER", s => `Best surviving return on teams actually chosen at auction: ${s.pickNet>=0?"+":"−"}$${Math.abs(s.pickNet)} on picks.`);
+    takeFirst([...perOwner].filter(o => o.daysLed > 0).sort((a,b) => b.daysLed - a.daysLed),
+      "THE FRONT-RUNNER", s => `Led the pool odds for ${s.daysLed} snapshots · peaked at ${(s.peak*100).toFixed(0)}%.`);
+    takeFirst([...perOwner].filter(o => o.upsetBenefit > 0).sort((a,b) => b.upsetBenefit - a.upsetBenefit),
+      "CHAOS MAGNET", () => "Profited most from results the market never saw coming.");
+    takeFirst([...perOwner].sort((a,b) => b.h2h.w - a.h2h.w),
+      "HEAD-TO-HEAD KING", s => `Most owner-vs-owner wins: ${s.h2h.w}.`);
+    for (const o of perOwner) if (!persona[o.name])
+      persona[o.name] = { label: "THE SURVIVOR", line: "Made it through all 104 games of this thing." };
+
+    return { champTeam, ruTeam, finalists, perOwner, persona, upsets: upsets.slice(0, 5) };
+  }, [status, h2h, titleOddsHistory, oddsHistory]);
+
+  const latestSnap = titleOddsHistory?.length ? titleOddsHistory[titleOddsHistory.length-1] : null;
+  const pct1 = v => `${(v*100).toFixed(1)}%`;
+
+  const Spark = ({ name }) => {
+    const hist = titleOddsHistory || [];
+    if (hist.length < 2) return null;
+    const W = 280, H = 46, PAD = 2;
+    const mx = Math.max(0.1, ...hist.map(s => s.probs?.[name] || 0));
+    const pts = hist.map((s,i) => [
+      (i/(hist.length-1))*(W-2*PAD)+PAD,
+      H-PAD - ((s.probs?.[name]||0)/mx)*(H-2*PAD),
+    ]);
+    const path = pts.map((p,i) => `${i===0?"M":"L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+    return (
+      <svg width={W} height={H} style={{marginTop:4}}>
+        <path d={path} fill="none" stroke={BIDDERS[name].color} strokeWidth="2"/>
+      </svg>
+    );
+  };
+
+  const Row = ({ label, value, color }) => (
+    <div style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:`1px solid ${C.line}`}}>
+      <span style={{fontSize:10,color:C.mute,letterSpacing:"0.06em"}}>{label}</span>
+      <span style={{fontSize:11,fontWeight:700,color:color||C.text,textAlign:"right"}}>{value}</span>
+    </div>
+  );
+
+  const finaleDone = !!D.champTeam;
+  const [fa, fb] = D.finalists.length === 2 ? D.finalists : [null, null];
+
+  return (
+    <div className="space-y-3">
+      <div style={{fontSize:11,color:C.mute}}>
+        Swipe through the cards → each one saves as an image for the group chat.
+      </div>
+      <div style={{display:"flex",gap:14,overflowX:"auto",scrollSnapType:"x mandatory",
+        padding:"4px 2px 10px",WebkitOverflowScrolling:"touch"}}>
+
+        {/* ── Card 1: finale stakes / champion ── */}
+        <RecapCard id="recap-finale" filename="wc26-recap-final.png" accent={C.gold}>
+          {finaleDone ? (
+            <>
+              <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.gold}}>WORLD CUP 2026 · THE POOL</div>
+              <div style={{fontSize:52,textAlign:"center",margin:"18px 0 6px"}}>🏆</div>
+              <div style={{...disp,fontSize:26,fontWeight:700,textAlign:"center",lineHeight:1.15}}>
+                {D.champTeam.name.toUpperCase()}
+              </div>
+              <div style={{textAlign:"center",fontSize:13,marginTop:6}}>
+                <span style={{color:BIDDERS[D.champTeam.owner].color,fontWeight:700}}>{D.champTeam.owner}</span>
+                <span style={{color:C.mute}}> wins the pool</span>
+              </div>
+              <div style={{fontSize:10,color:C.mute,textAlign:"center",marginTop:2}}>
+                …with a team assigned by random draw.
+              </div>
+              <div style={{marginTop:16}}>
+                {D.perOwner.map((o,i) => (
+                  <Row key={o.name}
+                    label={`${i+1}. ${o.name.toUpperCase()}`}
+                    value={`$${o.locked} back · ${o.net>=0?"+":"−"}$${Math.abs(o.net)}`}
+                    color={BIDDERS[o.name].color} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.gold}}>FINAL DAY · FOR ALL THE MARBLES</div>
+              {fa && fb && (
+                <div style={{textAlign:"center",margin:"20px 0 8px"}}>
+                  <div style={{fontSize:34}}><Flag f={fa.flag} size={34}/> <span style={{fontSize:16,color:C.mute}}>vs</span> <Flag f={fb.flag} size={34}/></div>
+                  <div style={{...disp,fontSize:18,fontWeight:700,marginTop:6}}>
+                    {fa.name} — {fb.name}
+                  </div>
+                  <div style={{fontSize:11,color:C.mute,marginTop:4}}>
+                    <b style={{color:BIDDERS[fa.owner].color}}>{fa.owner}</b> vs <b style={{color:BIDDERS[fb.owner].color}}>{fb.owner}</b> · both teams were token random draws
+                  </div>
+                </div>
+              )}
+              {latestSnap && (
+                <div style={{marginTop:10}}>
+                  {owners.filter(o => (latestSnap.probs?.[o]||0) > 0).sort((a,b)=>(latestSnap.probs[b]||0)-(latestSnap.probs[a]||0)).map(o => (
+                    <div key={o} style={{margin:"8px 0"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:11}}>
+                        <b style={{color:BIDDERS[o].color}}>{o}</b>
+                        <b>{pct1(latestSnap.probs[o]||0)}</b>
+                      </div>
+                      <div style={{height:10,background:"#0E1830",borderRadius:5,marginTop:3}}>
+                        <div style={{width:`${(latestSnap.probs[o]||0)*100}%`,height:"100%",
+                          background:BIDDERS[o].color,borderRadius:5}}/>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{fontSize:10,color:C.mute,marginTop:12,lineHeight:1.5}}>
+                Winner's owner banks <b style={{color:C.gold}}>$250</b>, runner-up <b style={{color:C.gold}}>$125</b>.
+                Everything else is already settled.
+              </div>
+            </>
+          )}
+        </RecapCard>
+
+        {/* ── Cards 2-5: player wrapped ── */}
+        {D.perOwner.map(o => (
+          <RecapCard key={o.name} id={`recap-${o.name.toLowerCase()}`}
+            filename={`wc26-recap-${o.name.toLowerCase()}.png`} accent={BIDDERS[o.name].color}>
+            <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.mute}}>WC26 WRAPPED</div>
+            <div style={{...disp,fontSize:30,fontWeight:700,color:BIDDERS[o.name].color,marginTop:6}}>
+              {o.name.toUpperCase()}
+            </div>
+            <div style={{...disp,fontSize:13,fontWeight:700,letterSpacing:"0.1em",color:C.gold,marginTop:2}}>
+              {D.persona[o.name]?.label}
+            </div>
+            <div style={{fontSize:10,color:C.mute,marginTop:2,lineHeight:1.4}}>
+              {D.persona[o.name]?.line}
+            </div>
+            <div style={{marginTop:10}}>
+              <Row label="AUCTION SPEND (11 PICKS)" value={`$${o.pickSpent}`} />
+              <Row label="BACK FROM PICKS" value={`$${o.pickLocked}`} />
+              <Row label="PICKS NET" value={`${o.pickNet>=0?"+":"−"}$${Math.abs(o.pickNet)}`}
+                color={o.pickNet>=0?C.green:C.red} />
+              {o.token && <Row label="TOKEN DRAW" value={`${o.token.name} · ${STAGE_LABEL[status[o.token.name].st]}`} />}
+              <Row label="DEEPEST RUN" value={`${o.deepest.name} · ${STAGE_LABEL[status[o.deepest.name].st]}`} />
+              {o.bestPick && <Row label="BEST PICK" color={C.green}
+                value={`${o.bestPick.name} $${o.bestPick.bid}→$${payoutLocked(status[o.bestPick.name].st)}`} />}
+              {o.bust && <Row label="BIGGEST BUST" color={C.red}
+                value={`${o.bust.name} $${o.bust.bid}→$${payoutLocked(status[o.bust.name].st)}`} />}
+              <Row label="H2H RECORD" value={`${o.h2h.w}W ${o.h2h.d}D ${o.h2h.l}L`} />
+              <Row label="DAYS LEADING POOL ODDS" value={`${o.daysLed} · peak ${(o.peak*100).toFixed(0)}%`} />
+            </div>
+            <div style={{fontSize:9,color:C.mute,marginTop:8,letterSpacing:"0.08em"}}>TITLE ODDS OVER THE TOURNAMENT</div>
+            <Spark name={o.name} />
+          </RecapCard>
+        ))}
+
+        {/* ── Card 6: the token-draw story ── */}
+        <RecapCard id="recap-lottery" filename="wc26-recap-lottery.png" accent={C.blue}>
+          <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.blue}}>THE RANDOM DRAW FINAL</div>
+          <div style={{...disp,fontSize:19,fontWeight:700,marginTop:8,lineHeight:1.3}}>
+            $792 of auction bids.<br/>Zero finalists.
+          </div>
+          <div style={{fontSize:10,color:C.mute,marginTop:6,lineHeight:1.5}}>
+            The four top seeds were assigned by lottery for a token $1. Two of them met in the final.
+          </div>
+          <div style={{...disp,fontSize:10,letterSpacing:"0.15em",color:C.mute,marginTop:14}}>THE RANDOM DRAWS</div>
+          {TEAMS.filter(t => t.random).sort((a,b)=>payoutLocked(status[b.name].st)-payoutLocked(status[a.name].st)).map(t => (
+            <Row key={t.name} label={`${t.name} → ${t.owner}`}
+              value={STAGE_LABEL[status[t.name].st]} color={BIDDERS[t.owner].color} />
+          ))}
+          <div style={{...disp,fontSize:10,letterSpacing:"0.15em",color:C.mute,marginTop:14}}>THE FIVE BIGGEST BUYS</div>
+          {TEAMS.filter(t => !t.random).sort((a,b)=>b.bid-a.bid).slice(0,5).map(t => (
+            <Row key={t.name} label={`${t.name} · $${t.bid} (${t.owner})`}
+              value={STAGE_LABEL[status[t.name].st]}
+              color={payoutLocked(status[t.name].st) >= 50 ? C.green : C.red} />
+          ))}
+        </RecapCard>
+
+        {/* ── Card 7: sliding doors ── */}
+        <RecapCard id="recap-upsets" filename="wc26-recap-upsets.png" accent={C.red}>
+          <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.red}}>SLIDING DOORS</div>
+          <div style={{...disp,fontSize:19,fontWeight:700,marginTop:8,lineHeight:1.3}}>
+            The results nobody saw coming
+          </div>
+          <div style={{fontSize:10,color:C.mute,marginTop:6,lineHeight:1.5}}>
+            Ranked by how unlikely the closing betting line said each result was.
+          </div>
+          <div style={{marginTop:12}}>
+            {D.upsets.map((u,i) => (
+              <div key={u.id} style={{padding:"8px 0",borderBottom:`1px solid ${C.line}`}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                  <span style={{fontSize:12,fontWeight:700}}>
+                    <Flag f={u.a.flag} size={12}/> {u.a.name} {u.hs}–{u.as} {u.b.name} <Flag f={u.b.flag} size={12}/>
+                  </span>
+                  <span style={{...disp,fontSize:14,fontWeight:700,color:C.red}}>{Math.round(u.prob*100)}%</span>
+                </div>
+                {u.benefitTeam && (
+                  <div style={{fontSize:9,color:C.mute,marginTop:2}}>
+                    market said {Math.round(u.prob*100)}% likely · good news for{" "}
+                    <b style={{color:BIDDERS[u.benefitTeam.owner].color}}>{u.benefitTeam.owner}</b>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </RecapCard>
+
+        {/* ── Card 8: rivalries ── */}
+        <RecapCard id="recap-rivalry" filename="wc26-recap-rivalry.png" accent={C.green}>
+          <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.green}}>THE PETTY WARS</div>
+          <div style={{...disp,fontSize:19,fontWeight:700,marginTop:8,lineHeight:1.3}}>
+            Owner vs owner,<br/>all tournament long
+          </div>
+          <div style={{fontSize:10,color:C.mute,marginTop:6,lineHeight:1.5}}>
+            Every match where two owners' teams met. W–D–L from the first name's side.
+          </div>
+          <div style={{marginTop:14}}>
+            {Object.entries(h2h || {})
+              .sort((a,b) => (b[1][0]+b[1][1]+b[1][2]) - (a[1][0]+a[1][1]+a[1][2]))
+              .map(([key, rec]) => {
+                const [p1, p2] = key.split("|");
+                const games = rec[0]+rec[1]+rec[2];
+                return (
+                  <div key={key} style={{padding:"7px 0",borderBottom:`1px solid ${C.line}`}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                      <span style={{fontSize:12}}>
+                        <b style={{color:BIDDERS[p1].color}}>{p1}</b>
+                        <span style={{color:C.mute}}> vs </span>
+                        <b style={{color:BIDDERS[p2].color}}>{p2}</b>
+                      </span>
+                      <span style={{...disp,fontSize:14,fontWeight:700}}>{rec[0]}–{rec[1]}–{rec[2]}</span>
+                    </div>
+                    <div style={{fontSize:9,color:C.mute,marginTop:1}}>{games} meetings</div>
+                  </div>
+                );
+              })}
+          </div>
+        </RecapCard>
+      </div>
     </div>
   );
 }
@@ -2348,7 +2681,7 @@ function PoolDashboard() {
       {/* ── Tabs ── */}
       <div className="max-w-5xl mx-auto px-4 mt-4">
         <div className="flex gap-2 flex-wrap">
-          {[["board","LEADERBOARD"],["bracket","BRACKET"],["fixtures","FIXTURES"],["groups","GROUPS"],["teams","TEAMS"],["upsets","UPSETS"],
+          {[["recap","RECAP"],["board","LEADERBOARD"],["bracket","BRACKET"],["fixtures","FIXTURES"],["groups","GROUPS"],["teams","TEAMS"],["upsets","UPSETS"],
             ...(allMatchday2Done ? [["odds","TITLE ODDS"]] : [])].map(([id,label]) => (
             <button key={id} onClick={()=>setTab(id)}
               style={{...disp,fontSize:14,fontWeight:600,letterSpacing:"0.1em",padding:"8px 18px",
@@ -2361,6 +2694,13 @@ function PoolDashboard() {
       </div>
 
       {/* ══ LEADERBOARD ══ */}
+      {/* ══ RECAP ══ */}
+      {tab==="recap" && (
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <RecapPanel status={status} h2h={h2h} titleOddsHistory={titleOddsHistory} oddsHistory={oddsHistory} />
+        </div>
+      )}
+
       {tab==="board" && (
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
           {board.map((b,i) => (
