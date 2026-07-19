@@ -195,7 +195,7 @@ def main():
         return
 
     KNOCKOUT_ROUND_PATTERNS = [
-        ("3RD_PLACE", re.compile(r"third.?place", re.I)),
+        ("3RD_PLACE", re.compile(r"(third|3rd).?place", re.I)),
         ("SF",        re.compile(r"semi.?final", re.I)),
         ("QF",        re.compile(r"quarter.?final", re.I)),
         ("R16",       re.compile(r"round.of.16", re.I)),
