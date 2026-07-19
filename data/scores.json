@@ -135,7 +135,7 @@
       "d": 1,
       "l": 0,
       "pts": 7,
-      "st": "SF"
+      "st": "3RD"
     },
     "France": {
       "p": 3,
@@ -143,7 +143,7 @@
       "d": 0,
       "l": 0,
       "pts": 9,
-      "st": "SF"
+      "st": "4TH"
     },
     "Germany": {
       "p": 3,
@@ -720,6 +720,15 @@
       "aScore": 0,
       "bScore": 0,
       "winner": null
+    },
+    {
+      "a": "France",
+      "b": "England",
+      "round": "3RD_PLACE",
+      "completed": true,
+      "aScore": 4,
+      "bScore": 6,
+      "winner": "England"
     }
   ]
 }

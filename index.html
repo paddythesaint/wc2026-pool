@@ -1768,7 +1768,7 @@ function computeStandingsAndH2H(events) {
 // tab's "Group A · Mexico City" captions. Order matters - "semifinal" and
 // "quarterfinal" both contain "final", so check the more specific rounds first.
 const KNOCKOUT_ROUND_PATTERNS = [
-  ["3RD_PLACE", /third[- ]place/i],
+  ["3RD_PLACE", /(third|3rd)[- ]?place/i],
   ["SF",        /semi[- ]?final/i],
   ["QF",        /quarter[- ]?final/i],
   ["R16",       /round of 16/i],
