@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-19T07:49:30.476060+00:00",
+  "updated": "2026-07-19T19:09:34.476758+00:00",
   "status": {
     "Algeria": {
       "p": 3,
@@ -397,14 +397,14 @@
     },
     {
       "d": "Jul 19",
-      "k": "3:00 PM ET",
+      "k": "LIVE",
       "a": "Spain",
       "b": "Argentina",
-      "s": "",
+      "s": "0-0",
       "g": "Final",
       "odds": {
         "home": 0.42,
-        "draw": 0.32,
+        "draw": 0.31,
         "away": 0.26
       }
     }
@@ -713,15 +713,6 @@
       "winner": "Argentina"
     },
     {
-      "a": "Spain",
-      "b": "Argentina",
-      "round": "FINAL",
-      "completed": false,
-      "aScore": 0,
-      "bScore": 0,
-      "winner": null
-    },
-    {
       "a": "France",
       "b": "England",
       "round": "3RD_PLACE",
@@ -729,6 +720,15 @@
       "aScore": 4,
       "bScore": 6,
       "winner": "England"
+    },
+    {
+      "a": "Spain",
+      "b": "Argentina",
+      "round": "FINAL",
+      "completed": false,
+      "aScore": 0,
+      "bScore": 0,
+      "winner": null
     }
   ]
 }
