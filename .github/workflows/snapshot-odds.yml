@@ -1,10 +1,11 @@
 name: Snapshot Odds
 
 on:
-  schedule:
-    # Hourly - this only feeds a "how have the odds moved" trend chart,
-    # not live scores, so occasional gaps from GitHub's scheduler are fine.
-    - cron: "0 * * * *"
+  # Tournament complete (Jul 19 2026) - cron disabled, kept for reference.
+  # schedule:
+  # # Hourly - this only feeds a "how have the odds moved" trend chart,
+  # # not live scores, so occasional gaps from GitHub's scheduler are fine.
+  # - cron: "0 * * * *"
   workflow_dispatch:   # manual trigger from the Actions tab
 
 jobs:
