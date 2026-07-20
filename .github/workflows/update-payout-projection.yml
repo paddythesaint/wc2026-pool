@@ -1,11 +1,12 @@
 name: Update Payout Projection
 
 on:
-  schedule:
-    # 09:00 UTC = 5am ET / 2am PT - well after every match that day has
-    # finished (even late West Coast kickoffs), so the nightly run reflects
-    # a fully up-to-date day's results before the next day's games start.
-    - cron: "0 9 * * *"
+  # Tournament complete (Jul 19 2026) - cron disabled, kept for reference.
+  # schedule:
+  # # 09:00 UTC = 5am ET / 2am PT - well after every match that day has
+  # # finished (even late West Coast kickoffs), so the nightly run reflects
+  # # a fully up-to-date day's results before the next day's games start.
+  # - cron: "0 9 * * *"
   workflow_dispatch:   # manual trigger from the Actions tab
 
 jobs:

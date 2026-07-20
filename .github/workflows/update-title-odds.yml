@@ -1,9 +1,10 @@
 name: Update Title Odds
 
 on:
-  schedule:
-    # 15:00 UTC = 11am ET during the tournament's June-July window (EDT, UTC-4).
-    - cron: "0 15 * * *"
+  # Tournament complete (Jul 19 2026) - cron disabled, kept for reference.
+  # schedule:
+  # # 15:00 UTC = 11am ET during the tournament's June-July window (EDT, UTC-4).
+  # - cron: "0 15 * * *"
   workflow_dispatch:   # manual trigger from the Actions tab
 
 jobs:

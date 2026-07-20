@@ -1149,6 +1149,70 @@ function RecapPanel({ status, h2h, titleOddsHistory, oddsHistory }) {
           )}
         </RecapCard>
 
+        {/* ── Card 1b: the ledger (only once the tournament is decided) ── */}
+        {finaleDone && (() => {
+          const ledger = owners.map(name => {
+            const mine = TEAMS.filter(t => t.owner === name);
+            const spent = mine.reduce((s,t) => s + t.bid, 0);
+            const won   = mine.reduce((s,t) => s + payoutLocked(status[t.name].st), 0);
+            return { name, spent, won, net: won - spent };
+          }).sort((a,b) => b.net - a.net);
+          // Greedy minimal transfers to settle everyone's net
+          const cred = ledger.filter(l => l.net > 0).map(l => ({ n: l.name, v: l.net }));
+          const debt = ledger.filter(l => l.net < 0).map(l => ({ n: l.name, v: -l.net }));
+          const transfers = [];
+          let i = 0, j = 0;
+          while (i < debt.length && j < cred.length) {
+            const amt = Math.min(debt[i].v, cred[j].v);
+            transfers.push({ from: debt[i].n, to: cred[j].n, amt });
+            debt[i].v -= amt; cred[j].v -= amt;
+            if (debt[i].v === 0) i++;
+            if (cred[j].v === 0) j++;
+          }
+          const leftover = cred.reduce((s,c) => s + c.v, 0) - debt.reduce((s,d) => s + d.v, 0);
+          return (
+            <RecapCard id="recap-ledger" filename="wc26-recap-settle-up.png" accent={C.green}>
+              <div style={{...disp,fontSize:11,letterSpacing:"0.2em",color:C.green}}>THE LEDGER · SETTLE UP</div>
+              <div style={{...disp,fontSize:19,fontWeight:700,marginTop:8,lineHeight:1.3}}>
+                Final accounts,<br/>38 days later
+              </div>
+              <div style={{marginTop:12}}>
+                {ledger.map((l,idx) => (
+                  <div key={l.name} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",
+                    padding:"7px 0",borderBottom:`1px solid ${C.line}`}}>
+                    <span style={{fontSize:12}}>
+                      <span style={{color:C.mute,marginRight:6}}>{idx+1}.</span>
+                      <b style={{color:BIDDERS[l.name].color}}>{l.name}</b>
+                      <span style={{fontSize:9,color:C.mute}}> · ${l.spent} in · ${l.won} out</span>
+                    </span>
+                    <span style={{...disp,fontSize:16,fontWeight:700,color:l.net>=0?C.green:C.red}}>
+                      {l.net>=0?`+$${l.net}`:`−$${Math.abs(l.net)}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div style={{...disp,fontSize:10,letterSpacing:"0.15em",color:C.mute,marginTop:14}}>WHO PAYS WHOM</div>
+              {transfers.map((t,idx) => (
+                <div key={idx} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",
+                  borderBottom:`1px solid ${C.line}`,fontSize:12}}>
+                  <span>
+                    <b style={{color:BIDDERS[t.from].color}}>{t.from}</b>
+                    <span style={{color:C.mute}}> → </span>
+                    <b style={{color:BIDDERS[t.to].color}}>{t.to}</b>
+                  </span>
+                  <b style={{...disp,fontSize:14}}>${t.amt}</b>
+                </div>
+              ))}
+              {leftover !== 0 && (
+                <div style={{fontSize:9,color:C.mute,marginTop:8,lineHeight:1.4}}>
+                  Note: bids totalled $797 vs the $800 payout schedule, so nets don't zero out by ${Math.abs(leftover)} —
+                  the group's call on who eats it.
+                </div>
+              )}
+            </RecapCard>
+          );
+        })()}
+
         {/* ── Cards 2-5: player wrapped ── */}
         {D.perOwner.map(o => (
           <RecapCard key={o.name} id={`recap-${o.name.toLowerCase()}`}
@@ -2403,7 +2467,7 @@ function saveMatchupOverrides(overrides) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 function PoolDashboard() {
-  const [tab, setTab]               = useState("fixtures");
+  const [tab, setTab]               = useState("recap"); // tournament over - land on the recap
   const [status, setStatus]         = useState(seedStatus);
   const [fixtures, setFixtures]     = useState(SEED_FIXTURES);
   const [h2h, setH2h]               = useState({});
